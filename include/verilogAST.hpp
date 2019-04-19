@@ -123,11 +123,7 @@ class ModuleInstantiation : Statement {
 
 
 class Wire : Statement {
-    std::string name;
-
-    // For [high:low] syntax, 
-    // TODO: just make these ints instead of NumericLiterals?
-    std::pair<NumericLiteral*, NumericLiteral*> size;
+    std::variant<Identifier, Index, Slice> value;
 };
 
 
