@@ -57,6 +57,10 @@ class TernaryOp : Expression {
   Expression *false_value;
 };
 
+class NegEdge : Expression {
+  Expression *value;
+};
+
 class PosEdge : Expression {
   Expression *value;
 };
@@ -90,7 +94,10 @@ class File : Node {
 
 class Statement : Node {};
 
-class ModuleInstantiation : Statement {
+class BehavioralStatement : Node {};
+class StructuralStatement : Node {};
+
+class ModuleInstantiation : StructuralStatement {
   std::string module_name;
 
   // TODO: For now we assume parameters are just numeric literals, are there
@@ -99,27 +106,37 @@ class ModuleInstantiation : Statement {
 
   std::string instance_name;
 
-  // map from instance port names to wire names
-  // TODO: Should we support the anonymous style of module connections?
-  std::map<std::string, Identifier *> connections;
+  // map from instance port names to connection expression
+  // NOTE: anonymous style of module connections is not supported
+  std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
+      connections;
 };
 
-class Wire : Statement {
+class Declaration : Node {
   std::variant<Identifier, Index, Slice> value;
 };
 
-class Assign : Statement {
+class Wire : Declaration {};
+
+class Reg : Declaration {};
+
+class ContinuousAssign : StructuralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
-
-  // TODO: Make these separate nodes instead of fields?
-  bool continuous; // assign {target} = {value}
-  bool blocking;   // = vs <=
 };
 
+class BehavioralAssign : BehavioralStatement {
+  std::variant<Identifier *, Index *, Slice *> target;
+  Expression *value;
+};
+
+class BlockingAssign : BehavioralAssign {};
+class NonBlockingAssign : BehavioralAssign {};
+
 class Always : Node {
-  std::vector<Expression *> sensitivity_list;
-  std::vector<Statement *> body;
+  std::vector<std::variant<Identifier *, PosEdge *, NegEdge *>>
+      sensitivity_list;
+  std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
 };
 
 }; // namespace verilogAST
