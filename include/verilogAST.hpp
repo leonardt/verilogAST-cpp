@@ -23,6 +23,9 @@ class NumericLiteral : Expression {
 
 class Identifier : Expression {
   std::string value;
+
+public:
+  Identifier(std::string value) : value(value){};
 };
 
 class Index : Expression {
