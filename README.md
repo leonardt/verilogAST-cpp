@@ -14,6 +14,12 @@ cmake ..
 make
 ```
 
+## Testing
+```
+cd build
+make test
+```
+
 ## Style
 All changes should be processed using `clang-format` before merging into
 master.
