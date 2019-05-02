@@ -7,28 +7,29 @@ namespace {
 
 TEST(BasicTests, TestNumericLiteral) {
   vAST::NumericLiteral *n = new vAST::NumericLiteral("23", 16, false, vAST::decimal);
-  ASSERT_EQ(n->toString(), "16'd23");
+  EXPECT_EQ(n->toString(), "16'd23");
 
   n = new vAST::NumericLiteral("DEADBEEF", 32, false, vAST::hex);
-  ASSERT_EQ(n->toString(), "32'hDEADBEEF");
+  EXPECT_EQ(n->toString(), "32'hDEADBEEF");
 
   n = new vAST::NumericLiteral("011001", 6, false, vAST::binary);
-  ASSERT_EQ(n->toString(), "6'b011001");
+  EXPECT_EQ(n->toString(), "6'b011001");
 
   n = new vAST::NumericLiteral("764", 24, false, vAST::octal);
-  ASSERT_EQ(n->toString(), "24'o764");
+  EXPECT_EQ(n->toString(), "24'o764");
 }
 
 TEST(BasicTests, TestIdentifier) {
   vAST::Identifier *id = new vAST::Identifier("x");
-  ASSERT_EQ(id->toString(), "x");
+  EXPECT_EQ(id->toString(), "x");
 }
 
-// TEST(BasicTests, TestIndex) {
-//   vAST::Identifier *id = new vAST::Identifier("x");
-//   vAST::Index *index = new vAST::Index(id);
-//   ASSERT_EQ(id->toString(), "x");
-// }
+TEST(BasicTests, TestIndex) {
+  vAST::Identifier *id = new vAST::Identifier("x");
+  vAST::NumericLiteral *n = new vAST::NumericLiteral("0");
+  vAST::Index *index = new vAST::Index(id, n);
+  EXPECT_EQ(index->toString(), "x[32'd0]");
+}
 
 } // namespace
 

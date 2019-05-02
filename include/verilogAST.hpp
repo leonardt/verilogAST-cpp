@@ -19,18 +19,29 @@ class NumericLiteral : Expression {
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
   //  convert it during code generation)
+  //
+  // TODO Maybe add special toString logic for the default case? E.g. if we're
+  // generating a 32 bit unsigned decimal literal (commonly used for indexing
+  // into ports) then we don't need to generate the "32'd" prefix
   std::string value;
-  unsigned int size;
-  bool _signed; // TODO default false
-  // TODO: This could be an enum
-  Radix radix;
+  unsigned int size; // default 32
+  bool _signed;      // default false
+  Radix radix;       // default decimal
 
 public:
   NumericLiteral(std::string value, unsigned int size, bool _signed,
                  Radix radix)
       : value(value), size(size), _signed(_signed), radix(radix){};
+
   NumericLiteral(std::string value, unsigned int size, bool _signed)
       : value(value), size(size), _signed(_signed), radix(decimal){};
+
+  NumericLiteral(std::string value, unsigned int size)
+      : value(value), size(size), _signed(false), radix(decimal){};
+
+  NumericLiteral(std::string value)
+      : value(value), size(32), _signed(false), radix(decimal){};
+
   std::string toString() {
     if (_signed) {
       throw std::runtime_error(
@@ -69,7 +80,10 @@ class Index : Expression {
   NumericLiteral *index;
 
 public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  Index(Identifier *id, NumericLiteral *index) : id(id), index(index){};
+  std::string toString() {
+    return id->toString() + '[' + index->toString() + ']';
+  };
 };
 
 class Slice : Expression {
