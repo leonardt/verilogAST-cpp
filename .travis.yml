@@ -14,10 +14,21 @@ matrix:
 
     - os: osx
       osx_image: xcode10.2
-      python: 3.7
+
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+     # Install later python for compatability with cpp-coveralls
+     export PYTHON=3.7.0;
+     brew install pyenv-virtualenv;
+     pyenv install ${PYTHON};
+     export PYENV_VERSION=$PYTHON;
+     export PATH="/Users/travis/.pyenv/shims:${PATH}";
+     pyenv virtualenv venv;
+     source /Users/travis/.pyenv/versions/${PYTHON}/envs/venv/bin/activate;
+     python --version;
+  fi
   - pip install --user cpp-coveralls
 
 
