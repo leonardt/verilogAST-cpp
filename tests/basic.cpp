@@ -7,6 +7,7 @@ namespace {
 
 TEST(BasicTests, TestIdentifier) {
   vAST::Identifier *id = new vAST::Identifier("x");
+  ASSERT_EQ(id->toString(), "x");
 }
 
 } // namespace

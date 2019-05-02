@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 enable_testing()
 
 project(verilogAST)
+set(COVERAGE OFF CACHE BOOL "Coverage")
+
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -41,7 +43,11 @@ set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
 
 add_executable(basic tests/basic.cpp)
-target_compile_options(basic PRIVATE --coverage)
-target_link_libraries(basic gtest_main ${LIBRARY_NAME} --coverage)
+if (COVERAGE)
+    target_compile_options(basic PRIVATE --coverage)
+    target_link_libraries(basic gtest_main ${LIBRARY_NAME} --coverage)
+else()
+    target_link_libraries(basic gtest_main ${LIBRARY_NAME})
+endif()
 add_test(NAME basic_tests COMMAND basic)
 

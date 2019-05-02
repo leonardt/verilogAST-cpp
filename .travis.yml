@@ -35,7 +35,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCOVERAGE=1 .
   - cmake --build .
   - ctest
 

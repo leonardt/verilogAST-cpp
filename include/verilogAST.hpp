@@ -6,7 +6,10 @@
 
 namespace verilogAST {
 
-class Node {};
+class Node {
+public:
+  virtual std::string toString() = 0;
+};
 
 class Expression : Node {};
 
@@ -26,17 +29,24 @@ class Identifier : Expression {
 
 public:
   Identifier(std::string value) : value(value){};
+  std::string toString() { return value; };
 };
 
 class Index : Expression {
   Identifier *id;
   NumericLiteral *index;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class Slice : Expression {
   Identifier *id;
   NumericLiteral *high_index;
   NumericLiteral *low_index;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class BinaryOp : Expression {
@@ -45,6 +55,9 @@ class BinaryOp : Expression {
 
   // TODO: Enum of support ops
   std::string op;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class UnaryOp : Expression {
@@ -52,20 +65,32 @@ class UnaryOp : Expression {
 
   // TODO: Enum of support ops
   std::string op;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class TernaryOp : Expression {
   Expression *cond;
   Expression *true_value;
   Expression *false_value;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class NegEdge : Expression {
   Expression *value;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class PosEdge : Expression {
   Expression *value;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class Port : Node {
@@ -82,6 +107,9 @@ class Port : Node {
   std::string direction;
   // probably can make these an enum too
   std::string data_type;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class Module : Node {
@@ -89,10 +117,16 @@ class Module : Node {
   std::vector<Port *> ports;
   std::vector<Node *> definition;
   std::map<std::string, NumericLiteral *> parameters;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class File : Node {
   std::vector<Module *> modules;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class Statement : Node {};
@@ -113,33 +147,60 @@ class ModuleInstantiation : StructuralStatement {
   // NOTE: anonymous style of module connections is not supported
   std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
       connections;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class Declaration : Node {
   std::variant<Identifier, Index, Slice> value;
 };
 
-class Wire : Declaration {};
+class Wire : Declaration {
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
+};
 
-class Reg : Declaration {};
+class Reg : Declaration {
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
+};
 
 class ContinuousAssign : StructuralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class BehavioralAssign : BehavioralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class BlockingAssign : BehavioralAssign {};
-class NonBlockingAssign : BehavioralAssign {};
+class BlockingAssign : BehavioralAssign {
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
+};
+
+class NonBlockingAssign : BehavioralAssign {
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
+};
 
 class Always : Node {
   std::vector<std::variant<Identifier *, PosEdge *, NegEdge *>>
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
+
+public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 }; // namespace verilogAST
