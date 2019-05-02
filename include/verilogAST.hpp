@@ -19,9 +19,21 @@ class NumericLiteral : Expression {
   //  convert it during code generation)
   std::string value;
   unsigned int size;
-  bool _signed; // default false
+  bool _signed; // TODO default false
   // TODO: This could be an enum
   std::string radix; // default decimal ('d)
+public:
+  NumericLiteral(std::string value, unsigned int size, bool _signed,
+                 std::string radix)
+      : value(value), size(size), _signed(_signed), radix(radix){};
+  std::string toString() {
+    if (_signed) {
+      throw std::runtime_error(
+          "NumericLiteral::toString when _signed == True has "
+          "not been implemented");
+    }
+    return std::to_string(size) + "'" + radix + value;
+  };
 };
 
 class Identifier : Expression {
