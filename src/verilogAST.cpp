@@ -29,4 +29,10 @@ std::string Identifier::toString() { return value; };
 std::string Index::toString() {
   return id->toString() + '[' + index->toString() + ']';
 };
+
+std::string Slice::toString() {
+  return id->toString() + '[' + high_index->toString() + ':' +
+         low_index->toString() + ']';
+};
+
 }; // namespace verilogAST

@@ -31,6 +31,14 @@ TEST(BasicTests, TestIndex) {
   EXPECT_EQ(index->toString(), "x[32'd0]");
 }
 
+TEST(BasicTests, TestSlice) {
+  vAST::Identifier *id = new vAST::Identifier("x");
+  vAST::NumericLiteral *high = new vAST::NumericLiteral("31");
+  vAST::NumericLiteral *low = new vAST::NumericLiteral("0");
+  vAST::Slice *slice = new vAST::Slice(id, high, low);
+  EXPECT_EQ(slice->toString(), "x[32'd31:32'd0]");
+}
+
 } // namespace
 
 int main(int argc, char **argv) {

@@ -67,7 +67,9 @@ class Slice : Expression {
   NumericLiteral *low_index;
 
 public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  Slice(Identifier *id, NumericLiteral *high_index, NumericLiteral *low_index)
+      : id(id), high_index(high_index), low_index(low_index){};
+  std::string toString();
 };
 
 class BinaryOp : Expression {
