@@ -13,6 +13,8 @@ public:
 
 class Expression : Node {};
 
+enum Radix { binary, octal, hex, decimal };
+
 class NumericLiteral : Expression {
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
@@ -21,18 +23,36 @@ class NumericLiteral : Expression {
   unsigned int size;
   bool _signed; // TODO default false
   // TODO: This could be an enum
-  std::string radix; // default decimal ('d)
+  Radix radix;
+
 public:
   NumericLiteral(std::string value, unsigned int size, bool _signed,
-                 std::string radix)
+                 Radix radix)
       : value(value), size(size), _signed(_signed), radix(radix){};
+  NumericLiteral(std::string value, unsigned int size, bool _signed)
+      : value(value), size(size), _signed(_signed), radix(decimal){};
   std::string toString() {
     if (_signed) {
       throw std::runtime_error(
           "NumericLiteral::toString when _signed == True has "
           "not been implemented");
     }
-    return std::to_string(size) + "'" + radix + value;
+    char radix_str;
+    switch (radix) {
+    case binary:
+      radix_str = 'b';
+      break;
+    case octal:
+      radix_str = 'o';
+      break;
+    case hex:
+      radix_str = 'h';
+      break;
+    case decimal:
+      radix_str = 'd';
+      break;
+    }
+    return std::to_string(size) + "'" + radix_str + value;
   };
 };
 
