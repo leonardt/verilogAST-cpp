@@ -41,30 +41,7 @@ public:
 
   NumericLiteral(std::string value)
       : value(value), size(32), _signed(false), radix(decimal){};
-
-  std::string toString() {
-    if (_signed) {
-      throw std::runtime_error(
-          "NumericLiteral::toString when _signed == True has "
-          "not been implemented");
-    }
-    char radix_str;
-    switch (radix) {
-    case binary:
-      radix_str = 'b';
-      break;
-    case octal:
-      radix_str = 'o';
-      break;
-    case hex:
-      radix_str = 'h';
-      break;
-    case decimal:
-      radix_str = 'd';
-      break;
-    }
-    return std::to_string(size) + "'" + radix_str + value;
-  };
+  std::string toString();
 };
 
 class Identifier : Expression {
@@ -72,7 +49,7 @@ class Identifier : Expression {
 
 public:
   Identifier(std::string value) : value(value){};
-  std::string toString() { return value; };
+  std::string toString();
 };
 
 class Index : Expression {
@@ -81,9 +58,7 @@ class Index : Expression {
 
 public:
   Index(Identifier *id, NumericLiteral *index) : id(id), index(index){};
-  std::string toString() {
-    return id->toString() + '[' + index->toString() + ']';
-  };
+  std::string toString();
 };
 
 class Slice : Expression {
