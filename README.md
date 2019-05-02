@@ -11,13 +11,13 @@ C++17 Implementation of an AST for Verilog
 mkdir build
 cd build
 cmake ..
-make
+cmake --build .
 ```
 
 ## Testing
 ```
-cd build
-make test
+# inside build directory
+ctest
 ```
 
 ## Style
