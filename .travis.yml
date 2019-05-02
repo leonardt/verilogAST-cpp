@@ -17,6 +17,7 @@ matrix:
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  - pip install --user cpp-coveralls
 
 
 script:
@@ -25,3 +26,6 @@ script:
   - cmake ..
   - make
   - make test
+
+after_success:
+  - coveralls --root . -E ".*CMakeFiles.*"
