@@ -11,11 +11,14 @@ public:
   virtual std::string toString() = 0;
 };
 
-class Expression : Node {};
+class Expression : public Node {
+public:
+  virtual std::string toString() = 0;
+};
 
-enum Radix { binary, octal, hex, decimal };
+enum Radix { BINARY, OCTAL, HEX, DECIMAL };
 
-class NumericLiteral : Expression {
+class NumericLiteral : public Expression {
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
   //  convert it during code generation)
@@ -34,34 +37,34 @@ public:
       : value(value), size(size), _signed(_signed), radix(radix){};
 
   NumericLiteral(std::string value, unsigned int size, bool _signed)
-      : value(value), size(size), _signed(_signed), radix(decimal){};
+      : value(value), size(size), _signed(_signed), radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value, unsigned int size)
-      : value(value), size(size), _signed(false), radix(decimal){};
+      : value(value), size(size), _signed(false), radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value)
-      : value(value), size(32), _signed(false), radix(decimal){};
-  std::string toString();
+      : value(value), size(32), _signed(false), radix(Radix::DECIMAL){};
+  std::string toString() override;
 };
 
-class Identifier : Expression {
+class Identifier : public Expression {
   std::string value;
 
 public:
   Identifier(std::string value) : value(value){};
-  std::string toString();
+  std::string toString() override;
 };
 
-class Index : Expression {
+class Index : public Expression {
   Identifier *id;
   NumericLiteral *index;
 
 public:
   Index(Identifier *id, NumericLiteral *index) : id(id), index(index){};
-  std::string toString();
+  std::string toString() override;
 };
 
-class Slice : Expression {
+class Slice : public Expression {
   Identifier *id;
   NumericLiteral *high_index;
   NumericLiteral *low_index;
@@ -69,21 +72,39 @@ class Slice : Expression {
 public:
   Slice(Identifier *id, NumericLiteral *high_index, NumericLiteral *low_index)
       : id(id), high_index(high_index), low_index(low_index){};
-  std::string toString();
+  std::string toString() override;
 };
 
-class BinaryOp : Expression {
+enum BinOp {
+  LSHIFT,
+  RSHIFT,
+  _AND,
+  _OR,
+  EQ,
+  NEQ,
+  ADD,
+  SUB,
+  MUL,
+  DIV,
+  POW,
+  MOD,
+  ALSHIFT,
+  ARSHIFT
+};
+
+class BinaryOp : public Expression {
   Expression *left;
   Expression *right;
 
-  // TODO: Enum of support ops
-  std::string op;
+  BinOp op;
 
 public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  BinaryOp(Expression *left, BinOp op, Expression *right)
+      : left(left), op(op), right(right){};
+  std::string toString() override;
 };
 
-class UnaryOp : Expression {
+class UnaryOp : public Expression {
   Expression *operand;
 
   // TODO: Enum of support ops
@@ -93,7 +114,7 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class TernaryOp : Expression {
+class TernaryOp : public Expression {
   Expression *cond;
   Expression *true_value;
   Expression *false_value;
@@ -102,21 +123,21 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class NegEdge : Expression {
+class NegEdge : public Expression {
   Expression *value;
 
 public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class PosEdge : Expression {
+class PosEdge : public Expression {
   Expression *value;
 
 public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class Port : Node {
+class Port : public Node {
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
   std::variant<Identifier *, Index *, Slice *> value;
@@ -135,7 +156,7 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class Module : Node {
+class Module : public Node {
   std::string name;
   std::vector<Port *> ports;
   std::vector<Node *> definition;
@@ -145,19 +166,19 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class File : Node {
+class File : public Node {
   std::vector<Module *> modules;
 
 public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class Statement : Node {};
+class Statement : public Node {};
 
-class BehavioralStatement : Node {};
-class StructuralStatement : Node {};
+class BehavioralStatement : public Statement {};
+class StructuralStatement : public Statement {};
 
-class ModuleInstantiation : StructuralStatement {
+class ModuleInstantiation : public StructuralStatement {
   std::string module_name;
 
   // TODO: For now we assume parameters are just numeric literals, are there
@@ -175,7 +196,7 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class Declaration : Node {
+class Declaration : public Node {
   std::variant<Identifier, Index, Slice> value;
 };
 
@@ -189,7 +210,7 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class ContinuousAssign : StructuralStatement {
+class ContinuousAssign : public StructuralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
 
@@ -197,7 +218,7 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class BehavioralAssign : BehavioralStatement {
+class BehavioralAssign : public BehavioralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
 
@@ -217,7 +238,7 @@ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class Always : Node {
+class Always : public Node {
   std::vector<std::variant<Identifier *, PosEdge *, NegEdge *>>
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;

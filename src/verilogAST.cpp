@@ -8,16 +8,16 @@ std::string NumericLiteral::toString() {
   }
   char radix_str;
   switch (radix) {
-  case binary:
+  case BINARY:
     radix_str = 'b';
     break;
-  case octal:
+  case OCTAL:
     radix_str = 'o';
     break;
-  case hex:
+  case HEX:
     radix_str = 'h';
     break;
-  case decimal:
+  case DECIMAL:
     radix_str = 'd';
     break;
   }
@@ -33,6 +33,55 @@ std::string Index::toString() {
 std::string Slice::toString() {
   return id->toString() + '[' + high_index->toString() + ':' +
          low_index->toString() + ']';
+};
+
+std::string BinaryOp::toString() {
+  std::string op_str;
+  switch (op) {
+  case LSHIFT:
+    op_str = "<<";
+    break;
+  case RSHIFT:
+    op_str = ">>";
+    break;
+  case _AND:
+    op_str = "&&";
+    break;
+  case _OR:
+    op_str = "||";
+    break;
+  case EQ:
+    op_str = "==";
+    break;
+  case NEQ:
+    op_str = "!=";
+    break;
+  case ADD:
+    op_str = "+";
+    break;
+  case SUB:
+    op_str = "-";
+    break;
+  case MUL:
+    op_str = "*";
+    break;
+  case DIV:
+    op_str = "/";
+    break;
+  case POW:
+    op_str = "**";
+    break;
+  case MOD:
+    op_str = "%";
+    break;
+  case ALSHIFT:
+    op_str = "<<<";
+    break;
+  case ARSHIFT:
+    op_str = ">>>";
+    break;
+  }
+  return left->toString() + ' ' + op_str + ' ' + right->toString();
 };
 
 }; // namespace verilogAST
