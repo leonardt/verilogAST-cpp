@@ -75,11 +75,13 @@ public:
   std::string toString() override;
 };
 
+namespace BinOp {
 enum BinOp {
+  // TODO Bitwise Logical ops like &, |,
   LSHIFT,
   RSHIFT,
-  _AND,
-  _OR,
+  AND,
+  OR,
   EQ,
   NEQ,
   ADD,
@@ -91,27 +93,44 @@ enum BinOp {
   ALSHIFT,
   ARSHIFT
 };
+}
 
 class BinaryOp : public Expression {
   Expression *left;
   Expression *right;
 
-  BinOp op;
+  BinOp::BinOp op;
 
 public:
-  BinaryOp(Expression *left, BinOp op, Expression *right)
+  BinaryOp(Expression *left, BinOp::BinOp op, Expression *right)
       : left(left), op(op), right(right){};
   std::string toString() override;
+};
+
+namespace UnOp {
+enum UnOp {
+  NOT,
+  INVERT,
+  AND,
+  NAND,
+  OR,
+  NOR,
+  XOR,
+  NXOR,
+  XNOR, // TODO ~^ vs ^~?
+  PLUS,
+  MINUS
+};
 };
 
 class UnaryOp : public Expression {
   Expression *operand;
 
-  // TODO: Enum of support ops
-  std::string op;
+  UnOp::UnOp op;
 
 public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  UnaryOp(Expression *operand, UnOp::UnOp op) : operand(operand), op(op){};
+  std::string toString();
 };
 
 class TernaryOp : public Expression {

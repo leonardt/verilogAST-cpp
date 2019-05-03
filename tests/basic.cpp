@@ -49,28 +49,50 @@ TEST(BasicTests, TestSlice) {
 }
 
 TEST(BasicTests, TestBinaryOp) {
-  std::vector<std::pair<vAST::BinOp, std::string>> ops;
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::LSHIFT, "<<"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::RSHIFT, ">>"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::_AND, "&&"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::_OR, "||"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::EQ, "=="));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::NEQ, "!="));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::ADD, "+"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::SUB, "-"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::MUL, "*"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::DIV, "/"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::POW, "**"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::MOD, "%"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::ALSHIFT, "<<<"));
-  ops.push_back(std::make_pair<vAST::BinOp, std::string>(vAST::ARSHIFT, ">>>"));
+  std::vector<std::pair<vAST::BinOp::BinOp, std::string>> ops;
+  ops.push_back(std::make_pair(vAST::BinOp::LSHIFT, "<<"));
+  ops.push_back(std::make_pair(vAST::BinOp::RSHIFT, ">>"));
+  ops.push_back(std::make_pair(vAST::BinOp::AND, "&&"));
+  ops.push_back(std::make_pair(vAST::BinOp::OR, "||"));
+  ops.push_back(std::make_pair(vAST::BinOp::EQ, "=="));
+  ops.push_back(std::make_pair(vAST::BinOp::NEQ, "!="));
+  ops.push_back(std::make_pair(vAST::BinOp::ADD, "+"));
+  ops.push_back(std::make_pair(vAST::BinOp::SUB, "-"));
+  ops.push_back(std::make_pair(vAST::BinOp::MUL, "*"));
+  ops.push_back(std::make_pair(vAST::BinOp::DIV, "/"));
+  ops.push_back(std::make_pair(vAST::BinOp::POW, "**"));
+  ops.push_back(std::make_pair(vAST::BinOp::MOD, "%"));
+  ops.push_back(std::make_pair(vAST::BinOp::ALSHIFT, "<<<"));
+  ops.push_back(std::make_pair(vAST::BinOp::ARSHIFT, ">>>"));
   vAST::Identifier x("x");
   vAST::Identifier y("y");
   for (auto it : ops) {
-    vAST::BinOp op = it.first;
+    vAST::BinOp::BinOp op = it.first;
     std::string op_str = it.second;
     vAST::BinaryOp bin_op(&x, op, &y);
     EXPECT_EQ(bin_op.toString(), "x " + op_str + " y");
+  }
+}
+
+TEST(BasicTests, TestUnaryOp) {
+  std::vector<std::pair<vAST::UnOp::UnOp, std::string>> ops;
+  ops.push_back(std::make_pair(vAST::UnOp::NOT, "!"));
+  ops.push_back(std::make_pair(vAST::UnOp::INVERT, "~"));
+  ops.push_back(std::make_pair(vAST::UnOp::AND, "&"));
+  ops.push_back(std::make_pair(vAST::UnOp::NAND, "~&"));
+  ops.push_back(std::make_pair(vAST::UnOp::OR, "|"));
+  ops.push_back(std::make_pair(vAST::UnOp::NOR, "~|"));
+  ops.push_back(std::make_pair(vAST::UnOp::XOR, "^"));
+  ops.push_back(std::make_pair(vAST::UnOp::NXOR, "~^"));
+  ops.push_back(std::make_pair(vAST::UnOp::XNOR, "^~"));
+  ops.push_back(std::make_pair(vAST::UnOp::PLUS, "+"));
+  ops.push_back(std::make_pair(vAST::UnOp::MINUS, "-"));
+  vAST::Identifier x("x");
+  for (auto it : ops) {
+    vAST::UnOp::UnOp op = it.first;
+    std::string op_str = it.second;
+    vAST::UnaryOp un_op(&x, op);
+    EXPECT_EQ(un_op.toString(), op_str + " x");
   }
 }
 

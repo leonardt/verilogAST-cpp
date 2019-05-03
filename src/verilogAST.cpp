@@ -38,50 +38,90 @@ std::string Slice::toString() {
 std::string BinaryOp::toString() {
   std::string op_str;
   switch (op) {
-  case LSHIFT:
+  case BinOp::LSHIFT:
     op_str = "<<";
     break;
-  case RSHIFT:
+  case BinOp::RSHIFT:
     op_str = ">>";
     break;
-  case _AND:
+  case BinOp::AND:
     op_str = "&&";
     break;
-  case _OR:
+  case BinOp::OR:
     op_str = "||";
     break;
-  case EQ:
+  case BinOp::EQ:
     op_str = "==";
     break;
-  case NEQ:
+  case BinOp::NEQ:
     op_str = "!=";
     break;
-  case ADD:
+  case BinOp::ADD:
     op_str = "+";
     break;
-  case SUB:
+  case BinOp::SUB:
     op_str = "-";
     break;
-  case MUL:
+  case BinOp::MUL:
     op_str = "*";
     break;
-  case DIV:
+  case BinOp::DIV:
     op_str = "/";
     break;
-  case POW:
+  case BinOp::POW:
     op_str = "**";
     break;
-  case MOD:
+  case BinOp::MOD:
     op_str = "%";
     break;
-  case ALSHIFT:
+  case BinOp::ALSHIFT:
     op_str = "<<<";
     break;
-  case ARSHIFT:
+  case BinOp::ARSHIFT:
     op_str = ">>>";
     break;
   }
   return left->toString() + ' ' + op_str + ' ' + right->toString();
+};
+
+std::string UnaryOp::toString() {
+  std::string op_str;
+  switch (op) {
+  case UnOp::NOT:
+    op_str = "!";
+    break;
+  case UnOp::INVERT:
+    op_str = "~";
+    break;
+  case UnOp::AND:
+    op_str = "&";
+    break;
+  case UnOp::NAND:
+    op_str = "~&";
+    break;
+  case UnOp::OR:
+    op_str = "|";
+    break;
+  case UnOp::NOR:
+    op_str = "~|";
+    break;
+  case UnOp::XOR:
+    op_str = "^";
+    break;
+  case UnOp::NXOR:
+    op_str = "~^";
+    break;
+  case UnOp::XNOR:
+    op_str = "^~";
+    break;
+  case UnOp::PLUS:
+    op_str = "+";
+    break;
+  case UnOp::MINUS:
+    op_str = "-";
+    break;
+  }
+  return op_str + ' ' + operand->toString();
 };
 
 }; // namespace verilogAST
