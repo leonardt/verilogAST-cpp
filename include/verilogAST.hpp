@@ -1,18 +1,18 @@
 #include <map>
 #include <string>
-#include <utility> // std::pair
+#include <utility>  // std::pair
 #include <variant>
 #include <vector>
 
 namespace verilogAST {
 
 class Node {
-public:
+ public:
   virtual std::string toString() = 0;
 };
 
 class Expression : public Node {
-public:
+ public:
   virtual std::string toString() = 0;
 };
 
@@ -27,11 +27,11 @@ class NumericLiteral : public Expression {
   // generating a 32 bit unsigned decimal literal (commonly used for indexing
   // into ports) then we don't need to generate the "32'd" prefix
   std::string value;
-  unsigned int size; // default 32
-  bool _signed;      // default false
-  Radix radix;       // default decimal
+  unsigned int size;  // default 32
+  bool _signed;       // default false
+  Radix radix;        // default decimal
 
-public:
+ public:
   NumericLiteral(std::string value, unsigned int size, bool _signed,
                  Radix radix)
       : value(value), size(size), _signed(_signed), radix(radix){};
@@ -50,7 +50,7 @@ public:
 class Identifier : public Expression {
   std::string value;
 
-public:
+ public:
   Identifier(std::string value) : value(value){};
   std::string toString() override;
 };
@@ -59,7 +59,7 @@ class Index : public Expression {
   Identifier *id;
   NumericLiteral *index;
 
-public:
+ public:
   Index(Identifier *id, NumericLiteral *index) : id(id), index(index){};
   std::string toString() override;
 };
@@ -69,7 +69,7 @@ class Slice : public Expression {
   NumericLiteral *high_index;
   NumericLiteral *low_index;
 
-public:
+ public:
   Slice(Identifier *id, NumericLiteral *high_index, NumericLiteral *low_index)
       : id(id), high_index(high_index), low_index(low_index){};
   std::string toString() override;
@@ -101,7 +101,7 @@ class BinaryOp : public Expression {
 
   BinOp::BinOp op;
 
-public:
+ public:
   BinaryOp(Expression *left, BinOp::BinOp op, Expression *right)
       : left(left), op(op), right(right){};
   std::string toString() override;
@@ -117,7 +117,7 @@ enum UnOp {
   NOR,
   XOR,
   NXOR,
-  XNOR, // TODO ~^ vs ^~?
+  XNOR,  // TODO ~^ vs ^~?
   PLUS,
   MINUS
 };
@@ -128,7 +128,7 @@ class UnaryOp : public Expression {
 
   UnOp::UnOp op;
 
-public:
+ public:
   UnaryOp(Expression *operand, UnOp::UnOp op) : operand(operand), op(op){};
   std::string toString();
 };
@@ -138,21 +138,21 @@ class TernaryOp : public Expression {
   Expression *true_value;
   Expression *false_value;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class NegEdge : public Expression {
   Expression *value;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class PosEdge : public Expression {
   Expression *value;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -171,7 +171,7 @@ class Port : public Node {
   // probably can make these an enum too
   std::string data_type;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -181,14 +181,14 @@ class Module : public Node {
   std::vector<Node *> definition;
   std::map<std::string, NumericLiteral *> parameters;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class File : public Node {
   std::vector<Module *> modules;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -211,7 +211,7 @@ class ModuleInstantiation : public StructuralStatement {
   std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
       connections;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -220,12 +220,12 @@ class Declaration : public Node {
 };
 
 class Wire : Declaration {
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class Reg : Declaration {
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -233,7 +233,7 @@ class ContinuousAssign : public StructuralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -241,19 +241,17 @@ class BehavioralAssign : public BehavioralStatement {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class BlockingAssign : BehavioralAssign {
-
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
 class NonBlockingAssign : BehavioralAssign {
-
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
@@ -262,8 +260,8 @@ class Always : public Node {
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
 
-public:
+ public:
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-}; // namespace verilogAST
+};  // namespace verilogAST
