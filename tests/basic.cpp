@@ -119,6 +119,23 @@ TEST(BasicTests, TestPosEdge) {
   EXPECT_EQ(pos_edge.toString(), "posedge clk");
 }
 
+TEST(BasicTests, TestPort) {
+  vAST::Identifier i("i");
+  vAST::Port i_port(&i, vAST::INPUT, vAST::WIRE);
+
+  EXPECT_EQ(i_port.toString(), "input i");
+
+  vAST::Identifier o("o");
+  vAST::Port o_port(&o, vAST::OUTPUT, vAST::WIRE);
+
+  EXPECT_EQ(o_port.toString(), "output o");
+
+  vAST::Identifier o_reg("o");
+  vAST::Port o_reg_port(&o_reg, vAST::OUTPUT, vAST::REG);
+
+  EXPECT_EQ(o_reg_port.toString(), "output reg o");
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

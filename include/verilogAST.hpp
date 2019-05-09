@@ -161,23 +161,30 @@ class PosEdge : public Expression {
   std::string toString();
 };
 
+enum Direction { INPUT, OUTPUT, INOUT };
+
+// TODO: Unify with declarations?
+enum PortType { WIRE, REG };
+
 class Port : public Node {
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
-  std::variant<Identifier *, Index *, Slice *> value;
+  // std::variant<Identifier *, Index *, Slice *> *value;
+  Expression *value;
 
   // technically the following are optional (e.g. port direction/data type
   // can be declared in the body of the definition), but for now let's force
   // users to declare ports in a single, unified way for
   // simplicity/maintenance
 
-  // input | output | inout, we could make this an enum instead of string
-  std::string direction;
-  // probably can make these an enum too
-  std::string data_type;
+  Direction direction;
+  PortType data_type;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  Port(Expression *value, Direction direction,
+       PortType data_type)
+      : value(value), direction(direction), data_type(data_type){};
+  std::string toString();
 };
 
 class Module : public Node {

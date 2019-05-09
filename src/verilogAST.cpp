@@ -129,12 +129,35 @@ std::string TernaryOp::toString() {
          false_value->toString();
 }
 
-std::string NegEdge::toString() {
-  return "negedge " + value->toString();
-}
+std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
-std::string PosEdge::toString() {
-  return "posedge " + value->toString();
+std::string PosEdge::toString() { return "posedge " + value->toString(); }
+
+std::string Port::toString() {
+  std::string value_str = value->toString();
+  std::string direction_str;
+  switch (direction) {
+    case INPUT:
+      direction_str = "input";
+      break;
+    case OUTPUT:
+      direction_str = "output";
+      break;
+    case INOUT:
+      direction_str = "inout";
+      break;
+  }
+
+  std::string data_type_str;
+  switch (data_type) {
+    case WIRE:
+      data_type_str = "";
+      break;
+    case REG:
+      data_type_str = "reg ";
+      break;
+  }
+  return direction_str + " " + data_type_str + value_str;
 }
 
 };  // namespace verilogAST
