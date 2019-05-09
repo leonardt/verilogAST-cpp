@@ -167,8 +167,7 @@ std::string Port::toString() {
   return direction_str + " " + data_type_str + value_str;
 }
 
-template <typename T>
-std::string join(std::vector<T> vec, std::string separator) {
+std::string join(std::vector<std::string> vec, std::string separator) {
   std::string result;
   for (size_t i = 0; i < vec.size(); i++) {
     if (i > 0) result += separator;
