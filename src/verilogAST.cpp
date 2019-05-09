@@ -133,13 +133,13 @@ std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
 
-std::string unpack(std::variant<Identifier *, Index *, Slice *> value) {
+std::string variant_to_string(std::variant<Identifier *, Index *, Slice *> value) {
   return std::visit(
       [](auto &&value) -> std::string { return value->toString(); }, value);
 }
 
 std::string Port::toString() {
-  std::string value_str = unpack(value);
+  std::string value_str = variant_to_string(value);
   std::string direction_str;
   switch (direction) {
     case INPUT:
