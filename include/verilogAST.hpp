@@ -169,19 +169,17 @@ enum PortType { WIRE, REG };
 class Port : public Node {
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
-  // std::variant<Identifier *, Index *, Slice *> *value;
-  Expression *value;
+  std::variant<Identifier *, Index *, Slice *> value;
 
   // technically the following are optional (e.g. port direction/data type
   // can be declared in the body of the definition), but for now let's force
   // users to declare ports in a single, unified way for
   // simplicity/maintenance
-
   Direction direction;
   PortType data_type;
 
  public:
-  Port(Expression *value, Direction direction,
+  Port(std::variant<Identifier *, Index *, Slice *> value, Direction direction,
        PortType data_type)
       : value(value), direction(direction), data_type(data_type){};
   std::string toString();
