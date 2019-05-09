@@ -124,4 +124,17 @@ std::string UnaryOp::toString() {
   return op_str + ' ' + operand->toString();
 };
 
+std::string TernaryOp::toString() {
+  return cond->toString() + " ? " + true_value->toString() + " : " +
+         false_value->toString();
+}
+
+std::string NegEdge::toString() {
+  return "negedge " + value->toString();
+}
+
+std::string PosEdge::toString() {
+  return "posedge " + value->toString();
+}
+
 };  // namespace verilogAST

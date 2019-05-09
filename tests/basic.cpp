@@ -1,5 +1,5 @@
-#include "verilogAST.hpp"
 #include "gtest/gtest.h"
+#include "verilogAST.hpp"
 
 namespace vAST = verilogAST;
 
@@ -96,7 +96,30 @@ TEST(BasicTests, TestUnaryOp) {
   }
 }
 
-} // namespace
+TEST(BasicTests, TestTernaryOp) {
+  vAST::Identifier x("x");
+  vAST::UnaryOp un_op(&x, vAST::UnOp::INVERT);
+  vAST::NumericLiteral zero("0");
+  vAST::NumericLiteral one("1");
+  vAST::TernaryOp tern_op(&un_op, &one, &zero);
+  EXPECT_EQ(tern_op.toString(), "~ x ? 32'd1 : 32'd0");
+}
+
+TEST(BasicTests, TestNegEdge) {
+  vAST::Identifier clk("clk");
+  vAST::NegEdge neg_edge(&clk);
+
+  EXPECT_EQ(neg_edge.toString(), "negedge clk");
+}
+
+TEST(BasicTests, TestPosEdge) {
+  vAST::Identifier clk("clk");
+  vAST::PosEdge pos_edge(&clk);
+
+  EXPECT_EQ(pos_edge.toString(), "posedge clk");
+}
+
+}  // namespace
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

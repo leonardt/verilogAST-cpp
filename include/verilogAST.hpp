@@ -52,6 +52,7 @@ class Identifier : public Expression {
 
  public:
   Identifier(std::string value) : value(value){};
+
   std::string toString() override;
 };
 
@@ -139,21 +140,25 @@ class TernaryOp : public Expression {
   Expression *false_value;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  TernaryOp(Expression *cond, Expression *true_value, Expression *false_value)
+      : cond(cond), true_value(true_value), false_value(false_value){};
+  std::string toString();
 };
 
 class NegEdge : public Expression {
   Expression *value;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  NegEdge(Expression *value) : value(value){};
+  std::string toString();
 };
 
 class PosEdge : public Expression {
   Expression *value;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  PosEdge(Expression *value) : value(value){};
+  std::string toString();
 };
 
 class Port : public Node {
