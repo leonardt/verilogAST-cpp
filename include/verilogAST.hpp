@@ -185,23 +185,6 @@ class Port : public Node {
   std::string toString();
 };
 
-class Module : public Node {
-  std::string name;
-  std::vector<Port *> ports;
-  std::vector<Node *> definition;
-  std::map<std::string, NumericLiteral *> parameters;
-
- public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
-};
-
-class File : public Node {
-  std::vector<Module *> modules;
-
- public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
-};
-
 class Statement : public Node {};
 
 class BehavioralStatement : public Statement {};
@@ -265,10 +248,35 @@ class NonBlockingAssign : BehavioralAssign {
   std::string toString() { return "NOT IMPLEMENTED"; };
 };
 
-class Always : public Node {
+class Always : public Statement {
   std::vector<std::variant<Identifier *, PosEdge *, NegEdge *>>
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
+
+ public:
+  std::string toString() { return "NOT IMPLEMENTED"; };
+};
+
+class Module : public Node {
+  std::string name;
+  std::vector<Port *> ports;
+  std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
+      body;
+  std::map<std::string, NumericLiteral *> parameters;
+
+ public:
+  Module(
+      std::string name, std::vector<Port *> ports,
+      std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
+          body,
+      std::map<std::string, NumericLiteral *> parameters)
+      : name(name), ports(ports), body(body), parameters(parameters){};
+
+  std::string toString();
+};
+
+class File : public Node {
+  std::vector<Module *> modules;
 
  public:
   std::string toString() { return "NOT IMPLEMENTED"; };

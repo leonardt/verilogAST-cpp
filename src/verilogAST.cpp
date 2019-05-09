@@ -133,13 +133,15 @@ std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
 
-std::string variant_to_string(std::variant<Identifier *, Index *, Slice *> value) {
+template <typename... Ts>
+std::string variant_to_string(std::variant<Ts...> value) {
   return std::visit(
       [](auto &&value) -> std::string { return value->toString(); }, value);
 }
 
 std::string Port::toString() {
-  std::string value_str = variant_to_string(value);
+  std::string value_str =
+      variant_to_string<Identifier *, Index *, Slice *>(value);
   std::string direction_str;
   switch (direction) {
     case INPUT:
@@ -163,6 +165,51 @@ std::string Port::toString() {
       break;
   }
   return direction_str + " " + data_type_str + value_str;
+}
+
+template <typename T>
+std::string join(std::vector<T> vec, std::string separator) {
+  std::string result;
+  for (size_t i = 0; i < vec.size(); i++) {
+    if (i > 0) result += separator;
+    result += vec[i];
+  }
+  return result;
+}
+
+std::string Module::toString() {
+  std::string module_str = "";
+  module_str += "module " + name;
+
+  // emit parameter string
+  if (!parameters.empty()) {
+    module_str += " #(";
+    std::vector<std::string> param_strs;
+    for (auto it : parameters) {
+      param_strs.push_back("parameter " + it.first + " = " +
+                           it.second->toString());
+    }
+    module_str += join(param_strs, ", ");
+    module_str += ")";
+  }
+
+  // emit port string
+  module_str += " (";
+  std::vector<std::string> ports_strs;
+  for (auto it : ports) ports_strs.push_back(it->toString());
+  module_str += join(ports_strs, ", ");
+  module_str += ");\n";
+
+  // emit body
+  for (auto statement : body) {
+    module_str +=
+        variant_to_string<Always *, StructuralStatement *, Declaration *>(
+            statement) +
+        ";\n";
+  }
+
+  module_str += "endmodule\n";
+  return module_str;
 }
 
 };  // namespace verilogAST

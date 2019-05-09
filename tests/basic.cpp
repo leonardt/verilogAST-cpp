@@ -136,6 +136,38 @@ TEST(BasicTests, TestPort) {
   EXPECT_EQ(o_reg_port.toString(), "output reg o");
 }
 
+TEST(BasicTests, TestModule) {
+  std::string name = "test_module";
+
+  vAST::Identifier i("i");
+  vAST::Port i_port(&i, vAST::INPUT, vAST::WIRE);
+
+  vAST::Identifier o("o");
+  vAST::Port o_port(&o, vAST::OUTPUT, vAST::WIRE);
+
+  std::vector<vAST::Port *> ports = {&i_port, &o_port};
+
+  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
+                           vAST::Declaration *>>
+      body;
+  vAST::NumericLiteral zero("0");
+  vAST::NumericLiteral one("1");
+  std::map<std::string, vAST::NumericLiteral *> parameters;
+  vAST::Module module(name, ports, body, parameters);
+
+  std::string expected_str =
+      "module test_module (input i, output o);\nendmodule\n";
+  EXPECT_EQ(module.toString(), expected_str);
+
+  parameters = {{"param0", &zero}, {"param1", &one}};
+  vAST::Module module_with_params(name, ports, body, parameters);
+
+  expected_str =
+      "module test_module #(parameter param0 = 32'd0, parameter param1 = "
+      "32'd1) (input i, output o);\nendmodule\n";
+  EXPECT_EQ(module_with_params.toString(), expected_str);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
