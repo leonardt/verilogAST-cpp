@@ -26,6 +26,9 @@ TEST(BasicTests, TestNumericLiteral) {
 
   vAST::NumericLiteral n6("764");
   EXPECT_EQ(n6.toString(), "32'd764");
+
+  vAST::NumericLiteral n7("764", 8, true);
+  EXPECT_EQ(n7.toString(), "8'sd764");
 }
 
 TEST(BasicTests, TestIdentifier) {

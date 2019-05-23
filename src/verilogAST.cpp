@@ -2,11 +2,8 @@
 
 namespace verilogAST {
 std::string NumericLiteral::toString() {
-  if (_signed) {
-    throw std::runtime_error(
-        "NumericLiteral::toString when _signed == True has "
-        "not been implemented");
-  }
+  std::string signed_str = _signed ? "s" : "";
+
   char radix_str;
   switch (radix) {
     case BINARY:
@@ -22,7 +19,7 @@ std::string NumericLiteral::toString() {
       radix_str = 'd';
       break;
   }
-  return std::to_string(size) + "'" + radix_str + value;
+  return std::to_string(size) + "'" + signed_str + radix_str + value;
 };
 
 std::string Identifier::toString() { return value; };
