@@ -168,6 +168,37 @@ TEST(BasicTests, TestModule) {
   EXPECT_EQ(module_with_params.toString(), expected_str);
 }
 
+TEST(BasicTests, TestModuleInst) {
+  std::string module_name = "test_module";
+
+  vAST::NumericLiteral zero("0");
+  vAST::NumericLiteral one("1");
+
+  std::map<std::string, vAST::NumericLiteral *> parameters = {{"param0", &zero},
+                                                              {"param1", &one}};
+
+  std::string instance_name = "test_module_inst";
+  vAST::Identifier a("a");
+  vAST::Identifier b("b");
+  vAST::Index b_index(&b, &zero);
+  vAST::Identifier c("c");
+  vAST::NumericLiteral high("31");
+  vAST::NumericLiteral low("0");
+  vAST::Slice c_slice(&c, &high, &low);
+
+  std::map<std::string,
+           std::variant<vAST::Identifier *, vAST::Index *, vAST::Slice *>>
+      connections = {{"a", &a}, {"b", &b_index}, {"c", &c_slice}};
+
+  vAST::ModuleInstantiation module_inst(module_name, parameters, instance_name,
+                                        connections);
+
+  EXPECT_EQ(
+      module_inst.toString(),
+      "test_module #(.param0(32'd0), .param1(32'd1)) test_module_inst(.a(a), "
+      ".b(b[32'd0]), .c(c[32'd31:32'd0]));");
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

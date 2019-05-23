@@ -211,4 +211,29 @@ std::string Module::toString() {
   return module_str;
 }
 
+std::string ModuleInstantiation::toString() {
+  std::string module_inst_str = "";
+  module_inst_str += module_name;
+  if (!parameters.empty()) {
+    module_inst_str += " #(";
+    std::vector<std::string> param_strs;
+    for (auto it : parameters) {
+      param_strs.push_back("." + it.first + "(" + it.second->toString() + ")");
+    }
+    module_inst_str += join(param_strs, ", ");
+    module_inst_str += ")";
+  }
+  module_inst_str += " " + instance_name + "(";
+  if (!connections.empty()) {
+    std::vector<std::string> param_strs;
+    for (auto it : connections) {
+      param_strs.push_back("." + it.first + "(" + variant_to_string(it.second) +
+                           ")");
+    }
+    module_inst_str += join(param_strs, ", ");
+  }
+  module_inst_str += ");";
+  return module_inst_str;
+}
+
 };  // namespace verilogAST

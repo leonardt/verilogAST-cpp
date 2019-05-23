@@ -205,7 +205,17 @@ class ModuleInstantiation : public StructuralStatement {
       connections;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  ModuleInstantiation(
+      std::string module_name,
+      std::map<std::string, NumericLiteral *> parameters,
+      std::string instance_name,
+      std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
+          connections)
+      : module_name(module_name),
+        parameters(parameters),
+        instance_name(instance_name),
+        connections(connections){};
+  std::string toString();
 };
 
 class Declaration : public Node {
