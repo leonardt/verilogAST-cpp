@@ -1,4 +1,5 @@
 #include "verilogAST.hpp"
+
 namespace verilogAST {
 std::string NumericLiteral::toString() {
   if (_signed) {

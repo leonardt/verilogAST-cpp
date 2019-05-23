@@ -130,6 +130,11 @@ TEST(BasicTests, TestPort) {
 
   EXPECT_EQ(o_port.toString(), "output o");
 
+  vAST::Identifier io("io");
+  vAST::Port io_port(&io, vAST::INOUT, vAST::WIRE);
+
+  EXPECT_EQ(io_port_port.toString(), "inout io");
+
   vAST::Identifier o_reg("o");
   vAST::Port o_reg_port(&o_reg, vAST::OUTPUT, vAST::REG);
 
