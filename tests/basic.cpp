@@ -133,44 +133,12 @@ TEST(BasicTests, TestPort) {
   vAST::Identifier io("io");
   vAST::Port io_port(&io, vAST::INOUT, vAST::WIRE);
 
-  EXPECT_EQ(io_port_port.toString(), "inout io");
+  EXPECT_EQ(io_port.toString(), "inout io");
 
   vAST::Identifier o_reg("o");
   vAST::Port o_reg_port(&o_reg, vAST::OUTPUT, vAST::REG);
 
   EXPECT_EQ(o_reg_port.toString(), "output reg o");
-}
-
-TEST(BasicTests, TestModule) {
-  std::string name = "test_module";
-
-  vAST::Identifier i("i");
-  vAST::Port i_port(&i, vAST::INPUT, vAST::WIRE);
-
-  vAST::Identifier o("o");
-  vAST::Port o_port(&o, vAST::OUTPUT, vAST::WIRE);
-
-  std::vector<vAST::Port *> ports = {&i_port, &o_port};
-
-  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
-                           vAST::Declaration *>>
-      body;
-  vAST::NumericLiteral zero("0");
-  vAST::NumericLiteral one("1");
-  std::map<std::string, vAST::NumericLiteral *> parameters;
-  vAST::Module module(name, ports, body, parameters);
-
-  std::string expected_str =
-      "module test_module (input i, output o);\nendmodule\n";
-  EXPECT_EQ(module.toString(), expected_str);
-
-  parameters = {{"param0", &zero}, {"param1", &one}};
-  vAST::Module module_with_params(name, ports, body, parameters);
-
-  expected_str =
-      "module test_module #(parameter param0 = 32'd0, parameter param1 = "
-      "32'd1) (input i, output o);\nendmodule\n";
-  EXPECT_EQ(module_with_params.toString(), expected_str);
 }
 
 TEST(BasicTests, TestModuleInst) {
@@ -198,10 +166,69 @@ TEST(BasicTests, TestModuleInst) {
   vAST::ModuleInstantiation module_inst(module_name, parameters, instance_name,
                                         connections);
 
-  EXPECT_EQ(
-      module_inst.toString(),
-      "test_module #(.param0(32'd0), .param1(32'd1)) test_module_inst(.a(a), "
-      ".b(b[32'd0]), .c(c[32'd31:32'd0]));");
+  EXPECT_EQ(module_inst.toString(),
+            "test_module #(.param0(32'd0), .param1(32'd1)) "
+            "test_module_inst(.a(a), .b(b[32'd0]), .c(c[32'd31:32'd0]))");
+}
+
+TEST(BasicTests, TestModule) {
+  std::string name = "test_module";
+
+  vAST::Identifier i("i");
+  vAST::Port i_port(&i, vAST::INPUT, vAST::WIRE);
+
+  vAST::Identifier o("o");
+  vAST::Port o_port(&o, vAST::OUTPUT, vAST::WIRE);
+
+  std::vector<vAST::Port *> ports = {&i_port, &o_port};
+
+  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
+                           vAST::Declaration *>>
+      body;
+
+  std::string module_name = "other_module";
+
+  vAST::NumericLiteral zero("0");
+  vAST::NumericLiteral one("1");
+
+  std::map<std::string, vAST::NumericLiteral *> inst_parameters = {
+      {"param0", &zero}, {"param1", &one}};
+
+  std::string instance_name = "other_module_inst";
+  vAST::Identifier a("a");
+  vAST::Identifier b("b");
+  vAST::Index b_index(&b, &zero);
+  vAST::Identifier c("c");
+  vAST::NumericLiteral high("31");
+  vAST::NumericLiteral low("0");
+  vAST::Slice c_slice(&c, &high, &low);
+
+  std::map<std::string,
+           std::variant<vAST::Identifier *, vAST::Index *, vAST::Slice *>>
+      connections = {{"a", &a}, {"b", &b_index}, {"c", &c_slice}};
+
+  vAST::ModuleInstantiation module_inst(module_name, inst_parameters,
+                                        instance_name, connections);
+  body.push_back(&module_inst);
+
+  std::map<std::string, vAST::NumericLiteral *> parameters;
+  vAST::Module module(name, ports, body, parameters);
+
+  std::string expected_str =
+      "module test_module (input i, output o);\nother_module #(.param0(32'd0), "
+      ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
+      ".c(c[32'd31:32'd0]));\nendmodule\n";
+  EXPECT_EQ(module.toString(), expected_str);
+
+  parameters = {{"param0", &zero}, {"param1", &one}};
+  vAST::Module module_with_params(name, ports, body, parameters);
+
+  expected_str =
+      "module test_module #(parameter param0 = 32'd0, parameter param1 = "
+      "32'd1) (input i, output o);\nother_module #(.param0(32'd0), "
+      ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
+      ".c(c[32'd31:32'd0]));\nendmodule\n";
+  EXPECT_EQ(module_with_params.toString(), expected_str);
 }
 
 }  // namespace

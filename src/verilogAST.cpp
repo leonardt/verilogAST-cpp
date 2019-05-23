@@ -233,7 +233,7 @@ std::string ModuleInstantiation::toString() {
     }
     module_inst_str += join(param_strs, ", ");
   }
-  module_inst_str += ");";
+  module_inst_str += ")";
   return module_inst_str;
 }
 
