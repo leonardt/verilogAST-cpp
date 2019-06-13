@@ -293,6 +293,17 @@ TEST(BasicTests, TestAlways) {
       "b <= c;\n"
       "end\n";
   EXPECT_EQ(always.toString(), expected_str);
+
+  sensitivity_list.clear();
+  vAST::Star star;
+  sensitivity_list.push_back(&star);
+  vAST::Always always_star(sensitivity_list, body);
+  expected_str =
+      "always @(*) begin\n"
+      "a = b;\n"
+      "b <= c;\n"
+      "end\n";
+  EXPECT_EQ(always_star.toString(), expected_str);
 }
 
 TEST(BasicTests, File) {
