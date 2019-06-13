@@ -304,6 +304,10 @@ TEST(BasicTests, TestAlways) {
       "b <= c;\n"
       "end\n";
   EXPECT_EQ(always_star.toString(), expected_str);
+
+  sensitivity_list.clear();
+  ASSERT_THROW(vAST::Always always_empty(sensitivity_list, body),
+               std::runtime_error);
 }
 
 TEST(BasicTests, File) {
