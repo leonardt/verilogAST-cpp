@@ -290,13 +290,24 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
   std::string toString() { return Assign::toString(); };
 };
 
+class Star : Node {
+ public:
+  std::string toString() { return "*"; };
+};
+
 class Always : public Statement {
-  std::vector<std::variant<Identifier *, PosEdge *, NegEdge *>>
+  std::vector<std::variant<Identifier *, PosEdge *, NegEdge *, Star *>>
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  Always(std::vector<std::variant<Identifier *, PosEdge *, NegEdge *, Star *>>
+             sensitivity_list,
+         std::vector<std::variant<BehavioralStatement *, Declaration *>> body)
+      : sensitivity_list(sensitivity_list), body(body) {
+    assert(!sensitivity_list.empty());
+  };
+  std::string toString();
 };
 
 class Module : public Node {

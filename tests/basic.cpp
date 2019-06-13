@@ -268,6 +268,33 @@ TEST(BasicTests, TestAssign) {
   EXPECT_EQ(non_blocking_assign.toString(), "a <= b");
 }
 
+TEST(BasicTests, TestAlways) {
+  vAST::Identifier a("a");
+  vAST::Identifier b("b");
+  vAST::Identifier c("c");
+  std::vector<std::variant<vAST::Identifier *, vAST::PosEdge *, vAST::NegEdge *,
+                           vAST::Star *>>
+      sensitivity_list;
+  sensitivity_list.push_back(&a);
+  vAST::PosEdge posedge(&b);
+  sensitivity_list.push_back(&posedge);
+  vAST::NegEdge negedge(&c);
+  sensitivity_list.push_back(&negedge);
+  std::vector<std::variant<vAST::BehavioralStatement *, vAST::Declaration *>>
+      body;
+  vAST::BlockingAssign assign0(&a, &b);
+  body.push_back(&assign0);
+  vAST::NonBlockingAssign assign1(&b, &c);
+  body.push_back(&assign1);
+  vAST::Always always(sensitivity_list, body);
+  std::string expected_str =
+      "always @(a, posedge b, negedge c) begin\n"
+      "a = b;\n"
+      "b <= c;\n"
+      "end\n";
+  EXPECT_EQ(always.toString(), expected_str);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

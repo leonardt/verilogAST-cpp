@@ -243,4 +243,27 @@ std::string Assign::toString() {
          value->toString();
 }
 
+std::string Always::toString() {
+  std::string always_str = "";
+  always_str += "always @(";
+
+  // emit sensitivity string
+  std::vector<std::string> sensitivity_strs;
+  for (auto it : sensitivity_list) {
+    sensitivity_strs.push_back(variant_to_string(it));
+  }
+  always_str += join(sensitivity_strs, ", ");
+  always_str += ") begin\n";
+
+  // emit body
+  for (auto statement : body) {
+    always_str +=
+        variant_to_string<BehavioralStatement *, Declaration *>(statement) +
+        ";\n";
+  }
+
+  always_str += "end\n";
+  return always_str;
+}
+
 };  // namespace verilogAST
