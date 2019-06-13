@@ -234,6 +234,27 @@ TEST(BasicTests, TestModule) {
   EXPECT_EQ(module_with_params.toString(), expected_str);
 }
 
+TEST(BasicTests, TestDeclaration) {
+  vAST::Identifier a("a");
+  vAST::Wire wire(&a);
+  EXPECT_EQ(wire.toString(), "wire a");
+
+  vAST::Reg reg(&a);
+  EXPECT_EQ(reg.toString(), "reg a");
+
+  vAST::Identifier id("x");
+  vAST::NumericLiteral n("0");
+  vAST::Index index(&id, &n);
+  vAST::Wire wire_index(&index);
+  EXPECT_EQ(wire_index.toString(), "wire x[32'd0]");
+
+  vAST::NumericLiteral high("31");
+  vAST::NumericLiteral low("0");
+  vAST::Slice slice(&id, &high, &low);
+  vAST::Reg reg_slice(&slice);
+  EXPECT_EQ(reg_slice.toString(), "reg x[32'd31:32'd0]");
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

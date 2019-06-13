@@ -219,17 +219,27 @@ class ModuleInstantiation : public StructuralStatement {
 };
 
 class Declaration : public Node {
-  std::variant<Identifier, Index, Slice> value;
+ protected:
+  std::string decl;
+  std::variant<Identifier *, Index *, Slice *> value;
+
+ public:
+  Declaration(std::variant<Identifier *, Index *, Slice *> value,
+              std::string decl)
+      : value(value), decl(decl){};
+  std::string toString();
 };
 
-class Wire : Declaration {
+class Wire : public Declaration {
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  Wire(std::variant<Identifier *, Index *, Slice *> value)
+      : Declaration(value, "wire"){};
 };
 
-class Reg : Declaration {
+class Reg : public Declaration {
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  Reg(std::variant<Identifier *, Index *, Slice *> value)
+      : Declaration(value, "reg"){};
 };
 
 class ContinuousAssign : public StructuralStatement {

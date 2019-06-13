@@ -234,4 +234,8 @@ std::string ModuleInstantiation::toString() {
   return module_inst_str;
 }
 
+std::string Declaration::toString() {
+  return decl + " " + variant_to_string(value);
+}
+
 };  // namespace verilogAST
