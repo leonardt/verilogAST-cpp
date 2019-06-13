@@ -305,7 +305,10 @@ class Always : public Statement {
              sensitivity_list,
          std::vector<std::variant<BehavioralStatement *, Declaration *>> body)
       : sensitivity_list(sensitivity_list), body(body) {
-    assert(!sensitivity_list.empty());
+    if (sensitivity_list.empty()) {
+      throw std::runtime_error(
+          "vAST::Always expects non-empty sensitivity list");
+    }
   };
   std::string toString();
 };
