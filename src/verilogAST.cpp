@@ -266,4 +266,15 @@ std::string Always::toString() {
   return always_str;
 }
 
+std::string File::toString() {
+  std::string file_str = "";
+
+  std::vector<std::string> file_strs;
+  for (auto module : modules) {
+    file_strs.push_back(module->toString());
+  }
+
+  return join(file_strs, "\n");
+}
+
 };  // namespace verilogAST

@@ -332,7 +332,8 @@ class File : public Node {
   std::vector<Module *> modules;
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  File(std::vector<Module *> modules) : modules(modules){};
+  std::string toString();
 };
 
 };  // namespace verilogAST
