@@ -239,7 +239,8 @@ std::string Declaration::toString() {
 }
 
 std::string Assign::toString() {
-  return prefix + variant_to_string(target) + " = " + value->toString();
+  return prefix + variant_to_string(target) + " " + symbol + " " +
+         value->toString();
 }
 
 };  // namespace verilogAST

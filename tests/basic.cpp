@@ -261,8 +261,11 @@ TEST(BasicTests, TestAssign) {
   vAST::ContinuousAssign cont_assign(&a, &b);
   EXPECT_EQ(cont_assign.toString(), "assign a = b");
 
-  vAST::BehavioralAssign behave_assign(&a, &b);
-  EXPECT_EQ(behave_assign.toString(), "a = b");
+  vAST::BlockingAssign blocking_assign(&a, &b);
+  EXPECT_EQ(blocking_assign.toString(), "a = b");
+
+  vAST::NonBlockingAssign non_blocking_assign(&a, &b);
+  EXPECT_EQ(non_blocking_assign.toString(), "a <= b");
 }
 
 }  // namespace

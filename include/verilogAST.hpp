@@ -248,10 +248,14 @@ class Assign : public Node {
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
   std::string prefix;
+  std::string symbol;
 
   Assign(std::variant<Identifier *, Index *, Slice *> target, Expression *value,
          std::string prefix)
-      : target(target), value(value), prefix(prefix){};
+      : target(target), value(value), prefix(prefix), symbol("="){};
+  Assign(std::variant<Identifier *, Index *, Slice *> target, Expression *value,
+         std::string prefix, std::string symbol)
+      : target(target), value(value), prefix(prefix), symbol(symbol){};
 
  public:
   std::string toString();
@@ -266,23 +270,24 @@ class ContinuousAssign : public StructuralStatement, public Assign {
   std::string toString() { return Assign::toString(); };
 };
 
-class BehavioralAssign : public BehavioralStatement, public Assign {
+class BehavioralAssign : public BehavioralStatement {};
+
+class BlockingAssign : public BehavioralAssign, public Assign {
  public:
-  BehavioralAssign(std::variant<Identifier *, Index *, Slice *> target,
-                   Expression *value)
+  BlockingAssign(std::variant<Identifier *, Index *, Slice *> target,
+                 Expression *value)
       : Assign(target, value, ""){};
   // Multiple inheritance forces us to have to explicitly state this?
   std::string toString() { return Assign::toString(); };
 };
 
-class BlockingAssign : BehavioralAssign {
+class NonBlockingAssign : public BehavioralAssign, public Assign {
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
-};
-
-class NonBlockingAssign : BehavioralAssign {
- public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  NonBlockingAssign(std::variant<Identifier *, Index *, Slice *> target,
+                    Expression *value)
+      : Assign(target, value, "", "<="){};
+  // Multiple inheritance forces us to have to explicitly state this?
+  std::string toString() { return Assign::toString(); };
 };
 
 class Always : public Statement {
