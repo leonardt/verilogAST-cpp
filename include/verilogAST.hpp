@@ -223,10 +223,11 @@ class Declaration : public Node {
   std::string decl;
   std::variant<Identifier *, Index *, Slice *> value;
 
- public:
   Declaration(std::variant<Identifier *, Index *, Slice *> value,
               std::string decl)
       : value(value), decl(decl){};
+
+ public:
   std::string toString();
 };
 
@@ -242,20 +243,36 @@ class Reg : public Declaration {
       : Declaration(value, "reg"){};
 };
 
-class ContinuousAssign : public StructuralStatement {
+class Assign : public Node {
+ protected:
   std::variant<Identifier *, Index *, Slice *> target;
   Expression *value;
+  std::string prefix;
+
+  Assign(std::variant<Identifier *, Index *, Slice *> target, Expression *value,
+         std::string prefix)
+      : target(target), value(value), prefix(prefix){};
 
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  std::string toString();
 };
 
-class BehavioralAssign : public BehavioralStatement {
-  std::variant<Identifier *, Index *, Slice *> target;
-  Expression *value;
-
+class ContinuousAssign : public StructuralStatement, public Assign {
  public:
-  std::string toString() { return "NOT IMPLEMENTED"; };
+  ContinuousAssign(std::variant<Identifier *, Index *, Slice *> target,
+                   Expression *value)
+      : Assign(target, value, "assign "){};
+  // Multiple inheritance forces us to have to explicitly state this?
+  std::string toString() { return Assign::toString(); };
+};
+
+class BehavioralAssign : public BehavioralStatement, public Assign {
+ public:
+  BehavioralAssign(std::variant<Identifier *, Index *, Slice *> target,
+                   Expression *value)
+      : Assign(target, value, ""){};
+  // Multiple inheritance forces us to have to explicitly state this?
+  std::string toString() { return Assign::toString(); };
 };
 
 class BlockingAssign : BehavioralAssign {

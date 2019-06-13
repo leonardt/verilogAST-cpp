@@ -255,6 +255,16 @@ TEST(BasicTests, TestDeclaration) {
   EXPECT_EQ(reg_slice.toString(), "reg x[32'd31:32'd0]");
 }
 
+TEST(BasicTests, TestAssign) {
+  vAST::Identifier a("a");
+  vAST::Identifier b("b");
+  vAST::ContinuousAssign cont_assign(&a, &b);
+  EXPECT_EQ(cont_assign.toString(), "assign a = b");
+
+  vAST::BehavioralAssign behave_assign(&a, &b);
+  EXPECT_EQ(behave_assign.toString(), "a = b");
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
