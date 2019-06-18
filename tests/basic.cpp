@@ -185,8 +185,7 @@ TEST(BasicTests, TestModule) {
 
   std::vector<vAST::Port *> ports = {&i_port, &o_port};
 
-  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
-                           vAST::Declaration *>>
+  std::vector<std::variant<vAST::StructuralStatement *,vAST::Declaration *>>
       body;
 
   std::string module_name = "other_module";
@@ -319,8 +318,7 @@ TEST(BasicTests, File) {
 
   std::vector<vAST::Port *> ports = {&i_port, &o_port};
 
-  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
-                           vAST::Declaration *>>
+  std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
       body;
 
   std::string module_name = "other_module";
