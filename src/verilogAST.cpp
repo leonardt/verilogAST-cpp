@@ -200,9 +200,8 @@ std::string Module::toString() {
   // emit body
   for (auto statement : body) {
     module_str +=
-        variant_to_string<Always *, StructuralStatement *, Declaration *>(
-            statement) +
-        ";\n";
+        variant_to_string<StructuralStatement *, Declaration *>(statement) +
+        "\n";
   }
 
   module_str += "endmodule\n";
@@ -230,17 +229,17 @@ std::string ModuleInstantiation::toString() {
     }
     module_inst_str += join(param_strs, ", ");
   }
-  module_inst_str += ")";
+  module_inst_str += ");";
   return module_inst_str;
 }
 
 std::string Declaration::toString() {
-  return decl + " " + variant_to_string(value);
+  return decl + " " + variant_to_string(value) + ";";
 }
 
 std::string Assign::toString() {
   return prefix + variant_to_string(target) + " " + symbol + " " +
-         value->toString();
+         value->toString() + ";";
 }
 
 std::string Always::toString() {
@@ -259,7 +258,7 @@ std::string Always::toString() {
   for (auto statement : body) {
     always_str +=
         variant_to_string<BehavioralStatement *, Declaration *>(statement) +
-        ";\n";
+        "\n";
   }
 
   always_str += "end\n";

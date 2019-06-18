@@ -300,7 +300,7 @@ class Star : Node {
   std::string toString() { return "*"; };
 };
 
-class Always : public Statement {
+class Always : public StructuralStatement {
   std::vector<std::variant<Identifier *, PosEdge *, NegEdge *, Star *>>
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
@@ -321,15 +321,13 @@ class Always : public Statement {
 class Module : public Node {
   std::string name;
   std::vector<Port *> ports;
-  std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
-      body;
-  
   Parameters parameters;
+  std::vector<std::variant<StructuralStatement *, Declaration *>> body;
 
  public:
   Module(
       std::string name, std::vector<Port *> ports,
-      std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
+      std::vector<std::variant<StructuralStatement *, Declaration *>>
           body,
       Parameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
