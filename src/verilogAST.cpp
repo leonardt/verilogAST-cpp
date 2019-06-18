@@ -82,6 +82,11 @@ std::string BinaryOp::toString() {
   return left->toString() + ' ' + op_str + ' ' + right->toString();
 };
 
+std::string ConstantBinaryOp::toString() {
+  return BinaryOp(this->left,this->op,this->right).toString();
+}
+
+
 std::string UnaryOp::toString() {
   std::string op_str;
   switch (op) {
@@ -122,9 +127,17 @@ std::string UnaryOp::toString() {
   return op_str + ' ' + operand->toString();
 };
 
+std::string ConstantUnaryOp::toString() {
+  return UnaryOp(this->operand,this->op).toString();
+}
+
 std::string TernaryOp::toString() {
   return cond->toString() + " ? " + true_value->toString() + " : " +
          false_value->toString();
+}
+
+std::string ConstantTernaryOp::toString() {
+  return TernaryOp(this->cond,this->true_value,this->false_value).toString();
 }
 
 std::string NegEdge::toString() { return "negedge " + value->toString(); }

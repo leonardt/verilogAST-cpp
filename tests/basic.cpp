@@ -6,7 +6,7 @@ namespace vAST = verilogAST;
 namespace {
 
 typedef std::vector<std::pair<vAST::Parameter *, vAST::NumericLiteral *>> ModuleParameters;
-typedef std::vector<std::pair<vAST::Parameter *, vAST::Constant *>> InstanceParameters;
+typedef std::vector<std::pair<vAST::Parameter *, vAST::ConstantExpression *>> InstanceParameters;
 
 TEST(BasicTests, TestNumericLiteral) {
   vAST::NumericLiteral n0("23", 16, false, vAST::DECIMAL);
@@ -80,6 +80,32 @@ TEST(BasicTests, TestBinaryOp) {
   }
 }
 
+TEST(BasicTests, TestConstantBinaryOp) {
+  std::vector<std::pair<vAST::BinOp::BinOp, std::string>> ops;
+  ops.push_back(std::make_pair(vAST::BinOp::LSHIFT, "<<"));
+  ops.push_back(std::make_pair(vAST::BinOp::RSHIFT, ">>"));
+  ops.push_back(std::make_pair(vAST::BinOp::AND, "&&"));
+  ops.push_back(std::make_pair(vAST::BinOp::OR, "||"));
+  ops.push_back(std::make_pair(vAST::BinOp::EQ, "=="));
+  ops.push_back(std::make_pair(vAST::BinOp::NEQ, "!="));
+  ops.push_back(std::make_pair(vAST::BinOp::ADD, "+"));
+  ops.push_back(std::make_pair(vAST::BinOp::SUB, "-"));
+  ops.push_back(std::make_pair(vAST::BinOp::MUL, "*"));
+  ops.push_back(std::make_pair(vAST::BinOp::DIV, "/"));
+  ops.push_back(std::make_pair(vAST::BinOp::POW, "**"));
+  ops.push_back(std::make_pair(vAST::BinOp::MOD, "%"));
+  ops.push_back(std::make_pair(vAST::BinOp::ALSHIFT, "<<<"));
+  ops.push_back(std::make_pair(vAST::BinOp::ARSHIFT, ">>>"));
+  vAST::Parameter x("x");
+  vAST::Parameter y("y");
+  for (auto it : ops) {
+    vAST::BinOp::BinOp op = it.first;
+    std::string op_str = it.second;
+    vAST::ConstantBinaryOp bin_op(&x, op, &y);
+    EXPECT_EQ(bin_op.toString(), "x " + op_str + " y");
+  }
+}
+
 TEST(BasicTests, TestUnaryOp) {
   std::vector<std::pair<vAST::UnOp::UnOp, std::string>> ops;
   ops.push_back(std::make_pair(vAST::UnOp::NOT, "!"));
@@ -102,9 +128,40 @@ TEST(BasicTests, TestUnaryOp) {
   }
 }
 
+TEST(BasicTests, TestConstantUnaryOp) {
+  std::vector<std::pair<vAST::UnOp::UnOp, std::string>> ops;
+  ops.push_back(std::make_pair(vAST::UnOp::NOT, "!"));
+  ops.push_back(std::make_pair(vAST::UnOp::INVERT, "~"));
+  ops.push_back(std::make_pair(vAST::UnOp::AND, "&"));
+  ops.push_back(std::make_pair(vAST::UnOp::NAND, "~&"));
+  ops.push_back(std::make_pair(vAST::UnOp::OR, "|"));
+  ops.push_back(std::make_pair(vAST::UnOp::NOR, "~|"));
+  ops.push_back(std::make_pair(vAST::UnOp::XOR, "^"));
+  ops.push_back(std::make_pair(vAST::UnOp::NXOR, "~^"));
+  ops.push_back(std::make_pair(vAST::UnOp::XNOR, "^~"));
+  ops.push_back(std::make_pair(vAST::UnOp::PLUS, "+"));
+  ops.push_back(std::make_pair(vAST::UnOp::MINUS, "-"));
+  vAST::Parameter x("x");
+  for (auto it : ops) {
+    vAST::UnOp::UnOp op = it.first;
+    std::string op_str = it.second;
+    vAST::ConstantUnaryOp un_op(&x, op);
+    EXPECT_EQ(un_op.toString(), op_str + " x");
+  }
+}
+
 TEST(BasicTests, TestTernaryOp) {
   vAST::Identifier x("x");
   vAST::UnaryOp un_op(&x, vAST::UnOp::INVERT);
+  vAST::NumericLiteral zero("0");
+  vAST::NumericLiteral one("1");
+  vAST::TernaryOp tern_op(&un_op, &one, &zero);
+  EXPECT_EQ(tern_op.toString(), "~ x ? 32'd1 : 32'd0");
+}
+
+TEST(BasicTests, TestConstantTernaryOp) {
+  vAST::Parameter x("x");
+  vAST::ConstantUnaryOp un_op(&x, vAST::UnOp::INVERT);
   vAST::NumericLiteral zero("0");
   vAST::NumericLiteral one("1");
   vAST::TernaryOp tern_op(&un_op, &one, &zero);

@@ -16,15 +16,12 @@ class Expression : public Node {
   virtual std::string toString() = 0;
 };
 
-enum Radix { BINARY, OCTAL, HEX, DECIMAL };
-
-
-class Constant : public Expression {
+class ConstantExpression : public Expression {
  public:
   virtual std::string toString() = 0;
 };
 
-class Parameter : public Constant {
+class Parameter : public ConstantExpression {
   //These are untyped parameters.
   //One weirdness is that these parameters could be strings as well as 32 bit values.
   //I think Verilog thinks of strings as an array of ascii bytes though.
@@ -35,7 +32,9 @@ class Parameter : public Constant {
 };
 
 
-class NumericLiteral : public Constant {
+enum Radix { BINARY, OCTAL, HEX, DECIMAL };
+
+class NumericLiteral : public ConstantExpression {
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
   //  convert it during code generation)
@@ -77,20 +76,20 @@ class Identifier : public Expression {
 
 class Index : public Expression {
   Identifier *id;
-  Constant *index;
+  ConstantExpression *index;
 
  public:
-  Index(Identifier *id, Constant *index) : id(id), index(index){};
+  Index(Identifier *id, ConstantExpression *index) : id(id), index(index){};
   std::string toString() override;
 };
 
 class Slice : public Expression {
   Identifier *id;
-  Constant *high_index;
-  Constant *low_index;
+  ConstantExpression *high_index;
+  ConstantExpression *low_index;
 
  public:
-  Slice(Identifier *id, Constant *high_index, Constant *low_index)
+  Slice(Identifier *id, ConstantExpression *high_index, ConstantExpression *low_index)
       : id(id), high_index(high_index), low_index(low_index){};
   std::string toString() override;
 };
@@ -127,6 +126,19 @@ class BinaryOp : public Expression {
   std::string toString() override;
 };
 
+class ConstantBinaryOp : public Expression {
+  ConstantExpression *left;
+  ConstantExpression *right;
+
+  BinOp::BinOp op;
+
+ public:
+  ConstantBinaryOp(ConstantExpression *left, BinOp::BinOp op, ConstantExpression *right)
+      : left(left), op(op), right(right){};
+  std::string toString() override;
+};
+
+
 namespace UnOp {
 enum UnOp {
   NOT,
@@ -153,6 +165,16 @@ class UnaryOp : public Expression {
   std::string toString();
 };
 
+class ConstantUnaryOp : public ConstantExpression {
+  ConstantExpression *operand;
+
+  UnOp::UnOp op;
+
+ public:
+  ConstantUnaryOp(ConstantExpression *operand, UnOp::UnOp op) : operand(operand), op(op){};
+  std::string toString();
+};
+
 class TernaryOp : public Expression {
   Expression *cond;
   Expression *true_value;
@@ -160,6 +182,17 @@ class TernaryOp : public Expression {
 
  public:
   TernaryOp(Expression *cond, Expression *true_value, Expression *false_value)
+      : cond(cond), true_value(true_value), false_value(false_value){};
+  std::string toString();
+};
+
+class ConstantTernaryOp : public ConstantExpression {
+  ConstantExpression *cond;
+  ConstantExpression *true_value;
+  ConstantExpression *false_value;
+
+ public:
+  ConstantTernaryOp(ConstantExpression *cond, ConstantExpression *true_value, ConstantExpression *false_value)
       : cond(cond), true_value(true_value), false_value(false_value){};
   std::string toString();
 };
@@ -213,7 +246,7 @@ class ModuleInstantiation : public StructuralStatement {
   std::string module_name;
 
   //parameter,value
-  std::vector<std::pair<Parameter *, Constant *>> parameters;
+  std::vector<std::pair<Parameter *, ConstantExpression *>> parameters;
 
   std::string instance_name;
 
@@ -226,7 +259,7 @@ class ModuleInstantiation : public StructuralStatement {
   //TODO Need to make sure that the instance parameters are a subset of the module parameters
   ModuleInstantiation(
       std::string module_name,
-      std::vector<std::pair<Parameter *, Constant *>> parameters,
+      std::vector<std::pair<Parameter *, ConstantExpression *>> parameters,
       std::string instance_name,
       std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
           connections)
