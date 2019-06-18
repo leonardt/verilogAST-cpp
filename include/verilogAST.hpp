@@ -19,23 +19,7 @@ class Expression : public Node {
 enum Radix { BINARY, OCTAL, HEX, DECIMAL };
 
 
-class Constant : public Expression {
- public:
-  virtual std::string toString() = 0;
-};
-
-class Parameter : public Constant {
-  //These are untyped parameters.
-  //One weirdness is that these parameters could be strings as well as 32 bit values.
-  //I think Verilog thinks of strings as an array of ascii bytes though.
-  std::string name;
- public:
-  Parameter(std::string name) : name(name) {}
-  std::string toString() override {return name;}
-};
-
-
-class NumericLiteral : public Constant {
+class NumericLiteral : public Expression {
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
   //  convert it during code generation)
@@ -77,20 +61,20 @@ class Identifier : public Expression {
 
 class Index : public Expression {
   Identifier *id;
-  Constant *index;
+  Expression *index;
 
  public:
-  Index(Identifier *id, Constant *index) : id(id), index(index){};
+  Index(Identifier *id, Expression *index) : id(id), index(index){};
   std::string toString() override;
 };
 
 class Slice : public Expression {
   Identifier *id;
-  Constant *high_index;
-  Constant *low_index;
+  Expression *high_index;
+  Expression *low_index;
 
  public:
-  Slice(Identifier *id, Constant *high_index, Constant *low_index)
+  Slice(Identifier *id, Expression *high_index, Expression *low_index)
       : id(id), high_index(high_index), low_index(low_index){};
   std::string toString() override;
 };
@@ -209,11 +193,13 @@ class Statement : public Node {};
 class BehavioralStatement : public Statement {};
 class StructuralStatement : public Statement {};
 
+typedef std::vector<std::pair<Identifier *, Expression *>> Parameters;
+
 class ModuleInstantiation : public StructuralStatement {
   std::string module_name;
 
   //parameter,value
-  std::vector<std::pair<Parameter *, Constant *>> parameters;
+  Parameters parameters;
 
   std::string instance_name;
 
@@ -226,7 +212,7 @@ class ModuleInstantiation : public StructuralStatement {
   //TODO Need to make sure that the instance parameters are a subset of the module parameters
   ModuleInstantiation(
       std::string module_name,
-      std::vector<std::pair<Parameter *, Constant *>> parameters,
+      Parameters parameters,
       std::string instance_name,
       std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
           connections)
@@ -337,15 +323,15 @@ class Module : public Node {
   std::vector<Port *> ports;
   std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
       body;
-  //parameter,defaultvalue
-  std::vector<std::pair<Parameter *, NumericLiteral *>> parameters;
+  
+  Parameters parameters;
 
  public:
   Module(
       std::string name, std::vector<Port *> ports,
       std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
           body,
-      std::vector<std::pair<Parameter *, NumericLiteral *>> parameters)
+      Parameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
 
   std::string toString();
