@@ -213,8 +213,7 @@ std::string Module::toString() {
   // emit body
   for (auto statement : body) {
     module_str +=
-        variant_to_string<Always *, StructuralStatement *, Declaration *>(
-            statement) +
+        variant_to_string<StructuralStatement *, Declaration *>(statement) +
         ";\n";
   }
 

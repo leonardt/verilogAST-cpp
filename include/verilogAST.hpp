@@ -126,7 +126,7 @@ class BinaryOp : public Expression {
   std::string toString() override;
 };
 
-class ConstantBinaryOp : public Expression {
+class ConstantBinaryOp : public ConstantExpression {
   ConstantExpression *left;
   ConstantExpression *right;
 
@@ -242,11 +242,14 @@ class Statement : public Node {};
 class BehavioralStatement : public Statement {};
 class StructuralStatement : public Statement {};
 
+typedef std::vector<std::pair<Parameter *, NumericLiteral *>> ModuleParameters;
+typedef std::vector<std::pair<Parameter *, ConstantExpression *>> InstanceParameters;
+
 class ModuleInstantiation : public StructuralStatement {
   std::string module_name;
 
   //parameter,value
-  std::vector<std::pair<Parameter *, ConstantExpression *>> parameters;
+  InstanceParameters parameters;
 
   std::string instance_name;
 
@@ -259,7 +262,7 @@ class ModuleInstantiation : public StructuralStatement {
   //TODO Need to make sure that the instance parameters are a subset of the module parameters
   ModuleInstantiation(
       std::string module_name,
-      std::vector<std::pair<Parameter *, ConstantExpression *>> parameters,
+      InstanceParameters parameters,
       std::string instance_name,
       std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
           connections)
@@ -347,7 +350,7 @@ class Star : Node {
   std::string toString() { return "*"; };
 };
 
-class Always : public Statement {
+class Always : public StructuralStatement {
   std::vector<std::variant<Identifier *, PosEdge *, NegEdge *, Star *>>
       sensitivity_list;
   std::vector<std::variant<BehavioralStatement *, Declaration *>> body;
@@ -368,17 +371,16 @@ class Always : public Statement {
 class Module : public Node {
   std::string name;
   std::vector<Port *> ports;
-  std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
-      body;
   //parameter,defaultvalue
-  std::vector<std::pair<Parameter *, NumericLiteral *>> parameters;
+  ModuleParameters parameters;
+  std::vector<std::variant<StructuralStatement *, Declaration *>> body;
 
  public:
   Module(
       std::string name, std::vector<Port *> ports,
-      std::vector<std::variant<Always *, StructuralStatement *, Declaration *>>
+      std::vector<std::variant<StructuralStatement *, Declaration *>>
           body,
-      std::vector<std::pair<Parameter *, NumericLiteral *>> parameters)
+      ModuleParameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
 
   std::string toString();
