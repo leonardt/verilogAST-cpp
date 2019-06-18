@@ -171,7 +171,7 @@ TEST(BasicTests, TestModuleInst) {
 
   EXPECT_EQ(module_inst.toString(),
             "test_module #(.param0(32'd0), .param1(32'd1)) "
-            "test_module_inst(.a(a), .b(b[32'd0]), .c(c[32'd31:32'd0]))");
+            "test_module_inst(.a(a), .b(b[32'd0]), .c(c[32'd31:32'd0]));");
 }
 
 TEST(BasicTests, TestModule) {
@@ -185,8 +185,7 @@ TEST(BasicTests, TestModule) {
 
   std::vector<vAST::Port *> ports = {&i_port, &o_port};
 
-  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
-                           vAST::Declaration *>>
+  std::vector<std::variant<vAST::StructuralStatement *,vAST::Declaration *>>
       body;
 
   std::string module_name = "other_module";
@@ -237,35 +236,35 @@ TEST(BasicTests, TestModule) {
 TEST(BasicTests, TestDeclaration) {
   vAST::Identifier a("a");
   vAST::Wire wire(&a);
-  EXPECT_EQ(wire.toString(), "wire a");
+  EXPECT_EQ(wire.toString(), "wire a;");
 
   vAST::Reg reg(&a);
-  EXPECT_EQ(reg.toString(), "reg a");
+  EXPECT_EQ(reg.toString(), "reg a;");
 
   vAST::Identifier id("x");
   vAST::NumericLiteral n("0");
   vAST::Index index(&id, &n);
   vAST::Wire wire_index(&index);
-  EXPECT_EQ(wire_index.toString(), "wire x[32'd0]");
+  EXPECT_EQ(wire_index.toString(), "wire x[32'd0];");
 
   vAST::NumericLiteral high("31");
   vAST::NumericLiteral low("0");
   vAST::Slice slice(&id, &high, &low);
   vAST::Reg reg_slice(&slice);
-  EXPECT_EQ(reg_slice.toString(), "reg x[32'd31:32'd0]");
+  EXPECT_EQ(reg_slice.toString(), "reg x[32'd31:32'd0];");
 }
 
 TEST(BasicTests, TestAssign) {
   vAST::Identifier a("a");
   vAST::Identifier b("b");
   vAST::ContinuousAssign cont_assign(&a, &b);
-  EXPECT_EQ(cont_assign.toString(), "assign a = b");
+  EXPECT_EQ(cont_assign.toString(), "assign a = b;");
 
   vAST::BlockingAssign blocking_assign(&a, &b);
-  EXPECT_EQ(blocking_assign.toString(), "a = b");
+  EXPECT_EQ(blocking_assign.toString(), "a = b;");
 
   vAST::NonBlockingAssign non_blocking_assign(&a, &b);
-  EXPECT_EQ(non_blocking_assign.toString(), "a <= b");
+  EXPECT_EQ(non_blocking_assign.toString(), "a <= b;");
 }
 
 TEST(BasicTests, TestAlways) {
@@ -319,8 +318,7 @@ TEST(BasicTests, File) {
 
   std::vector<vAST::Port *> ports = {&i_port, &o_port};
 
-  std::vector<std::variant<vAST::Always *, vAST::StructuralStatement *,
-                           vAST::Declaration *>>
+  std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
       body;
 
   std::string module_name = "other_module";
