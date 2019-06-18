@@ -201,7 +201,7 @@ std::string Module::toString() {
   for (auto statement : body) {
     module_str +=
         variant_to_string<StructuralStatement *, Declaration *>(statement) +
-        ";\n";
+        "\n";
   }
 
   module_str += "endmodule\n";
@@ -229,7 +229,7 @@ std::string ModuleInstantiation::toString() {
     }
     module_inst_str += join(param_strs, ", ");
   }
-  module_inst_str += ")";
+  module_inst_str += ");";
   return module_inst_str;
 }
 

@@ -171,7 +171,7 @@ TEST(BasicTests, TestModuleInst) {
 
   EXPECT_EQ(module_inst.toString(),
             "test_module #(.param0(32'd0), .param1(32'd1)) "
-            "test_module_inst(.a(a), .b(b[32'd0]), .c(c[32'd31:32'd0]))");
+            "test_module_inst(.a(a), .b(b[32'd0]), .c(c[32'd31:32'd0]));");
 }
 
 TEST(BasicTests, TestModule) {
