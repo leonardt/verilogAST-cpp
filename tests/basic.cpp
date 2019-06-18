@@ -162,7 +162,7 @@ TEST(BasicTests, TestConstantTernaryOp) {
   vAST::ConstantUnaryOp un_op(&x, vAST::UnOp::INVERT);
   vAST::NumericLiteral zero("0");
   vAST::NumericLiteral one("1");
-  vAST::TernaryOp tern_op(&un_op, &one, &zero);
+  vAST::ConstantTernaryOp tern_op(&un_op, &one, &zero);
   EXPECT_EQ(tern_op.toString(), "~ x ? 32'd1 : 32'd0");
 }
 
