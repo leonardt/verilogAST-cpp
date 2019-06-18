@@ -5,6 +5,9 @@ namespace vAST = verilogAST;
 
 namespace {
 
+typedef std::vector<std::pair<vAST::Parameter *, vAST::NumericLiteral *>> ModuleParameters;
+typedef std::vector<std::pair<vAST::Parameter *, vAST::Constant *>> InstanceParameters;
+
 TEST(BasicTests, TestNumericLiteral) {
   vAST::NumericLiteral n0("23", 16, false, vAST::DECIMAL);
   EXPECT_EQ(n0.toString(), "16'd23");
@@ -150,8 +153,9 @@ TEST(BasicTests, TestModuleInst) {
   vAST::NumericLiteral zero("0");
   vAST::NumericLiteral one("1");
 
-  std::map<std::string, vAST::NumericLiteral *> parameters = {{"param0", &zero},
-                                                              {"param1", &one}};
+  vAST::Parameter param0("param0");
+  vAST::Parameter param1("param1");
+  InstanceParameters parameters = {{&param0, &zero},{&param1,&one}};
 
   std::string instance_name = "test_module_inst";
   vAST::Identifier a("a");
@@ -193,9 +197,10 @@ TEST(BasicTests, TestModule) {
 
   vAST::NumericLiteral zero("0");
   vAST::NumericLiteral one("1");
+  vAST::Parameter param0("param0");
+  vAST::Parameter param1("param1");
 
-  std::map<std::string, vAST::NumericLiteral *> inst_parameters = {
-      {"param0", &zero}, {"param1", &one}};
+  InstanceParameters inst_parameters = {{&param0, &zero}, {&param1, &one}};
 
   std::string instance_name = "other_module_inst";
   vAST::Identifier a("a");
@@ -214,7 +219,7 @@ TEST(BasicTests, TestModule) {
                                         instance_name, connections);
   body.push_back(&module_inst);
 
-  std::map<std::string, vAST::NumericLiteral *> parameters;
+  ModuleParameters parameters;
   vAST::Module module(name, ports, body, parameters);
 
   std::string expected_str =
@@ -223,7 +228,7 @@ TEST(BasicTests, TestModule) {
       ".c(c[32'd31:32'd0]));\nendmodule\n";
   EXPECT_EQ(module.toString(), expected_str);
 
-  parameters = {{"param0", &zero}, {"param1", &one}};
+  parameters = {{&param0, &zero}, {&param1, &one}};
   vAST::Module module_with_params(name, ports, body, parameters);
 
   expected_str =
@@ -327,9 +332,10 @@ TEST(BasicTests, File) {
 
   vAST::NumericLiteral zero("0");
   vAST::NumericLiteral one("1");
+  vAST::Parameter param0("param0");
+  vAST::Parameter param1("param1");
 
-  std::map<std::string, vAST::NumericLiteral *> inst_parameters = {
-      {"param0", &zero}, {"param1", &one}};
+  InstanceParameters inst_parameters = {{&param0, &zero}, {&param1, &one}};
 
   std::string instance_name = "other_module_inst";
   vAST::Identifier a("a");
@@ -348,9 +354,9 @@ TEST(BasicTests, File) {
                                         instance_name, connections);
   body.push_back(&module_inst);
 
-  std::map<std::string, vAST::NumericLiteral *> parameters;
+  ModuleParameters parameters;
   vAST::Module module("test_module0", ports, body, parameters);
-  parameters = {{"param0", &zero}, {"param1", &one}};
+  parameters = {{&param0, &zero}, {&param1, &one}};
   vAST::Module module_with_params("test_module1", ports, body, parameters);
   std::vector<vAST::Module *> modules;
   modules.push_back(&module);
