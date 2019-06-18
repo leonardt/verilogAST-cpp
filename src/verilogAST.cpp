@@ -234,12 +234,12 @@ std::string ModuleInstantiation::toString() {
 }
 
 std::string Declaration::toString() {
-  return decl + " " + variant_to_string(value);
+  return decl + " " + variant_to_string(value) + ";";
 }
 
 std::string Assign::toString() {
   return prefix + variant_to_string(target) + " " + symbol + " " +
-         value->toString();
+         value->toString() + ";";
 }
 
 std::string Always::toString() {
@@ -258,7 +258,7 @@ std::string Always::toString() {
   for (auto statement : body) {
     always_str +=
         variant_to_string<BehavioralStatement *, Declaration *>(statement) +
-        ";\n";
+        "\n";
   }
 
   always_str += "end\n";
