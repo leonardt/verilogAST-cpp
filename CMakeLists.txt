@@ -53,4 +53,3 @@ add_test(NAME basic_tests COMMAND basic)
 add_executable(parameterized_module tests/parameterized_module.cpp)
 target_link_libraries(parameterized_module gtest_main ${LIBRARY_NAME})
 add_test(NAME parameterized_module_tests COMMAND parameterized_module)
-
