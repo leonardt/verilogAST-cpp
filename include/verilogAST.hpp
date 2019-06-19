@@ -18,7 +18,6 @@ class Expression : public Node {
 
 enum Radix { BINARY, OCTAL, HEX, DECIMAL };
 
-
 class NumericLiteral : public Expression {
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and

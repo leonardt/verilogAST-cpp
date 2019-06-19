@@ -49,4 +49,3 @@ add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
 add_executable(basic tests/basic.cpp)
 target_link_libraries(basic gtest_main ${LIBRARY_NAME})
 add_test(NAME basic_tests COMMAND basic)
-
