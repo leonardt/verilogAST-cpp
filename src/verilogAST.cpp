@@ -213,7 +213,7 @@ std::string Module::toString() {
   return module_str;
 }
 
-std::string StringModule::toString() {
+std::string StringBodyModule::toString() {
   std::string module_str = "";
   module_str += emitModuleHeader();
   module_str += body;
