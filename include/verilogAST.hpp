@@ -322,15 +322,17 @@ class Module : public Node {
   std::vector<std::variant<StructuralStatement *, Declaration *>> body;
   Parameters parameters;
   std::string emitModuleHeader();
+  // Protected initializer that is used by the StringModule subclass which
+  // overrides the `body` field (but reuses the other fields)
+  Module(std::string name, std::vector<Port *> ports, 
+         Parameters parameters)
+      : name(name), ports(ports), parameters(parameters){};
 
  public:
   Module(std::string name, std::vector<Port *> ports,
          std::vector<std::variant<StructuralStatement *, Declaration *>> body,
          Parameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
-  Module(std::string name, std::vector<Port *> ports, 
-         Parameters parameters)
-      : name(name), ports(ports), parameters(parameters){};
 
   std::string toString();
 };
