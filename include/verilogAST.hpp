@@ -47,7 +47,7 @@ class NumericLiteral : public Expression {
   std::string toString() override;
 };
 
-//TODO also need a string literal, as strings can be used as parameter values
+// TODO also need a string literal, as strings can be used as parameter values
 
 class Identifier : public Expression {
   std::string value;
@@ -196,7 +196,7 @@ typedef std::vector<std::pair<Identifier *, Expression *>> Parameters;
 class ModuleInstantiation : public StructuralStatement {
   std::string module_name;
 
-  //parameter,value
+  // parameter,value
   Parameters parameters;
 
   std::string instance_name;
@@ -207,11 +207,10 @@ class ModuleInstantiation : public StructuralStatement {
       connections;
 
  public:
-  //TODO Need to make sure that the instance parameters are a subset of the module parameters
+  // TODO Need to make sure that the instance parameters are a subset of the
+  // module parameters
   ModuleInstantiation(
-      std::string module_name,
-      Parameters parameters,
-      std::string instance_name,
+      std::string module_name, Parameters parameters, std::string instance_name,
       std::map<std::string, std::variant<Identifier *, Index *, Slice *>>
           connections)
       : module_name(module_name),
@@ -323,11 +322,9 @@ class Module : public Node {
   Parameters parameters;
 
  public:
-  Module(
-      std::string name, std::vector<Port *> ports,
-      std::vector<std::variant<StructuralStatement *, Declaration *>>
-          body,
-      Parameters parameters)
+  Module(std::string name, std::vector<Port *> ports,
+         std::vector<std::variant<StructuralStatement *, Declaration *>> body,
+         Parameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
 
   std::string toString();

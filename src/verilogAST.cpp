@@ -215,7 +215,8 @@ std::string ModuleInstantiation::toString() {
     module_inst_str += " #(";
     std::vector<std::string> param_strs;
     for (auto it : parameters) {
-      param_strs.push_back("." + it.first->toString() + "(" + it.second->toString() + ")");
+      param_strs.push_back("." + it.first->toString() + "(" +
+                           it.second->toString() + ")");
     }
     module_inst_str += join(param_strs, ", ");
     module_inst_str += ")";
