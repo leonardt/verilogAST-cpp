@@ -367,7 +367,7 @@ TEST(BasicTests, File) {
       ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
       ".c(c[32'd31:32'd0]));\nendmodule\n";
   EXPECT_EQ(file.toString(), expected_str);
-};
+}
 
 }  // namespace
 
