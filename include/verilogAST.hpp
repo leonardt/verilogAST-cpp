@@ -123,7 +123,7 @@ enum UnOp {
   PLUS,
   MINUS
 };
-};
+}
 
 class UnaryOp : public Expression {
   Expression *operand;
@@ -338,4 +338,4 @@ class File : public Node {
   std::string toString();
 };
 
-};  // namespace verilogAST
+}  // namespace verilogAST

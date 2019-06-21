@@ -20,18 +20,18 @@ std::string NumericLiteral::toString() {
       break;
   }
   return std::to_string(size) + "'" + signed_str + radix_str + value;
-};
+}
 
-std::string Identifier::toString() { return value; };
+std::string Identifier::toString() { return value; }
 
 std::string Index::toString() {
   return id->toString() + '[' + index->toString() + ']';
-};
+}
 
 std::string Slice::toString() {
   return id->toString() + '[' + high_index->toString() + ':' +
          low_index->toString() + ']';
-};
+}
 
 std::string BinaryOp::toString() {
   std::string op_str;
@@ -80,7 +80,7 @@ std::string BinaryOp::toString() {
       break;
   }
   return left->toString() + ' ' + op_str + ' ' + right->toString();
-};
+}
 
 std::string UnaryOp::toString() {
   std::string op_str;
@@ -120,7 +120,7 @@ std::string UnaryOp::toString() {
       break;
   }
   return op_str + ' ' + operand->toString();
-};
+}
 
 std::string TernaryOp::toString() {
   return cond->toString() + " ? " + true_value->toString() + " : " +
@@ -277,4 +277,4 @@ std::string File::toString() {
   return join(file_strs, "\n");
 }
 
-};  // namespace verilogAST
+}  // namespace verilogAST
