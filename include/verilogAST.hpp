@@ -316,17 +316,32 @@ class Always : public StructuralStatement {
 };
 
 class Module : public Node {
+ protected:
   std::string name;
   std::vector<Port *> ports;
   std::vector<std::variant<StructuralStatement *, Declaration *>> body;
   Parameters parameters;
+  std::string emitModuleHeader();
 
  public:
   Module(std::string name, std::vector<Port *> ports,
          std::vector<std::variant<StructuralStatement *, Declaration *>> body,
          Parameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
+  Module(std::string name, std::vector<Port *> ports, 
+         Parameters parameters)
+      : name(name), ports(ports), parameters(parameters){};
 
+  std::string toString();
+};
+
+class StringModule : public Module {
+  std::string body;
+
+ public:
+  StringModule(std::string name, std::vector<Port *> ports, std::string body,
+               Parameters parameters)
+      : Module(name, ports, parameters), body(body){};
   std::string toString();
 };
 
