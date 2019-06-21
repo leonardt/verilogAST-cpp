@@ -100,9 +100,8 @@ enum BinOp {
 
 class BinaryOp : public Expression {
   Expression *left;
-  Expression *right;
-
   BinOp::BinOp op;
+  Expression *right;
 
  public:
   BinaryOp(Expression *left, BinOp::BinOp op, Expression *right)
@@ -229,7 +228,7 @@ class Declaration : public Node {
 
   Declaration(std::variant<Identifier *, Index *, Slice *> value,
               std::string decl)
-      : value(value), decl(decl){};
+      : decl(decl), value(value){};
 
  public:
   std::string toString();
@@ -320,8 +319,8 @@ class Always : public StructuralStatement {
 class Module : public Node {
   std::string name;
   std::vector<Port *> ports;
-  Parameters parameters;
   std::vector<std::variant<StructuralStatement *, Declaration *>> body;
+  Parameters parameters;
 
  public:
   Module(
