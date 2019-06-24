@@ -188,6 +188,22 @@ class Port : public Node {
 
 class Statement : public Node {};
 
+class SingleLineComment : public Statement {
+  std::string value;
+
+ public:
+  SingleLineComment(std::string value) : value(value){};
+  std::string toString() { return "// " + value; };
+};
+
+class BlockComment : public Statement {
+  std::string value;
+
+ public:
+  BlockComment(std::string value) : value(value){};
+  std::string toString() { return "/*\n" + value + "\n*/"; };
+};
+
 class BehavioralStatement : public Statement {};
 class StructuralStatement : public Statement {};
 

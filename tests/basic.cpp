@@ -379,6 +379,13 @@ TEST(BasicTests, File) {
       ".c(c[32'd31:32'd0]));\nendmodule\n";
   EXPECT_EQ(file.toString(), expected_str);
 }
+TEST(BasicTests, Comment) {
+    vAST::SingleLineComment single_line_comment("Test comment");
+    EXPECT_EQ(single_line_comment.toString(), "// Test comment");
+    vAST::BlockComment block_comment("Test comment\non multiple lines");
+    EXPECT_EQ(block_comment.toString(), "/*\nTest comment\non multiple lines\n*/");
+}
+    
 
 }  // namespace
 
