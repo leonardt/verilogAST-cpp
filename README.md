@@ -18,6 +18,8 @@ cmake --build .
 ## Testing
 ```
 # inside build directory
+cmake -DVERILOGAST_BUILD_TESTS=ON ..
+cmake --build .
 ctest
 ```
 

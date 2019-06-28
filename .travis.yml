@@ -32,7 +32,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake -DCOVERAGE=1 ..
+  - cmake -DCOVERAGE=1 -DVERILOGAST_BUILD_TESTS=ON ..
   - cmake --build .
   - ctest
 
