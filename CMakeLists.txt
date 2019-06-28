@@ -25,7 +25,7 @@ set(LIB_SOURCES src/verilogAST.cpp)
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
 
-if (verilogAST_build_tests)
+if (VERILOGAST_BUILD_TESTS)
     # Download and unpack googletest at configure time
     configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
