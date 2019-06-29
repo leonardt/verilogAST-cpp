@@ -152,7 +152,7 @@ TEST(BasicTests, TestModuleInst) {
 
   vAST::Identifier param0("param0");
   vAST::Identifier param1("param1");
-  vAST::Parameters parameters = {{&param0, &zero},{&param1,&one}};
+  vAST::Parameters parameters = {{&param0, &zero}, {&param1, &one}};
 
   std::string instance_name = "test_module_inst";
   vAST::Identifier a("a");
@@ -186,7 +186,7 @@ TEST(BasicTests, TestModule) {
 
   std::vector<vAST::Port *> ports = {&i_port, &o_port};
 
-  std::vector<std::variant<vAST::StructuralStatement *,vAST::Declaration *>>
+  std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
       body;
 
   std::string module_name = "other_module";
@@ -233,6 +233,17 @@ TEST(BasicTests, TestModule) {
       ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
       ".c(c[32'd31:32'd0]));\nendmodule\n";
   EXPECT_EQ(module_with_params.toString(), expected_str);
+
+  std::string string_body = "reg d;\nassign d = a + b;\nassign c = d;";
+  vAST::StringBodyModule string_body_module(name, ports, string_body, parameters);
+  expected_str =
+      "module test_module #(parameter param0 = 32'd0, parameter param1 = "
+      "32'd1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
+      "d;\nendmodule\n";
+  EXPECT_EQ(string_body_module.toString(), expected_str);
+
+  vAST::StringModule string_module(expected_str);
+  EXPECT_EQ(string_module.toString(), expected_str);
 }
 
 TEST(BasicTests, TestDeclaration) {
@@ -353,7 +364,7 @@ TEST(BasicTests, File) {
   vAST::Module module("test_module0", ports, body, parameters);
   parameters = {{&param0, &zero}, {&param1, &one}};
   vAST::Module module_with_params("test_module1", ports, body, parameters);
-  std::vector<vAST::Module *> modules;
+  std::vector<vAST::AbstractModule *> modules;
   modules.push_back(&module);
   modules.push_back(&module_with_params);
   vAST::File file(modules);

@@ -174,28 +174,33 @@ std::string join(std::vector<std::string> vec, std::string separator) {
   return result;
 }
 
-std::string Module::toString() {
-  std::string module_str = "";
-  module_str += "module " + name;
+std::string Module::emitModuleHeader() {
+  std::string module_header_str = "module " + name;
 
   // emit parameter string
   if (!parameters.empty()) {
-    module_str += " #(";
+    module_header_str += " #(";
     std::vector<std::string> param_strs;
     for (auto it : parameters) {
       param_strs.push_back("parameter " + it.first->toString() + " = " +
                            it.second->toString());
     }
-    module_str += join(param_strs, ", ");
-    module_str += ")";
+    module_header_str += join(param_strs, ", ");
+    module_header_str += ")";
   }
 
   // emit port string
-  module_str += " (";
+  module_header_str += " (";
   std::vector<std::string> ports_strs;
   for (auto it : ports) ports_strs.push_back(it->toString());
-  module_str += join(ports_strs, ", ");
-  module_str += ");\n";
+  module_header_str += join(ports_strs, ", ");
+  module_header_str += ");\n";
+  return module_header_str;
+}
+
+std::string Module::toString() {
+  std::string module_str = "";
+  module_str += emitModuleHeader();
 
   // emit body
   for (auto statement : body) {
@@ -205,6 +210,14 @@ std::string Module::toString() {
   }
 
   module_str += "endmodule\n";
+  return module_str;
+}
+
+std::string StringBodyModule::toString() {
+  std::string module_str = "";
+  module_str += emitModuleHeader();
+  module_str += body;
+  module_str += "\nendmodule\n";
   return module_str;
 }
 

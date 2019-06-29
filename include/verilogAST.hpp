@@ -331,11 +331,20 @@ class Always : public StructuralStatement {
   std::string toString();
 };
 
-class Module : public Node {
+class AbstractModule : public Node {};
+
+class Module : public AbstractModule {
+ protected:
   std::string name;
   std::vector<Port *> ports;
   std::vector<std::variant<StructuralStatement *, Declaration *>> body;
   Parameters parameters;
+  std::string emitModuleHeader();
+  // Protected initializer that is used by the StringBodyModule subclass which
+  // overrides the `body` field (but reuses the other fields)
+  Module(std::string name, std::vector<Port *> ports, 
+         Parameters parameters)
+      : name(name), ports(ports), parameters(parameters){};
 
  public:
   Module(std::string name, std::vector<Port *> ports,
@@ -346,11 +355,28 @@ class Module : public Node {
   std::string toString();
 };
 
-class File : public Node {
-  std::vector<Module *> modules;
+class StringBodyModule : public Module {
+  std::string body;
 
  public:
-  File(std::vector<Module *> modules) : modules(modules){};
+  StringBodyModule(std::string name, std::vector<Port *> ports, std::string body,
+               Parameters parameters)
+      : Module(name, ports, parameters), body(body){};
+  std::string toString();
+};
+
+class StringModule : public AbstractModule {
+  std::string definition;
+ public:
+  StringModule(std::string definition) : definition(definition){};
+  std::string toString() { return definition; };
+};
+
+class File : public Node {
+  std::vector<AbstractModule *> modules;
+
+ public:
+  File(std::vector<AbstractModule *> modules) : modules(modules){};
   std::string toString();
 };
 
