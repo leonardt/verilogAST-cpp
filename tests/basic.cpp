@@ -36,6 +36,11 @@ TEST(BasicTests, TestIdentifier) {
   EXPECT_EQ(id.toString(), "x");
 }
 
+TEST(BasicTests, TestString) {
+  vAST::String str("mystring");
+  EXPECT_EQ(str.toString(), "\"mystring\"");
+}
+
 TEST(BasicTests, TestIndex) {
   vAST::Identifier id("x");
   vAST::NumericLiteral n("0");

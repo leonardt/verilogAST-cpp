@@ -24,6 +24,8 @@ std::string NumericLiteral::toString() {
 
 std::string Identifier::toString() { return value; }
 
+std::string String::toString() { return "\"" + value + "\""; }
+
 std::string Index::toString() {
   return id->toString() + '[' + index->toString() + ']';
 }
