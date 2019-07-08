@@ -36,9 +36,9 @@ script:
   - cmake --build .
   - ctest
   # Check that installation works
-  - make install
-  - test -f /usr/lib/libverilogAST.so
-  - test -f /usr/include/verilogAST.hpp
+  - sudo make install
+  - test -f /usr/local/lib/libverilogAST.so
+  - test -f /usr/local/include/verilogAST.hpp
 
 after_success:
   - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
