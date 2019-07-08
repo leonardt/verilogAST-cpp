@@ -37,7 +37,12 @@ script:
   - ctest
   # Check that installation works
   - sudo make install
-  - test -f /usr/local/lib/libverilogAST.so
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+      test -f /usr/local/lib/libverilogAST.dylib 
+    else 
+      test -f /usr/local/lib/libverilogAST.so 
+    fi
   - test -f /usr/local/include/verilogAST.hpp
 
 after_success:
