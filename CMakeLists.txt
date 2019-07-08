@@ -57,3 +57,6 @@ if (VERILOGAST_BUILD_TESTS)
     target_link_libraries(parameterized_module gtest_main ${LIBRARY_NAME})
     add_test(NAME parameterized_module_tests COMMAND parameterized_module)
 endif()
+
+install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
+install(FILES include/verilogAST.hpp DESTINATION include)
