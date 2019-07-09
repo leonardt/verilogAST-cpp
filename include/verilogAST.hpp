@@ -58,6 +58,15 @@ class Identifier : public Expression {
   std::string toString() override;
 };
 
+class String : public Expression {
+  std::string value;
+
+ public:
+  String(std::string value) : value(value){};
+
+  std::string toString() override;
+};
+
 class Index : public Expression {
   Identifier *id;
   Expression *index;
