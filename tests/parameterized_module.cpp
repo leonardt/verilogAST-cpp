@@ -37,7 +37,7 @@ TEST(ParameterizedModuleTests, TestEq) {
   vAST::Port in1_port(&in1_slice, vAST::INPUT, vAST::WIRE);
   vAST::Port out_port(&out, vAST::OUTPUT, vAST::WIRE);
 
-  std::vector<vAST::Port *> ports = {&in0_port, &in1_port, &out_port};
+  std::vector<vAST::AbstractPort *> ports = {&in0_port, &in1_port, &out_port};
 
   std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
       body;
