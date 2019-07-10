@@ -149,6 +149,12 @@ TEST(BasicTests, TestPort) {
   EXPECT_EQ(o_reg_port.toString(), "output reg o");
 }
 
+TEST(BasicTests, TestStringPort) {
+  vAST::StringPort port("output reg [width-1:0] I");
+
+  EXPECT_EQ(port.toString(), "output reg [width-1:0] I");
+}
+
 TEST(BasicTests, TestModuleInst) {
   std::string module_name = "test_module";
 
@@ -189,7 +195,7 @@ TEST(BasicTests, TestModule) {
   vAST::Identifier o("o");
   vAST::Port o_port(&o, vAST::OUTPUT, vAST::WIRE);
 
-  std::vector<vAST::Port *> ports = {&i_port, &o_port};
+  std::vector<vAST::AbstractPort *> ports = {&i_port, &o_port};
 
   std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
       body;
@@ -334,7 +340,7 @@ TEST(BasicTests, File) {
   vAST::Identifier o("o");
   vAST::Port o_port(&o, vAST::OUTPUT, vAST::WIRE);
 
-  std::vector<vAST::Port *> ports = {&i_port, &o_port};
+  std::vector<vAST::AbstractPort *> ports = {&i_port, &o_port};
 
   std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
       body;

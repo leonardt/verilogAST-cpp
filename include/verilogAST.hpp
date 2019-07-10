@@ -176,7 +176,9 @@ enum Direction { INPUT, OUTPUT, INOUT };
 // TODO: Unify with declarations?
 enum PortType { WIRE, REG };
 
-class Port : public Node {
+class AbstractPort : public Node {};
+
+class Port : public AbstractPort {
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
   std::variant<Identifier *, Index *, Slice *> value;
@@ -193,6 +195,14 @@ class Port : public Node {
        PortType data_type)
       : value(value), direction(direction), data_type(data_type){};
   std::string toString();
+};
+
+class StringPort : public AbstractPort {
+  std::string value;
+
+ public:
+  StringPort(std::string value) : value(value){};
+  std::string toString() { return value; };
 };
 
 class Statement : public Node {};
@@ -345,18 +355,17 @@ class AbstractModule : public Node {};
 class Module : public AbstractModule {
  protected:
   std::string name;
-  std::vector<Port *> ports;
+  std::vector<AbstractPort *> ports;
   std::vector<std::variant<StructuralStatement *, Declaration *>> body;
   Parameters parameters;
   std::string emitModuleHeader();
   // Protected initializer that is used by the StringBodyModule subclass which
   // overrides the `body` field (but reuses the other fields)
-  Module(std::string name, std::vector<Port *> ports, 
-         Parameters parameters)
+  Module(std::string name, std::vector<AbstractPort *> ports, Parameters parameters)
       : name(name), ports(ports), parameters(parameters){};
 
  public:
-  Module(std::string name, std::vector<Port *> ports,
+  Module(std::string name, std::vector<AbstractPort *> ports,
          std::vector<std::variant<StructuralStatement *, Declaration *>> body,
          Parameters parameters)
       : name(name), ports(ports), body(body), parameters(parameters){};
@@ -368,14 +377,15 @@ class StringBodyModule : public Module {
   std::string body;
 
  public:
-  StringBodyModule(std::string name, std::vector<Port *> ports, std::string body,
-               Parameters parameters)
+  StringBodyModule(std::string name, std::vector<AbstractPort *> ports,
+                   std::string body, Parameters parameters)
       : Module(name, ports, parameters), body(body){};
   std::string toString();
 };
 
 class StringModule : public AbstractModule {
   std::string definition;
+
  public:
   StringModule(std::string definition) : definition(definition){};
   std::string toString() { return definition; };
