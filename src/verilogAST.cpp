@@ -35,6 +35,10 @@ std::string Slice::toString() {
          low_index->toString() + ']';
 }
 
+std::string Vector::toString() {
+  return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
+}
+
 std::string BinaryOp::toString() {
   std::string op_str;
   switch (op) {
@@ -141,7 +145,7 @@ std::string variant_to_string(std::variant<Ts...> value) {
 
 std::string Port::toString() {
   std::string value_str =
-      variant_to_string<Identifier *, Index *, Slice *>(value);
+      variant_to_string<Identifier *, Vector *>(value);
   std::string direction_str;
   switch (direction) {
     case INPUT:

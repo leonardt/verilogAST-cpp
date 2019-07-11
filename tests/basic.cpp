@@ -56,6 +56,14 @@ TEST(BasicTests, TestSlice) {
   EXPECT_EQ(slice.toString(), "x[32'd31:32'd0]");
 }
 
+TEST(BasicTests, TestVector) {
+  vAST::Identifier id("x");
+  vAST::NumericLiteral high("31");
+  vAST::NumericLiteral low("0");
+  vAST::Vector slice(&id, &high, &low);
+  EXPECT_EQ(slice.toString(), "[32'd31:32'd0] x");
+}
+
 TEST(BasicTests, TestBinaryOp) {
   std::vector<std::pair<vAST::BinOp::BinOp, std::string>> ops;
   ops.push_back(std::make_pair(vAST::BinOp::LSHIFT, "<<"));
@@ -266,16 +274,11 @@ TEST(BasicTests, TestDeclaration) {
   EXPECT_EQ(reg.toString(), "reg a;");
 
   vAST::Identifier id("x");
-  vAST::NumericLiteral n("0");
-  vAST::Index index(&id, &n);
-  vAST::Wire wire_index(&index);
-  EXPECT_EQ(wire_index.toString(), "wire x[32'd0];");
-
   vAST::NumericLiteral high("31");
   vAST::NumericLiteral low("0");
-  vAST::Slice slice(&id, &high, &low);
+  vAST::Vector slice(&id, &high, &low);
   vAST::Reg reg_slice(&slice);
-  EXPECT_EQ(reg_slice.toString(), "reg x[32'd31:32'd0];");
+  EXPECT_EQ(reg_slice.toString(), "reg [32'd31:32'd0] x;");
 }
 
 TEST(BasicTests, TestAssign) {
