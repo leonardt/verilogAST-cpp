@@ -21,12 +21,12 @@ std::string NumericLiteral::toString() {
   }
   std::string size_str = std::to_string(size);
   if (size_str == "32") {
-      size_str = "";
+    size_str = "";
   }
 
   std::string separator = "";
   if (size_str + signed_str + radix_str != "") {
-      separator = "'";
+    separator = "'";
   }
   return size_str + separator + signed_str + radix_str + value;
 }
@@ -154,7 +154,8 @@ std::string variant_to_string(std::variant<Ts...> &value) {
 
 std::string Port::toString() {
   std::string value_str =
-      variant_to_string<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>(value);
+      variant_to_string<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>(
+          value);
   std::string direction_str;
   switch (direction) {
     case INPUT:
@@ -219,9 +220,9 @@ std::string Module::toString() {
 
   // emit body
   for (auto &statement : body) {
-    module_str +=
-        variant_to_string<std::unique_ptr<StructuralStatement>, std::unique_ptr<Declaration>>(statement) +
-        "\n";
+    module_str += variant_to_string<std::unique_ptr<StructuralStatement>,
+                                    std::unique_ptr<Declaration>>(statement) +
+                  "\n";
   }
 
   module_str += "endmodule\n";
@@ -285,9 +286,9 @@ std::string Always::toString() {
 
   // emit body
   for (auto &statement : body) {
-    always_str +=
-        variant_to_string<std::unique_ptr<BehavioralStatement>, std::unique_ptr<Declaration>>(statement) +
-        "\n";
+    always_str += variant_to_string<std::unique_ptr<BehavioralStatement>,
+                                    std::unique_ptr<Declaration>>(statement) +
+                  "\n";
   }
 
   always_str += "end\n";

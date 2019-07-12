@@ -1,3 +1,4 @@
+#include "common.cpp"
 #include "gtest/gtest.h"
 #include "verilogAST.hpp"
 
@@ -42,23 +43,18 @@ TEST(BasicTests, TestString) {
 }
 
 TEST(BasicTests, TestIndex) {
-  vAST::Index index(std::make_unique<vAST::Identifier>("x"),
-                    std::make_unique<vAST::NumericLiteral>("0"));
+  vAST::Index index(make_id("x"), make_num("0"));
   EXPECT_EQ(index.toString(), "x[0]");
 }
 
 TEST(BasicTests, TestSlice) {
   vAST::Identifier id("x");
-  vAST::Slice slice(std::make_unique<vAST::Identifier>("x"),
-                    std::make_unique<vAST::NumericLiteral>("31"),
-                    std::make_unique<vAST::NumericLiteral>("0"));
+  vAST::Slice slice(make_id("x"), make_num("31"), make_num("0"));
   EXPECT_EQ(slice.toString(), "x[31:0]");
 }
 
 TEST(BasicTests, TestVector) {
-  vAST::Vector slice(std::make_unique<vAST::Identifier>("x"),
-                     std::make_unique<vAST::NumericLiteral>("31"),
-                     std::make_unique<vAST::NumericLiteral>("0"));
+  vAST::Vector slice(make_id("x"), make_num("31"), make_num("0"));
   EXPECT_EQ(slice.toString(), "[31:0] x");
 }
 
@@ -81,8 +77,7 @@ TEST(BasicTests, TestBinaryOp) {
   for (auto it : ops) {
     vAST::BinOp::BinOp op = it.first;
     std::string op_str = it.second;
-    vAST::BinaryOp bin_op(std::make_unique<vAST::Identifier>("x"), op,
-                          std::make_unique<vAST::Identifier>("y"));
+    vAST::BinaryOp bin_op(make_id("x"), op, make_id("y"));
     EXPECT_EQ(bin_op.toString(), "x " + op_str + " y");
   }
 }
@@ -103,7 +98,7 @@ TEST(BasicTests, TestUnaryOp) {
   for (auto it : ops) {
     vAST::UnOp::UnOp op = it.first;
     std::string op_str = it.second;
-    vAST::UnaryOp un_op(std::make_unique<vAST::Identifier>("x"), op);
+    vAST::UnaryOp un_op(make_id("x"), op);
     EXPECT_EQ(un_op.toString(), op_str + " x");
   }
 }
@@ -112,43 +107,37 @@ TEST(BasicTests, TestTernaryOp) {
   vAST::UnaryOp un_op(std::make_unique<vAST::Identifier>("x"),
                       vAST::UnOp::INVERT);
   vAST::TernaryOp tern_op(
-      std::make_unique<vAST::UnaryOp>(std::make_unique<vAST::Identifier>("x"),
-                                      vAST::UnOp::INVERT),
-      std::make_unique<vAST::NumericLiteral>("1"),
-      std::make_unique<vAST::NumericLiteral>("0"));
+      std::make_unique<vAST::UnaryOp>(make_id("x"), vAST::UnOp::INVERT),
+      make_num("1"), make_num("0"));
   EXPECT_EQ(tern_op.toString(), "~ x ? 1 : 0");
 }
 
 TEST(BasicTests, TestNegEdge) {
-  vAST::NegEdge neg_edge(std::make_unique<vAST::Identifier>("clk"));
+  vAST::NegEdge neg_edge(make_id("clk"));
 
   EXPECT_EQ(neg_edge.toString(), "negedge clk");
 }
 
 TEST(BasicTests, TestPosEdge) {
-  vAST::PosEdge pos_edge(std::make_unique<vAST::Identifier>("clk"));
+  vAST::PosEdge pos_edge(make_id("clk"));
 
   EXPECT_EQ(pos_edge.toString(), "posedge clk");
 }
 
 TEST(BasicTests, TestPort) {
-  vAST::Port i_port(std::make_unique<vAST::Identifier>("i"), vAST::INPUT,
-                    vAST::WIRE);
+  vAST::Port i_port(make_id("i"), vAST::INPUT, vAST::WIRE);
 
   EXPECT_EQ(i_port.toString(), "input i");
 
-  vAST::Port o_port(std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT,
-                    vAST::WIRE);
+  vAST::Port o_port(make_id("o"), vAST::OUTPUT, vAST::WIRE);
 
   EXPECT_EQ(o_port.toString(), "output o");
 
-  vAST::Port io_port(std::make_unique<vAST::Identifier>("io"), vAST::INOUT,
-                     vAST::WIRE);
+  vAST::Port io_port(make_id("io"), vAST::INOUT, vAST::WIRE);
 
   EXPECT_EQ(io_port.toString(), "inout io");
 
-  vAST::Port o_reg_port(std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT,
-                        vAST::REG);
+  vAST::Port o_reg_port(make_id("o"), vAST::OUTPUT, vAST::REG);
 
   EXPECT_EQ(o_reg_port.toString(), "output reg o");
 }
@@ -162,37 +151,13 @@ TEST(BasicTests, TestStringPort) {
 TEST(BasicTests, TestModuleInst) {
   std::string module_name = "test_module";
 
-  vAST::Parameters parameters;
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
+  vAST::Parameters parameters = make_simple_params();
 
   std::string instance_name = "test_module_inst";
-  vAST::Identifier a("a");
-  vAST::Index b_index(std::make_unique<vAST::Identifier>("b"),
-                      std::make_unique<vAST::NumericLiteral>("0"));
-  vAST::Slice c_slice(std::make_unique<vAST::Identifier>("c"),
-                      std::make_unique<vAST::NumericLiteral>("31"),
-                      std::make_unique<vAST::NumericLiteral>("0"));
 
-  std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                     std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>>>
-      connections;
-  connections["a"] = std::make_unique<vAST::Identifier>("a");
-  connections["b"] = std::make_unique<vAST::Index>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-  connections["c"] = std::make_unique<vAST::Slice>(
-      std::make_unique<vAST::Identifier>("c"),
-      std::make_unique<vAST::NumericLiteral>("31"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-
-  vAST::ModuleInstantiation module_inst(module_name, std::move(parameters), instance_name,
-                                        std::move(connections));
+  vAST::ModuleInstantiation module_inst(module_name, std::move(parameters),
+                                        instance_name,
+                                        make_simple_connections());
 
   EXPECT_EQ(module_inst.toString(),
             "test_module #(.param0(0), .param1(1)) "
@@ -202,52 +167,22 @@ TEST(BasicTests, TestModuleInst) {
 TEST(BasicTests, TestModule) {
   std::string name = "test_module";
 
-  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
-  ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("i"), vAST::INPUT, vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT, vAST::WIRE));
-
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body;
 
   std::string module_name = "other_module";
-
-  vAST::Parameters inst_parameters;
-  inst_parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  inst_parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
-
   std::string instance_name = "other_module_inst";
-  vAST::Identifier a("a");
-  vAST::Index b_index(std::make_unique<vAST::Identifier>("b"),
-                      std::make_unique<vAST::NumericLiteral>("0"));
-  vAST::Slice c_slice(std::make_unique<vAST::Identifier>("c"),
-                      std::make_unique<vAST::NumericLiteral>("31"),
-                      std::make_unique<vAST::NumericLiteral>("0"));
 
-  std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                     std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>>>
-      connections;
-  connections["a"] = std::make_unique<vAST::Identifier>("a");
-  connections["b"] = std::make_unique<vAST::Index>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-  connections["c"] = std::make_unique<vAST::Slice>(
-      std::make_unique<vAST::Identifier>("c"),
-      std::make_unique<vAST::NumericLiteral>("31"),
-      std::make_unique<vAST::NumericLiteral>("0"));
+  vAST::Parameters inst_parameters = make_simple_params();
 
   body.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, std::move(inst_parameters), instance_name, std::move(connections)));
+      module_name, std::move(inst_parameters), instance_name,
+      make_simple_connections()));
 
   vAST::Parameters parameters;
-  vAST::Module module(name, std::move(ports), std::move(body), std::move(parameters));
+  vAST::Module module(name, make_simple_ports(), std::move(body),
+                      std::move(parameters));
 
   std::string expected_str =
       "module test_module (input i, output o);\nother_module #(.param0(0), "
@@ -259,58 +194,23 @@ TEST(BasicTests, TestModule) {
 TEST(BasicTests, TestParamModule) {
   std::string name = "test_module";
 
-  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
-  ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("i"), vAST::INPUT, vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT, vAST::WIRE));
-
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body;
 
   std::string module_name = "other_module";
 
-  vAST::Parameters inst_parameters;
-  inst_parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  inst_parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
+  vAST::Parameters inst_parameters = make_simple_params();
 
   std::string instance_name = "other_module_inst";
-  vAST::Identifier a("a");
-  vAST::Index b_index(std::make_unique<vAST::Identifier>("b"),
-                      std::make_unique<vAST::NumericLiteral>("0"));
-  vAST::Slice c_slice(std::make_unique<vAST::Identifier>("c"),
-                      std::make_unique<vAST::NumericLiteral>("31"),
-                      std::make_unique<vAST::NumericLiteral>("0"));
-
-  std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                     std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>>>
-      connections;
-  connections["a"] = std::make_unique<vAST::Identifier>("a");
-  connections["b"] = std::make_unique<vAST::Index>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-  connections["c"] = std::make_unique<vAST::Slice>(
-      std::make_unique<vAST::Identifier>("c"),
-      std::make_unique<vAST::NumericLiteral>("31"),
-      std::make_unique<vAST::NumericLiteral>("0"));
 
   body.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, std::move(inst_parameters), instance_name, std::move(connections)));
+      module_name, std::move(inst_parameters), instance_name,
+      make_simple_connections()));
 
-  vAST::Parameters parameters;
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
-  vAST::Module module_with_params(name, std::move(ports), std::move(body), std::move(parameters));
+  vAST::Parameters parameters = make_simple_params();
+  vAST::Module module_with_params(name, make_simple_ports(), std::move(body),
+                                  std::move(parameters));
 
   std::string expected_str =
       "module test_module #(parameter param0 = 0, parameter param1 = "
@@ -323,28 +223,15 @@ TEST(BasicTests, TestParamModule) {
 TEST(BasicTests, TestStringBodyModule) {
   std::string name = "test_module";
 
-  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
-  ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("i"), vAST::INPUT, vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT, vAST::WIRE));
-
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body;
-  vAST::Parameters parameters;
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
 
   std::string module_name = "other_module";
 
   std::string string_body = "reg d;\nassign d = a + b;\nassign c = d;";
-  vAST::StringBodyModule string_body_module(name, std::move(ports), string_body,
-                                            std::move(parameters));
+  vAST::StringBodyModule string_body_module(name, make_simple_ports(),
+                                            string_body, make_simple_params());
   std::string expected_str =
       "module test_module #(parameter param0 = 0, parameter param1 = "
       "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
@@ -456,17 +343,12 @@ TEST(BasicTests, TestAlwaysEmpty) {
                            std::unique_ptr<vAST::Declaration>>>
       body;
 
-  ASSERT_THROW(vAST::Always always_empty(std::move(sensitivity_list), std::move(body)),
-               std::runtime_error);
+  ASSERT_THROW(
+      vAST::Always always_empty(std::move(sensitivity_list), std::move(body)),
+      std::runtime_error);
 }
 
 TEST(BasicTests, File) {
-  std::vector<std::unique_ptr<vAST::AbstractPort>> ports0;
-  ports0.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("i"), vAST::INPUT, vAST::WIRE));
-  ports0.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT, vAST::WIRE));
-
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body0;
@@ -474,47 +356,15 @@ TEST(BasicTests, File) {
   std::string module_name = "other_module";
   std::string instance_name = "other_module_inst";
 
-  vAST::Parameters inst_parameters;
-  inst_parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  inst_parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
-
-  std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                     std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>>>
-      connections;
-  connections["a"] = std::make_unique<vAST::Identifier>("a");
-  connections["b"] = std::make_unique<vAST::Index>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-  connections["c"] = std::make_unique<vAST::Slice>(
-      std::make_unique<vAST::Identifier>("c"),
-      std::make_unique<vAST::NumericLiteral>("31"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-
   body0.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, std::move(inst_parameters), instance_name, std::move(connections)));
+      module_name, make_simple_params(), instance_name,
+      make_simple_connections()));
 
   std::vector<std::unique_ptr<vAST::AbstractModule>> modules;
   vAST::Parameters parameters0;
   modules.push_back(
-      std::make_unique<vAST::Module>("test_module0", std::move(ports0), std::move(body0), std::move(parameters0)));
-
-  vAST::Parameters parameters1;
-  parameters1.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  parameters1.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
-  std::vector<std::unique_ptr<vAST::AbstractPort>> ports1;
-  ports1.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("i"), vAST::INPUT, vAST::WIRE));
-  ports1.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Identifier>("o"), vAST::OUTPUT, vAST::WIRE));
+      std::make_unique<vAST::Module>("test_module0", make_simple_ports(),
+                                     std::move(body0), std::move(parameters0)));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -523,40 +373,13 @@ TEST(BasicTests, File) {
   module_name = "other_module";
   instance_name = "other_module_inst";
 
-  vAST::Parameters inst_parameters0;
-  inst_parameters0.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  inst_parameters0.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
-
-  std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                     std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>>>
-      connections0;
-  connections0["a"] = std::make_unique<vAST::Identifier>("a");
-  connections0["b"] = std::make_unique<vAST::Index>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-  connections0["c"] = std::make_unique<vAST::Slice>(
-      std::make_unique<vAST::Identifier>("c"),
-      std::make_unique<vAST::NumericLiteral>("31"),
-      std::make_unique<vAST::NumericLiteral>("0"));
-
   body1.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, std::move(inst_parameters0), instance_name, std::move(connections0)));
-
-  vAST::Parameters parameters;
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param0"),
-                     std::make_unique<vAST::NumericLiteral>("0")));
-  parameters.push_back(
-      std::make_pair(std::make_unique<vAST::Identifier>("param1"),
-                     std::make_unique<vAST::NumericLiteral>("1")));
+      module_name, make_simple_params(), instance_name,
+      make_simple_connections()));
 
   modules.push_back(
-      std::make_unique<vAST::Module>("test_module1", std::move(ports1), std::move(body1), std::move(parameters)));
+      std::make_unique<vAST::Module>("test_module1", make_simple_ports(),
+                                     std::move(body1), make_simple_params()));
 
   vAST::File file(modules);
 
