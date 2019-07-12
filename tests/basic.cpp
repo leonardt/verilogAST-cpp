@@ -43,18 +43,20 @@ TEST(BasicTests, TestString) {
 }
 
 TEST(BasicTests, TestIndex) {
-  vAST::Index index(make_id("x"), make_num("0"));
+  vAST::Index index(vAST::make_id("x"), vAST::make_num("0"));
   EXPECT_EQ(index.toString(), "x[0]");
 }
 
 TEST(BasicTests, TestSlice) {
   vAST::Identifier id("x");
-  vAST::Slice slice(make_id("x"), make_num("31"), make_num("0"));
+  vAST::Slice slice(vAST::make_id("x"), vAST::make_num("31"),
+                    vAST::make_num("0"));
   EXPECT_EQ(slice.toString(), "x[31:0]");
 }
 
 TEST(BasicTests, TestVector) {
-  vAST::Vector slice(make_id("x"), make_num("31"), make_num("0"));
+  vAST::Vector slice(vAST::make_id("x"), vAST::make_num("31"),
+                     vAST::make_num("0"));
   EXPECT_EQ(slice.toString(), "[31:0] x");
 }
 
@@ -77,7 +79,7 @@ TEST(BasicTests, TestBinaryOp) {
   for (auto it : ops) {
     vAST::BinOp::BinOp op = it.first;
     std::string op_str = it.second;
-    vAST::BinaryOp bin_op(make_id("x"), op, make_id("y"));
+    vAST::BinaryOp bin_op(vAST::make_id("x"), op, vAST::make_id("y"));
     EXPECT_EQ(bin_op.toString(), "x " + op_str + " y");
   }
 }
@@ -98,7 +100,7 @@ TEST(BasicTests, TestUnaryOp) {
   for (auto it : ops) {
     vAST::UnOp::UnOp op = it.first;
     std::string op_str = it.second;
-    vAST::UnaryOp un_op(make_id("x"), op);
+    vAST::UnaryOp un_op(vAST::make_id("x"), op);
     EXPECT_EQ(un_op.toString(), op_str + " x");
   }
 }
@@ -107,37 +109,37 @@ TEST(BasicTests, TestTernaryOp) {
   vAST::UnaryOp un_op(std::make_unique<vAST::Identifier>("x"),
                       vAST::UnOp::INVERT);
   vAST::TernaryOp tern_op(
-      std::make_unique<vAST::UnaryOp>(make_id("x"), vAST::UnOp::INVERT),
-      make_num("1"), make_num("0"));
+      std::make_unique<vAST::UnaryOp>(vAST::make_id("x"), vAST::UnOp::INVERT),
+      vAST::make_num("1"), vAST::make_num("0"));
   EXPECT_EQ(tern_op.toString(), "~ x ? 1 : 0");
 }
 
 TEST(BasicTests, TestNegEdge) {
-  vAST::NegEdge neg_edge(make_id("clk"));
+  vAST::NegEdge neg_edge(vAST::make_id("clk"));
 
   EXPECT_EQ(neg_edge.toString(), "negedge clk");
 }
 
 TEST(BasicTests, TestPosEdge) {
-  vAST::PosEdge pos_edge(make_id("clk"));
+  vAST::PosEdge pos_edge(vAST::make_id("clk"));
 
   EXPECT_EQ(pos_edge.toString(), "posedge clk");
 }
 
 TEST(BasicTests, TestPort) {
-  vAST::Port i_port(make_id("i"), vAST::INPUT, vAST::WIRE);
+  vAST::Port i_port(vAST::make_id("i"), vAST::INPUT, vAST::WIRE);
 
   EXPECT_EQ(i_port.toString(), "input i");
 
-  vAST::Port o_port(make_id("o"), vAST::OUTPUT, vAST::WIRE);
+  vAST::Port o_port(vAST::make_id("o"), vAST::OUTPUT, vAST::WIRE);
 
   EXPECT_EQ(o_port.toString(), "output o");
 
-  vAST::Port io_port(make_id("io"), vAST::INOUT, vAST::WIRE);
+  vAST::Port io_port(vAST::make_id("io"), vAST::INOUT, vAST::WIRE);
 
   EXPECT_EQ(io_port.toString(), "inout io");
 
-  vAST::Port o_reg_port(make_id("o"), vAST::OUTPUT, vAST::REG);
+  vAST::Port o_reg_port(vAST::make_id("o"), vAST::OUTPUT, vAST::REG);
 
   EXPECT_EQ(o_reg_port.toString(), "output reg o");
 }

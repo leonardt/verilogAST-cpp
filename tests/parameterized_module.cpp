@@ -23,17 +23,20 @@ TEST(ParameterizedModuleTests, TestEq) {
   std::string name = "coreir_eq";
 
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
-  ports.push_back(make_port(
-      make_vector(make_id("in0"),
-                  make_binop(make_id("width"), vAST::BinOp::SUB, make_num("1")),
-                  make_num("0")),
+  ports.push_back(vAST::make_port(
+      vAST::make_vector(vAST::make_id("in0"),
+                        vAST::make_binop(vAST::make_id("width"),
+                                         vAST::BinOp::SUB, vAST::make_num("1")),
+                        vAST::make_num("0")),
       vAST::INPUT, vAST::WIRE));
-  ports.push_back(make_port(
-      make_vector(make_id("in1"),
-                  make_binop(make_id("width"), vAST::BinOp::SUB, make_num("1")),
-                  make_num("0")),
+  ports.push_back(vAST::make_port(
+      vAST::make_vector(vAST::make_id("in1"),
+                        vAST::make_binop(vAST::make_id("width"),
+                                         vAST::BinOp::SUB, vAST::make_num("1")),
+                        vAST::make_num("0")),
       vAST::INPUT, vAST::WIRE));
-  ports.push_back(make_port(make_id("out"), vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(
+      vAST::make_port(vAST::make_id("out"), vAST::OUTPUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -41,13 +44,15 @@ TEST(ParameterizedModuleTests, TestEq) {
 
   std::unique_ptr<vAST::ContinuousAssign> eq_assign =
       std::make_unique<vAST::ContinuousAssign>(
-          make_id("out"),
-          make_binop(make_id("in0"), vAST::BinOp::EQ, make_id("in1")));
+          vAST::make_id("out"),
+          vAST::make_binop(vAST::make_id("in0"), vAST::BinOp::EQ,
+                           vAST::make_id("in1")));
 
   body.push_back(std::move(eq_assign));
 
   vAST::Parameters parameters;
-  parameters.push_back(std::make_pair(make_id("width"), make_num("1")));
+  parameters.push_back(
+      std::make_pair(vAST::make_id("width"), vAST::make_num("1")));
   std::unique_ptr<vAST::Module> coreir_eq = std::make_unique<vAST::Module>(
       name, std::move(ports), std::move(body), std::move(parameters));
 
