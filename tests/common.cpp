@@ -65,7 +65,8 @@ std::vector<std::unique_ptr<vAST::AbstractPort>> make_simple_ports() {
 }
 
 std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
-    std::unique_ptr<vAST::Declaration>>> make_simple_body() {
+                         std::unique_ptr<vAST::Declaration>>>
+make_simple_body() {
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body;
@@ -76,5 +77,21 @@ std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
   body.push_back(std::make_unique<vAST::ModuleInstantiation>(
       module_name, make_simple_params(), instance_name,
       make_simple_connections()));
+  return body;
+}
+
+std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
+                         std::unique_ptr<vAST::Declaration>>>
+make_simple_always_body() {
+  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body;
+  body.push_back(std::make_unique<vAST::BlockingAssign>(
+      std::make_unique<vAST::Identifier>("a"),
+      std::make_unique<vAST::Identifier>("b")));
+  body.push_back(std::make_unique<vAST::NonBlockingAssign>(
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("c")));
+
   return body;
 }

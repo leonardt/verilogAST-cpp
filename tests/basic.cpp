@@ -260,16 +260,7 @@ TEST(BasicTests, TestAlways) {
       std::make_unique<vAST::PosEdge>(std::make_unique<vAST::Identifier>("b")));
   sensitivity_list.push_back(
       std::make_unique<vAST::NegEdge>(std::make_unique<vAST::Identifier>("c")));
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
-  body.push_back(std::make_unique<vAST::BlockingAssign>(
-      std::make_unique<vAST::Identifier>("a"),
-      std::make_unique<vAST::Identifier>("b")));
-  body.push_back(std::make_unique<vAST::NonBlockingAssign>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::Identifier>("c")));
-  vAST::Always always(std::move(sensitivity_list), std::move(body));
+  vAST::Always always(std::move(sensitivity_list), make_simple_always_body());
   std::string expected_str =
       "always @(a, posedge b, negedge c) begin\n"
       "a = b;\n"
@@ -283,17 +274,9 @@ TEST(BasicTests, TestAlwaysStar) {
       std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
       std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
       sensitivity_list;
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
-  body.push_back(std::make_unique<vAST::BlockingAssign>(
-      std::make_unique<vAST::Identifier>("a"),
-      std::make_unique<vAST::Identifier>("b")));
-  body.push_back(std::make_unique<vAST::NonBlockingAssign>(
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::Identifier>("c")));
   sensitivity_list.push_back(std::make_unique<vAST::Star>());
-  vAST::Always always_star(std::move(sensitivity_list), std::move(body));
+  vAST::Always always_star(std::move(sensitivity_list),
+                           make_simple_always_body());
   std::string expected_str =
       "always @(*) begin\n"
       "a = b;\n"
