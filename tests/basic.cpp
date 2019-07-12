@@ -7,10 +7,10 @@ namespace {
 
 TEST(BasicTests, TestNumericLiteral) {
   vAST::NumericLiteral n0("23", 16, false, vAST::DECIMAL);
-  EXPECT_EQ(n0.toString(), "16'd23");
+  EXPECT_EQ(n0.toString(), "16'23");
 
   vAST::NumericLiteral n1("DEADBEEF", 32, false, vAST::HEX);
-  EXPECT_EQ(n1.toString(), "32'hDEADBEEF");
+  EXPECT_EQ(n1.toString(), "'hDEADBEEF");
 
   vAST::NumericLiteral n2("011001", 6, false, vAST::BINARY);
   EXPECT_EQ(n2.toString(), "6'b011001");
@@ -19,16 +19,16 @@ TEST(BasicTests, TestNumericLiteral) {
   EXPECT_EQ(n3.toString(), "24'o764");
 
   vAST::NumericLiteral n4("764", 8, false);
-  EXPECT_EQ(n4.toString(), "8'd764");
+  EXPECT_EQ(n4.toString(), "8'764");
 
   vAST::NumericLiteral n5("764", 8);
-  EXPECT_EQ(n5.toString(), "8'd764");
+  EXPECT_EQ(n5.toString(), "8'764");
 
   vAST::NumericLiteral n6("764");
-  EXPECT_EQ(n6.toString(), "32'd764");
+  EXPECT_EQ(n6.toString(), "764");
 
   vAST::NumericLiteral n7("764", 8, true);
-  EXPECT_EQ(n7.toString(), "8'sd764");
+  EXPECT_EQ(n7.toString(), "8's764");
 }
 
 TEST(BasicTests, TestIdentifier) {
@@ -45,7 +45,7 @@ TEST(BasicTests, TestIndex) {
   vAST::Identifier id("x");
   vAST::NumericLiteral n("0");
   vAST::Index index(&id, &n);
-  EXPECT_EQ(index.toString(), "x[32'd0]");
+  EXPECT_EQ(index.toString(), "x[0]");
 }
 
 TEST(BasicTests, TestSlice) {
@@ -53,7 +53,15 @@ TEST(BasicTests, TestSlice) {
   vAST::NumericLiteral high("31");
   vAST::NumericLiteral low("0");
   vAST::Slice slice(&id, &high, &low);
-  EXPECT_EQ(slice.toString(), "x[32'd31:32'd0]");
+  EXPECT_EQ(slice.toString(), "x[31:0]");
+}
+
+TEST(BasicTests, TestVector) {
+  vAST::Identifier id("x");
+  vAST::NumericLiteral high("31");
+  vAST::NumericLiteral low("0");
+  vAST::Vector slice(&id, &high, &low);
+  EXPECT_EQ(slice.toString(), "[31:0] x");
 }
 
 TEST(BasicTests, TestBinaryOp) {
@@ -110,7 +118,7 @@ TEST(BasicTests, TestTernaryOp) {
   vAST::NumericLiteral zero("0");
   vAST::NumericLiteral one("1");
   vAST::TernaryOp tern_op(&un_op, &one, &zero);
-  EXPECT_EQ(tern_op.toString(), "~ x ? 32'd1 : 32'd0");
+  EXPECT_EQ(tern_op.toString(), "~ x ? 1 : 0");
 }
 
 TEST(BasicTests, TestNegEdge) {
@@ -182,8 +190,8 @@ TEST(BasicTests, TestModuleInst) {
                                         connections);
 
   EXPECT_EQ(module_inst.toString(),
-            "test_module #(.param0(32'd0), .param1(32'd1)) "
-            "test_module_inst(.a(a), .b(b[32'd0]), .c(c[32'd31:32'd0]));");
+            "test_module #(.param0(0), .param1(1)) "
+            "test_module_inst(.a(a), .b(b[0]), .c(c[31:0]));");
 }
 
 TEST(BasicTests, TestModule) {
@@ -230,26 +238,27 @@ TEST(BasicTests, TestModule) {
   vAST::Module module(name, ports, body, parameters);
 
   std::string expected_str =
-      "module test_module (input i, output o);\nother_module #(.param0(32'd0), "
-      ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
-      ".c(c[32'd31:32'd0]));\nendmodule\n";
+      "module test_module (input i, output o);\nother_module #(.param0(0), "
+      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
+      ".c(c[31:0]));\nendmodule\n";
   EXPECT_EQ(module.toString(), expected_str);
 
   parameters = {{&param0, &zero}, {&param1, &one}};
   vAST::Module module_with_params(name, ports, body, parameters);
 
   expected_str =
-      "module test_module #(parameter param0 = 32'd0, parameter param1 = "
-      "32'd1) (input i, output o);\nother_module #(.param0(32'd0), "
-      ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
-      ".c(c[32'd31:32'd0]));\nendmodule\n";
+      "module test_module #(parameter param0 = 0, parameter param1 = "
+      "1) (input i, output o);\nother_module #(.param0(0), "
+      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
+      ".c(c[31:0]));\nendmodule\n";
   EXPECT_EQ(module_with_params.toString(), expected_str);
 
   std::string string_body = "reg d;\nassign d = a + b;\nassign c = d;";
-  vAST::StringBodyModule string_body_module(name, ports, string_body, parameters);
+  vAST::StringBodyModule string_body_module(name, ports, string_body,
+                                            parameters);
   expected_str =
-      "module test_module #(parameter param0 = 32'd0, parameter param1 = "
-      "32'd1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
+      "module test_module #(parameter param0 = 0, parameter param1 = "
+      "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
       "d;\nendmodule\n";
   EXPECT_EQ(string_body_module.toString(), expected_str);
 
@@ -266,16 +275,19 @@ TEST(BasicTests, TestDeclaration) {
   EXPECT_EQ(reg.toString(), "reg a;");
 
   vAST::Identifier id("x");
-  vAST::NumericLiteral n("0");
-  vAST::Index index(&id, &n);
-  vAST::Wire wire_index(&index);
-  EXPECT_EQ(wire_index.toString(), "wire x[32'd0];");
-
   vAST::NumericLiteral high("31");
   vAST::NumericLiteral low("0");
   vAST::Slice slice(&id, &high, &low);
   vAST::Reg reg_slice(&slice);
-  EXPECT_EQ(reg_slice.toString(), "reg x[32'd31:32'd0];");
+  EXPECT_EQ(reg_slice.toString(), "reg x[31:0];");
+
+  vAST::Index index(&id, &high);
+  vAST::Reg reg_index(&index);
+  EXPECT_EQ(reg_index.toString(), "reg x[31];");
+
+  vAST::Vector vec(&id, &high, &low);
+  vAST::Reg reg_vec(&vec);
+  EXPECT_EQ(reg_vec.toString(), "reg [31:0] x;");
 }
 
 TEST(BasicTests, TestAssign) {
@@ -382,21 +394,21 @@ TEST(BasicTests, File) {
 
   std::string expected_str =
       "module test_module0 (input i, output o);\nother_module "
-      "#(.param0(32'd0), .param1(32'd1)) other_module_inst(.a(a), "
-      ".b(b[32'd0]), .c(c[32'd31:32'd0]));\nendmodule\n\n"
-      "module test_module1 #(parameter param0 = 32'd0, parameter param1 = "
-      "32'd1) (input i, output o);\nother_module #(.param0(32'd0), "
-      ".param1(32'd1)) other_module_inst(.a(a), .b(b[32'd0]), "
-      ".c(c[32'd31:32'd0]));\nendmodule\n";
+      "#(.param0(0), .param1(1)) other_module_inst(.a(a), "
+      ".b(b[0]), .c(c[31:0]));\nendmodule\n\n"
+      "module test_module1 #(parameter param0 = 0, parameter param1 = "
+      "1) (input i, output o);\nother_module #(.param0(0), "
+      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
+      ".c(c[31:0]));\nendmodule\n";
   EXPECT_EQ(file.toString(), expected_str);
 }
 TEST(BasicTests, Comment) {
-    vAST::SingleLineComment single_line_comment("Test comment");
-    EXPECT_EQ(single_line_comment.toString(), "// Test comment");
-    vAST::BlockComment block_comment("Test comment\non multiple lines");
-    EXPECT_EQ(block_comment.toString(), "/*\nTest comment\non multiple lines\n*/");
+  vAST::SingleLineComment single_line_comment("Test comment");
+  EXPECT_EQ(single_line_comment.toString(), "// Test comment");
+  vAST::BlockComment block_comment("Test comment\non multiple lines");
+  EXPECT_EQ(block_comment.toString(),
+            "/*\nTest comment\non multiple lines\n*/");
 }
-    
 
 }  // namespace
 

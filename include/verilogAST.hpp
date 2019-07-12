@@ -178,10 +178,21 @@ enum PortType { WIRE, REG };
 
 class AbstractPort : public Node {};
 
+class Vector : public Node {
+  Identifier *id;
+  Expression *msb;
+  Expression *lsb;
+
+ public:
+  Vector(Identifier *id, Expression *msb, Expression *lsb)
+      : id(id), msb(msb), lsb(lsb){};
+  std::string toString() override;
+};
+
 class Port : public AbstractPort {
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
-  std::variant<Identifier *, Index *, Slice *> value;
+  std::variant<Identifier *, Vector *> value;
 
   // technically the following are optional (e.g. port direction/data type
   // can be declared in the body of the definition), but for now let's force
@@ -191,7 +202,7 @@ class Port : public AbstractPort {
   PortType data_type;
 
  public:
-  Port(std::variant<Identifier *, Index *, Slice *> value, Direction direction,
+  Port(std::variant<Identifier *, Vector *> value, Direction direction,
        PortType data_type)
       : value(value), direction(direction), data_type(data_type){};
   std::string toString();
@@ -258,9 +269,9 @@ class ModuleInstantiation : public StructuralStatement {
 class Declaration : public Node {
  protected:
   std::string decl;
-  std::variant<Identifier *, Index *, Slice *> value;
+  std::variant<Identifier *, Index *, Slice *, Vector *> value;
 
-  Declaration(std::variant<Identifier *, Index *, Slice *> value,
+  Declaration(std::variant<Identifier *, Index *, Slice *, Vector *> value,
               std::string decl)
       : decl(decl), value(value){};
 
@@ -270,13 +281,13 @@ class Declaration : public Node {
 
 class Wire : public Declaration {
  public:
-  Wire(std::variant<Identifier *, Index *, Slice *> value)
+  Wire(std::variant<Identifier *, Index *, Slice *, Vector *> value)
       : Declaration(value, "wire"){};
 };
 
 class Reg : public Declaration {
  public:
-  Reg(std::variant<Identifier *, Index *, Slice *> value)
+  Reg(std::variant<Identifier *, Index *, Slice *, Vector *> value)
       : Declaration(value, "reg"){};
 };
 
@@ -361,7 +372,8 @@ class Module : public AbstractModule {
   std::string emitModuleHeader();
   // Protected initializer that is used by the StringBodyModule subclass which
   // overrides the `body` field (but reuses the other fields)
-  Module(std::string name, std::vector<AbstractPort *> ports, Parameters parameters)
+  Module(std::string name, std::vector<AbstractPort *> ports,
+         Parameters parameters)
       : name(name), ports(ports), parameters(parameters){};
 
  public:

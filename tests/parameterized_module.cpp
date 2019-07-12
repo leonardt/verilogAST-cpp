@@ -30,11 +30,11 @@ TEST(ParameterizedModuleTests, TestEq) {
   vAST::BinaryOp hi(&width,vAST::BinOp::SUB,&one);
   auto lo = zero;
 
-  vAST::Slice in0_slice(&in0, &hi, &lo);
-  vAST::Slice in1_slice(&in1, &hi, &lo);
+  vAST::Vector in0_vec(&in0, &hi, &lo);
+  vAST::Vector in1_vec(&in1, &hi, &lo);
 
-  vAST::Port in0_port(&in0_slice, vAST::INPUT, vAST::WIRE);
-  vAST::Port in1_port(&in1_slice, vAST::INPUT, vAST::WIRE);
+  vAST::Port in0_port(&in0_vec, vAST::INPUT, vAST::WIRE);
+  vAST::Port in1_port(&in1_vec, vAST::INPUT, vAST::WIRE);
   vAST::Port out_port(&out, vAST::OUTPUT, vAST::WIRE);
 
   std::vector<vAST::AbstractPort *> ports = {&in0_port, &in1_port, &out_port};
@@ -52,7 +52,7 @@ TEST(ParameterizedModuleTests, TestEq) {
 
   cout << "//coreir_eq" << endl << coreir_eq.toString() << endl;
   std::string expected_str =
-      "module coreir_eq #(parameter width = 32'd1) (input in0[width - 32'd1:32'd0], input in1[width - 32'd1:32'd0], output out);\n"
+      "module coreir_eq #(parameter width = 1) (input [width - 1:0] in0, input [width - 1:0] in1, output out);\n"
       "assign out = in0 == in1;\n"
       "endmodule\n";
   EXPECT_EQ(coreir_eq.toString(), expected_str);

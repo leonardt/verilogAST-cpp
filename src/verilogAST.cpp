@@ -4,22 +4,31 @@ namespace verilogAST {
 std::string NumericLiteral::toString() {
   std::string signed_str = _signed ? "s" : "";
 
-  char radix_str;
+  std::string radix_str;
   switch (radix) {
     case BINARY:
-      radix_str = 'b';
+      radix_str = "b";
       break;
     case OCTAL:
-      radix_str = 'o';
+      radix_str = "o";
       break;
     case HEX:
-      radix_str = 'h';
+      radix_str = "h";
       break;
     case DECIMAL:
-      radix_str = 'd';
+      radix_str = "";
       break;
   }
-  return std::to_string(size) + "'" + signed_str + radix_str + value;
+  std::string size_str = std::to_string(size);
+  if (size_str == "32") {
+      size_str = "";
+  }
+
+  std::string separator = "";
+  if (size_str + signed_str + radix_str != "") {
+      separator = "'";
+  }
+  return size_str + separator + signed_str + radix_str + value;
 }
 
 std::string Identifier::toString() { return value; }
@@ -33,6 +42,10 @@ std::string Index::toString() {
 std::string Slice::toString() {
   return id->toString() + '[' + high_index->toString() + ':' +
          low_index->toString() + ']';
+}
+
+std::string Vector::toString() {
+  return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
 }
 
 std::string BinaryOp::toString() {
@@ -141,7 +154,7 @@ std::string variant_to_string(std::variant<Ts...> value) {
 
 std::string Port::toString() {
   std::string value_str =
-      variant_to_string<Identifier *, Index *, Slice *>(value);
+      variant_to_string<Identifier *, Vector *>(value);
   std::string direction_str;
   switch (direction) {
     case INPUT:
