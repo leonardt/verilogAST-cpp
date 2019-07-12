@@ -63,3 +63,18 @@ std::vector<std::unique_ptr<vAST::AbstractPort>> make_simple_ports() {
       std::make_unique<vAST::Port>(make_id("o"), vAST::OUTPUT, vAST::WIRE));
   return ports;
 }
+
+std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+    std::unique_ptr<vAST::Declaration>>> make_simple_body() {
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body;
+
+  std::string module_name = "other_module";
+  std::string instance_name = "other_module_inst";
+
+  body.push_back(std::make_unique<vAST::ModuleInstantiation>(
+      module_name, make_simple_params(), instance_name,
+      make_simple_connections()));
+  return body;
+}

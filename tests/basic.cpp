@@ -167,21 +167,8 @@ TEST(BasicTests, TestModuleInst) {
 TEST(BasicTests, TestModule) {
   std::string name = "test_module";
 
-  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
-
-  std::string module_name = "other_module";
-  std::string instance_name = "other_module_inst";
-
-  vAST::Parameters inst_parameters = make_simple_params();
-
-  body.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, std::move(inst_parameters), instance_name,
-      make_simple_connections()));
-
   vAST::Parameters parameters;
-  vAST::Module module(name, make_simple_ports(), std::move(body),
+  vAST::Module module(name, make_simple_ports(), make_simple_body(),
                       std::move(parameters));
 
   std::string expected_str =
@@ -194,23 +181,8 @@ TEST(BasicTests, TestModule) {
 TEST(BasicTests, TestParamModule) {
   std::string name = "test_module";
 
-  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
-
-  std::string module_name = "other_module";
-
-  vAST::Parameters inst_parameters = make_simple_params();
-
-  std::string instance_name = "other_module_inst";
-
-  body.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, std::move(inst_parameters), instance_name,
-      make_simple_connections()));
-
-  vAST::Parameters parameters = make_simple_params();
-  vAST::Module module_with_params(name, make_simple_ports(), std::move(body),
-                                  std::move(parameters));
+  vAST::Module module_with_params(name, make_simple_ports(), make_simple_body(),
+                                  make_simple_params());
 
   std::string expected_str =
       "module test_module #(parameter param0 = 0, parameter param1 = "
@@ -222,10 +194,6 @@ TEST(BasicTests, TestParamModule) {
 
 TEST(BasicTests, TestStringBodyModule) {
   std::string name = "test_module";
-
-  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
 
   std::string module_name = "other_module";
 
@@ -349,37 +317,15 @@ TEST(BasicTests, TestAlwaysEmpty) {
 }
 
 TEST(BasicTests, File) {
-  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body0;
-
-  std::string module_name = "other_module";
-  std::string instance_name = "other_module_inst";
-
-  body0.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, make_simple_params(), instance_name,
-      make_simple_connections()));
-
   std::vector<std::unique_ptr<vAST::AbstractModule>> modules;
   vAST::Parameters parameters0;
-  modules.push_back(
-      std::make_unique<vAST::Module>("test_module0", make_simple_ports(),
-                                     std::move(body0), std::move(parameters0)));
-
-  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body1;
-
-  module_name = "other_module";
-  instance_name = "other_module_inst";
-
-  body1.push_back(std::make_unique<vAST::ModuleInstantiation>(
-      module_name, make_simple_params(), instance_name,
-      make_simple_connections()));
+  modules.push_back(std::make_unique<vAST::Module>(
+      "test_module0", make_simple_ports(), make_simple_body(),
+      std::move(parameters0)));
 
   modules.push_back(
       std::make_unique<vAST::Module>("test_module1", make_simple_ports(),
-                                     std::move(body1), make_simple_params()));
+                                     make_simple_body(), make_simple_params()));
 
   vAST::File file(modules);
 
