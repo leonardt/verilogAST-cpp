@@ -269,9 +269,9 @@ class ModuleInstantiation : public StructuralStatement {
 class Declaration : public Node {
  protected:
   std::string decl;
-  std::variant<Identifier *, Vector *> value;
+  std::variant<Identifier *, Index *, Slice *, Vector *> value;
 
-  Declaration(std::variant<Identifier *, Vector *> value,
+  Declaration(std::variant<Identifier *, Index *, Slice *, Vector *> value,
               std::string decl)
       : decl(decl), value(value){};
 
@@ -281,13 +281,13 @@ class Declaration : public Node {
 
 class Wire : public Declaration {
  public:
-  Wire(std::variant<Identifier *, Vector *> value)
+  Wire(std::variant<Identifier *, Index *, Slice *, Vector *> value)
       : Declaration(value, "wire"){};
 };
 
 class Reg : public Declaration {
  public:
-  Reg(std::variant<Identifier *, Vector *> value)
+  Reg(std::variant<Identifier *, Index *, Slice *, Vector *> value)
       : Declaration(value, "reg"){};
 };
 

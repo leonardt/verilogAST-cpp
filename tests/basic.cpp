@@ -277,9 +277,17 @@ TEST(BasicTests, TestDeclaration) {
   vAST::Identifier id("x");
   vAST::NumericLiteral high("31");
   vAST::NumericLiteral low("0");
-  vAST::Vector slice(&id, &high, &low);
+  vAST::Slice slice(&id, &high, &low);
   vAST::Reg reg_slice(&slice);
-  EXPECT_EQ(reg_slice.toString(), "reg [31:0] x;");
+  EXPECT_EQ(reg_slice.toString(), "reg x[31:0];");
+
+  vAST::Index index(&id, &high);
+  vAST::Reg reg_index(&index);
+  EXPECT_EQ(reg_index.toString(), "reg x[31];");
+
+  vAST::Vector vec(&id, &high, &low);
+  vAST::Reg reg_vec(&vec);
+  EXPECT_EQ(reg_vec.toString(), "reg [31:0] x;");
 }
 
 TEST(BasicTests, TestAssign) {
