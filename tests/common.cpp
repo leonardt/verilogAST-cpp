@@ -13,11 +13,13 @@ vAST::Parameters make_simple_params() {
 
 std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
                                    std::unique_ptr<vAST::Index>,
-                                   std::unique_ptr<vAST::Slice>>>
+                                   std::unique_ptr<vAST::Slice>,
+                                   std::unique_ptr<vAST::Concat>>>
 make_simple_connections() {
   std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
                                      std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>>>
+                                     std::unique_ptr<vAST::Slice>,
+                                     std::unique_ptr<vAST::Concat>>>
       connections;
   connections["a"] = vAST::make_id("a");
   connections["b"] =
