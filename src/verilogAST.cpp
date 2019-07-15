@@ -316,4 +316,31 @@ std::string File::toString() {
   return join(file_strs, "\n");
 }
 
+std::unique_ptr<Identifier> make_id(std::string name) {
+  return std::make_unique<Identifier>(name);
+}
+
+std::unique_ptr<NumericLiteral> make_num(std::string val) {
+  return std::make_unique<NumericLiteral>(val);
+}
+
+std::unique_ptr<BinaryOp> make_binop(std::unique_ptr<Expression> left,
+                                     BinOp::BinOp op,
+                                     std::unique_ptr<Expression> right) {
+  return std::make_unique<BinaryOp>(std::move(left), op, std::move(right));
+}
+
+std::unique_ptr<Port> make_port(
+    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
+    Direction direction, PortType data_type) {
+  return std::make_unique<Port>(std::move(value), direction, data_type);
+}
+
+std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
+                                    std::unique_ptr<Expression> msb,
+                                    std::unique_ptr<Expression> lsb) {
+  return std::make_unique<Vector>(std::move(id), std::move(msb),
+                                  std::move(lsb));
+}
+
 }  // namespace verilogAST
