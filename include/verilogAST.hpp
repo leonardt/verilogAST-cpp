@@ -179,6 +179,15 @@ class TernaryOp : public Expression {
   ~TernaryOp(){};
 };
 
+class Concat : public Expression {
+  std::vector<std::unique_ptr<Expression>> args;
+
+ public:
+  Concat(std::vector<std::unique_ptr<Expression>> args)
+      : args(std::move(args)){};
+  std::string toString();
+};
+
 class NegEdge : public Expression {
   std::unique_ptr<Expression> value;
 
@@ -287,7 +296,7 @@ class ModuleInstantiation : public StructuralStatement {
   // NOTE: anonymous style of module connections is not supported
   std::map<std::string,
            std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
-                        std::unique_ptr<Slice>>>
+                        std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
       connections;
 
  public:
@@ -297,7 +306,7 @@ class ModuleInstantiation : public StructuralStatement {
       std::string module_name, Parameters parameters, std::string instance_name,
       std::map<std::string,
                std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
-                            std::unique_ptr<Slice>>>
+                            std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
           connections)
       : module_name(module_name),
         parameters(std::move(parameters)),
