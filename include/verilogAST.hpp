@@ -1,4 +1,6 @@
 #pragma once
+#ifndef VERILOGAST_H
+#define VERILOGAST_H
 
 #include <map>
 #include <memory>
@@ -539,3 +541,4 @@ std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
 }
 
 }  // namespace verilogAST
+#endif
