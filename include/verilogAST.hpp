@@ -179,6 +179,15 @@ class TernaryOp : public Expression {
   ~TernaryOp(){};
 };
 
+class Concat : public Expression {
+  std::vector<std::unique_ptr<Expression>> args;
+
+ public:
+  Concat(std::vector<std::unique_ptr<Expression>> args)
+      : args(std::move(args)){};
+  std::string toString();
+};
+
 class NegEdge : public Expression {
   std::unique_ptr<Expression> value;
 

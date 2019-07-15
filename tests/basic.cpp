@@ -114,6 +114,14 @@ TEST(BasicTests, TestTernaryOp) {
   EXPECT_EQ(tern_op.toString(), "~ x ? 1 : 0");
 }
 
+TEST(BasicTests, TestConcat) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_id("x"));
+  args.push_back(vAST::make_id("y"));
+  vAST::Concat concat(std::move(args));
+  EXPECT_EQ(concat.toString(), "{x,y}");
+}
+
 TEST(BasicTests, TestNegEdge) {
   vAST::NegEdge neg_edge(vAST::make_id("clk"));
 

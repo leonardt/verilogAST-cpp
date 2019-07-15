@@ -1,5 +1,16 @@
 #include "verilogAST.hpp"
 
+// Helper function to join a vector of strings with a specified separator ala
+// Python's ",".join(...)
+std::string join(std::vector<std::string> vec, std::string separator) {
+  std::string result;
+  for (size_t i = 0; i < vec.size(); i++) {
+    if (i > 0) result += separator;
+    result += vec[i];
+  }
+  return result;
+}
+
 namespace verilogAST {
 std::string NumericLiteral::toString() {
   std::string signed_str = _signed ? "s" : "";
@@ -142,6 +153,14 @@ std::string TernaryOp::toString() {
          false_value->toString();
 }
 
+std::string Concat::toString() {
+  std::vector<std::string> arg_strs;
+  for (auto &arg : args) {
+    arg_strs.push_back(arg->toString());
+  }
+  return "{" + join(arg_strs, ",") + "}";
+}
+
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
@@ -179,15 +198,6 @@ std::string Port::toString() {
       break;
   }
   return direction_str + " " + data_type_str + value_str;
-}
-
-std::string join(std::vector<std::string> vec, std::string separator) {
-  std::string result;
-  for (size_t i = 0; i < vec.size(); i++) {
-    if (i > 0) result += separator;
-    result += vec[i];
-  }
-  return result;
 }
 
 std::string Module::emitModuleHeader() {
