@@ -1,3 +1,4 @@
+#include "common.cpp"
 #include "gtest/gtest.h"
 #include "verilogAST.hpp"
 
@@ -20,45 +21,51 @@ namespace {
 
 TEST(ParameterizedModuleTests, TestEq) {
   std::string name = "coreir_eq";
-  
-  vAST::Identifier width("width");
-  vAST::Identifier in0("in0");
-  vAST::Identifier in1("in1");
-  vAST::Identifier out("out");
-  vAST::NumericLiteral one("1");
-  vAST::NumericLiteral zero("0");
-  vAST::BinaryOp hi(&width,vAST::BinOp::SUB,&one);
-  auto lo = zero;
 
-  vAST::Vector in0_vec(&in0, &hi, &lo);
-  vAST::Vector in1_vec(&in1, &hi, &lo);
+  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
+  ports.push_back(vAST::make_port(
+      vAST::make_vector(vAST::make_id("in0"),
+                        vAST::make_binop(vAST::make_id("width"),
+                                         vAST::BinOp::SUB, vAST::make_num("1")),
+                        vAST::make_num("0")),
+      vAST::INPUT, vAST::WIRE));
+  ports.push_back(vAST::make_port(
+      vAST::make_vector(vAST::make_id("in1"),
+                        vAST::make_binop(vAST::make_id("width"),
+                                         vAST::BinOp::SUB, vAST::make_num("1")),
+                        vAST::make_num("0")),
+      vAST::INPUT, vAST::WIRE));
+  ports.push_back(
+      vAST::make_port(vAST::make_id("out"), vAST::OUTPUT, vAST::WIRE));
 
-  vAST::Port in0_port(&in0_vec, vAST::INPUT, vAST::WIRE);
-  vAST::Port in1_port(&in1_vec, vAST::INPUT, vAST::WIRE);
-  vAST::Port out_port(&out, vAST::OUTPUT, vAST::WIRE);
-
-  std::vector<vAST::AbstractPort *> ports = {&in0_port, &in1_port, &out_port};
-
-  std::vector<std::variant<vAST::StructuralStatement *, vAST::Declaration *>>
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
       body;
 
-  vAST::BinaryOp eq_op(&in0,vAST::BinOp::EQ,&in1);
-  vAST::ContinuousAssign eq_assign(&out, &eq_op);
+  std::unique_ptr<vAST::ContinuousAssign> eq_assign =
+      std::make_unique<vAST::ContinuousAssign>(
+          vAST::make_id("out"),
+          vAST::make_binop(vAST::make_id("in0"), vAST::BinOp::EQ,
+                           vAST::make_id("in1")));
 
-  body.push_back(&eq_assign);
+  body.push_back(std::move(eq_assign));
 
-  vAST::Parameters parameters = {{&width,&one}};
-  vAST::Module coreir_eq(name, ports, body, parameters);
+  vAST::Parameters parameters;
+  parameters.push_back(
+      std::make_pair(vAST::make_id("width"), vAST::make_num("1")));
+  std::unique_ptr<vAST::Module> coreir_eq = std::make_unique<vAST::Module>(
+      name, std::move(ports), std::move(body), std::move(parameters));
 
-  cout << "//coreir_eq" << endl << coreir_eq.toString() << endl;
+  cout << "//coreir_eq" << endl << coreir_eq->toString() << endl;
   std::string expected_str =
-      "module coreir_eq #(parameter width = 1) (input [width - 1:0] in0, input [width - 1:0] in1, output out);\n"
+      "module coreir_eq #(parameter width = 1) (input [width - 1:0] in0, input "
+      "[width - 1:0] in1, output out);\n"
       "assign out = in0 == in1;\n"
       "endmodule\n";
-  EXPECT_EQ(coreir_eq.toString(), expected_str);
+  EXPECT_EQ(coreir_eq->toString(), expected_str);
 }
 
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

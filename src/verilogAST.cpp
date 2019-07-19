@@ -1,5 +1,16 @@
 #include "verilogAST.hpp"
 
+// Helper function to join a vector of strings with a specified separator ala
+// Python's ",".join(...)
+std::string join(std::vector<std::string> vec, std::string separator) {
+  std::string result;
+  for (size_t i = 0; i < vec.size(); i++) {
+    if (i > 0) result += separator;
+    result += vec[i];
+  }
+  return result;
+}
+
 namespace verilogAST {
 std::string NumericLiteral::toString() {
   std::string signed_str = _signed ? "s" : "";
@@ -21,12 +32,12 @@ std::string NumericLiteral::toString() {
   }
   std::string size_str = std::to_string(size);
   if (size_str == "32") {
-      size_str = "";
+    size_str = "";
   }
 
   std::string separator = "";
   if (size_str + signed_str + radix_str != "") {
-      separator = "'";
+    separator = "'";
   }
   return size_str + separator + signed_str + radix_str + value;
 }
@@ -142,19 +153,28 @@ std::string TernaryOp::toString() {
          false_value->toString();
 }
 
+std::string Concat::toString() {
+  std::vector<std::string> arg_strs;
+  for (auto &arg : args) {
+    arg_strs.push_back(arg->toString());
+  }
+  return "{" + join(arg_strs, ",") + "}";
+}
+
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
 
 template <typename... Ts>
-std::string variant_to_string(std::variant<Ts...> value) {
+std::string variant_to_string(std::variant<Ts...> &value) {
   return std::visit(
       [](auto &&value) -> std::string { return value->toString(); }, value);
 }
 
 std::string Port::toString() {
   std::string value_str =
-      variant_to_string<Identifier *, Vector *>(value);
+      variant_to_string<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>(
+          value);
   std::string direction_str;
   switch (direction) {
     case INPUT:
@@ -180,15 +200,6 @@ std::string Port::toString() {
   return direction_str + " " + data_type_str + value_str;
 }
 
-std::string join(std::vector<std::string> vec, std::string separator) {
-  std::string result;
-  for (size_t i = 0; i < vec.size(); i++) {
-    if (i > 0) result += separator;
-    result += vec[i];
-  }
-  return result;
-}
-
 std::string Module::emitModuleHeader() {
   std::string module_header_str = "module " + name;
 
@@ -196,7 +207,7 @@ std::string Module::emitModuleHeader() {
   if (!parameters.empty()) {
     module_header_str += " #(";
     std::vector<std::string> param_strs;
-    for (auto it : parameters) {
+    for (auto &it : parameters) {
       param_strs.push_back("parameter " + it.first->toString() + " = " +
                            it.second->toString());
     }
@@ -207,7 +218,7 @@ std::string Module::emitModuleHeader() {
   // emit port string
   module_header_str += " (";
   std::vector<std::string> ports_strs;
-  for (auto it : ports) ports_strs.push_back(it->toString());
+  for (auto &it : ports) ports_strs.push_back(it->toString());
   module_header_str += join(ports_strs, ", ");
   module_header_str += ");\n";
   return module_header_str;
@@ -218,10 +229,10 @@ std::string Module::toString() {
   module_str += emitModuleHeader();
 
   // emit body
-  for (auto statement : body) {
-    module_str +=
-        variant_to_string<StructuralStatement *, Declaration *>(statement) +
-        "\n";
+  for (auto &statement : body) {
+    module_str += variant_to_string<std::unique_ptr<StructuralStatement>,
+                                    std::unique_ptr<Declaration>>(statement) +
+                  "\n";
   }
 
   module_str += "endmodule\n";
@@ -242,7 +253,7 @@ std::string ModuleInstantiation::toString() {
   if (!parameters.empty()) {
     module_inst_str += " #(";
     std::vector<std::string> param_strs;
-    for (auto it : parameters) {
+    for (auto &it : parameters) {
       param_strs.push_back("." + it.first->toString() + "(" +
                            it.second->toString() + ")");
     }
@@ -252,7 +263,7 @@ std::string ModuleInstantiation::toString() {
   module_inst_str += " " + instance_name + "(";
   if (!connections.empty()) {
     std::vector<std::string> param_strs;
-    for (auto it : connections) {
+    for (auto &it : connections) {
       param_strs.push_back("." + it.first + "(" + variant_to_string(it.second) +
                            ")");
     }
@@ -277,17 +288,17 @@ std::string Always::toString() {
 
   // emit sensitivity string
   std::vector<std::string> sensitivity_strs;
-  for (auto it : sensitivity_list) {
+  for (auto &it : sensitivity_list) {
     sensitivity_strs.push_back(variant_to_string(it));
   }
   always_str += join(sensitivity_strs, ", ");
   always_str += ") begin\n";
 
   // emit body
-  for (auto statement : body) {
-    always_str +=
-        variant_to_string<BehavioralStatement *, Declaration *>(statement) +
-        "\n";
+  for (auto &statement : body) {
+    always_str += variant_to_string<std::unique_ptr<BehavioralStatement>,
+                                    std::unique_ptr<Declaration>>(statement) +
+                  "\n";
   }
 
   always_str += "end\n";
@@ -298,11 +309,38 @@ std::string File::toString() {
   std::string file_str = "";
 
   std::vector<std::string> file_strs;
-  for (auto module : modules) {
+  for (auto &module : modules) {
     file_strs.push_back(module->toString());
   }
 
   return join(file_strs, "\n");
+}
+
+std::unique_ptr<Identifier> make_id(std::string name) {
+  return std::make_unique<Identifier>(name);
+}
+
+std::unique_ptr<NumericLiteral> make_num(std::string val) {
+  return std::make_unique<NumericLiteral>(val);
+}
+
+std::unique_ptr<BinaryOp> make_binop(std::unique_ptr<Expression> left,
+                                     BinOp::BinOp op,
+                                     std::unique_ptr<Expression> right) {
+  return std::make_unique<BinaryOp>(std::move(left), op, std::move(right));
+}
+
+std::unique_ptr<Port> make_port(
+    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
+    Direction direction, PortType data_type) {
+  return std::make_unique<Port>(std::move(value), direction, data_type);
+}
+
+std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
+                                    std::unique_ptr<Expression> msb,
+                                    std::unique_ptr<Expression> lsb) {
+  return std::make_unique<Vector>(std::move(id), std::move(msb),
+                                  std::move(lsb));
 }
 
 }  // namespace verilogAST
