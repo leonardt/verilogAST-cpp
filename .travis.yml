@@ -36,11 +36,11 @@ script:
 after_success:
 - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
 before_deploy:
-- mkdir release
-- cd release
+- mkdir libverilogAST-release
+- cd libverilogAST-release
 - cmake -DCMAKE_BUILD_TYPE=Release ..
 - cd ..
-- tar -zcvf libverilogAST.tar.gz release
+- tar -zcvf libverilogAST.tar.gz libverilogAST-release
 deploy:
   provider: releases
   api_key:
@@ -48,4 +48,6 @@ deploy:
   file: libverilogAST.tar.gz
   skip_cleanup: true
   on:
+    repo: leonardt/verilogAST-cpp
     tags: true
+    branch: master
