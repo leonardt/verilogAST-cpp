@@ -46,5 +46,6 @@ deploy:
   api_key:
     secure: zka7DAcHgUo61lq6zUViSi4NvSilTustmxuDWT7IGMd7Qk6rXOlLdHeYWVW+t32QBb6a8Ii3Yhi2oaqVb4/XLA50iBbmPCjL6cj1sGcVG9VB2NVP+UoMCByid6iU7LzpFD0C8+Ki4r7CZRRZFmA6wXPoCQd3cnlC7504+fSypv2Y0+5mEsa4DkcD3BDJQmSnJyo0y45MGiK6OT9+6Xu+szVAvORFxNMj6o3V8aA7+VvfXBImPLq2xm+wsoePXl3VnnY/++dbR/7B7ba+K+y2qqAZHEBmpBGjib3EJ5YZPvFIFIrJydM5CDJIvCtriH4oQqjabc10jw6Qq5WtuHjeR41YMnp6waAfAKSDGx7UcEvUCa3GHbmSblBx2DbnceH5jKOl7yTJwZh/QkHUdVghXNB1JknOkPksTVbQ6aa6+SgvQXidWsatC/0qFqlC/v8Z1O+vUR4Xn+1V5CC36mYIcxGtY0LhS7q/Z2JiGnWKw2f3OFNHgfnBZEVDTzyW8i6FSGbCs6ojsCFU8BVjLJEsmFNJfifGQziR4Zr3jN3tKenX9gJlcXCrrgjkbxcTsvoknLSE01wwAqyIMzGIuIVOyQYner+K7Vqlej74pICiN7Wo7vgjK+Sz/o2AzcxM1QuL+Mh9VGZ++V2vabbcFOv70ezfVErjAeY105QZgj3Tc/8=
   file: libverilogAST.tar.gz
+  skip_cleanup: true
   on:
-    repo: leonardt/verilogAST-cpp
+    tags: true
