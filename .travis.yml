@@ -33,9 +33,9 @@ script:
 - "if [[ \"$TRAVIS_OS_NAME\" == \"osx\" ]]; then \n  test -f /usr/local/lib/libverilogAST.dylib
   \nelse \n  test -f /usr/local/lib/libverilogAST.so \nfi\n"
 - test -f /usr/local/include/verilogAST.hpp
-- cd ..
 after_success:
 - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
+- cd ..
 before_deploy:
 - mkdir release
 - cd release
