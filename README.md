@@ -17,7 +17,7 @@ sudo ./verilogAST-0.0.7-Linux.sh
 wget https://github.com/leonardt/verilogAST-cpp/releases/download/0.0.7/libverilogAST-osx.tar.gz
 tar -xf libverilogAST-osx.tar.gz
 cd libverilogAST-osx 
-./verilogAST-0.0.7-osx.sh
+./verilogAST-0.0.7-Darwin.sh
 ```
 
 ## Dependencies
