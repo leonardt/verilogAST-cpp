@@ -39,6 +39,7 @@ before_deploy:
 - mkdir libverilogAST-release
 - cd libverilogAST-release
 - cmake -DCMAKE_BUILD_TYPE=Release ..
+- cmake --build .
 - cd ..
 - tar -zcvf libverilogAST.tar.gz libverilogAST-release
 deploy:
@@ -51,3 +52,4 @@ deploy:
     repo: leonardt/verilogAST-cpp
     tags: true
     branch: master
+    condition: $TRAVIS_OS_NAME == "linux"
