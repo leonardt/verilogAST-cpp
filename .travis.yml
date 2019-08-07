@@ -37,15 +37,10 @@ after_success:
 - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
 - cd ..
 before_deploy:
-- mkdir release
-- cd release
-- cmake -DCMAKE_BUILD_TYPE=Release ..
-- cmake --build .
-- cpack
-- cd ..
-- mkdir libverilogAST-${TRAVIS_OS_NAME}
-- cp release/*.tar.gz libverilogAST-${TRAVIS_OS_NAME}
-- cp release/*.sh libverilogAST-${TRAVIS_OS_NAME}
+- "if [[ \"$TRAVIS_OS_NAME\" == \"osx\" ]]; then \n  cp build/lib/libverilogAST.dylib release
+  \nelse \n  cp build/lib/libverilogAST.so release \nfi\n"
+- cp include/verilogAST.hpp release
+- cp -r release libverilogAST-${TRAVIS_OS_NAME}
 - tar -zcvf libverilogAST-${TRAVIS_OS_NAME}.tar.gz libverilogAST-${TRAVIS_OS_NAME}
 deploy:
   provider: releases
