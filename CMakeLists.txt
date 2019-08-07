@@ -8,6 +8,7 @@ option(VERILOGAST_BUILD_TESTS "Build all of verilogAST's own tests." OFF)
 project(verilogAST)
 set(COVERAGE OFF CACHE BOOL "Coverage")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 if (COVERAGE)
