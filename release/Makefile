@@ -10,10 +10,10 @@ endif
 
 install:
 	install verilogAST.hpp $(PREFIX)/include
-	install verilogAST.$(SUFFIX) $(PREFIX)/lib
+	install libverilogAST.$(SUFFIX) $(PREFIX)/lib
 
 uninstall:
 	-rm $(PREFIX)/include/verilogAST.hpp
-	-rm $(PREFIX)/lib/verilogAST.$(SUFFIX) 
+	-rm $(PREFIX)/lib/libverilogAST.$(SUFFIX) 
 
 .PHONY: install uninstall
