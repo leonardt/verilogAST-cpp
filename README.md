@@ -7,17 +7,17 @@ C++17 Implementation of an AST for Verilog
 ## Installation
 ### Linux
 ```
-wget https://github.com/leonardt/verilogAST-cpp/releases/download/0.0.8/libverilogAST-linux.tar.gz
+curl -s -L https://github.com/leonardt/verilogAST-cpp/releases/latest | grep "href.*libverilogAST-linux.tar.gz" | cut -d \" -f 2 | xargs -I {} wget https://github.com"{}"
 tar -xf libverilogAST-linux.tar.gz
 cd libverilogAST-linux 
-./verilogAST-0.0.8-Linux.sh 
+make install
 ```
 ### OSX
 ```
-wget https://github.com/leonardt/verilogAST-cpp/releases/download/0.0.8/libverilogAST-osx.tar.gz
+curl -s -L https://github.com/leonardt/verilogAST-cpp/releases/latest | grep "href.*libverilogAST-osx.tar.gz" | cut -d \" -f 2 | xargs -I {} wget https://github.com"{}"
 tar -xf libverilogAST-osx.tar.gz
 cd libverilogAST-osx 
-./verilogAST-0.0.8-Darwin.sh
+make install
 ```
 
 ## Dependencies
