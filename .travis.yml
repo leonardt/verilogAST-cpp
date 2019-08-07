@@ -37,11 +37,15 @@ script:
 after_success:
 - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
 before_deploy:
-- mkdir libverilogAST-${TRAVIS_OS_NAME}
-- cd libverilogAST-${TRAVIS_OS_NAME}
+- mkdir release
+- cd release
 - cmake -DCMAKE_BUILD_TYPE=Release ..
 - cmake --build .
+- cpack
 - cd ..
+- mkdir libverilogAST-${TRAVIS_OS_NAME}
+- cp release/*.tar.gz libverilogAST-${TRAVIS_OS_NAME}
+- cp release/*.sh libverilogAST-${TRAVIS_OS_NAME}
 - tar -zcvf libverilogAST-${TRAVIS_OS_NAME}.tar.gz libverilogAST-${TRAVIS_OS_NAME}
 deploy:
   provider: releases
