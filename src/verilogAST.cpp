@@ -218,12 +218,12 @@ std::string Port::toString() {
   return direction_str + " " + data_type_str + value_str;
 }
 
-Port::~Port(){};
+Port::~Port(){}
 std::string StringPort::toString() { return value; };
-StringPort::~StringPort(){};
+StringPort::~StringPort(){}
 
 std::string SingleLineComment::toString() { return "// " + value; };
-SingleLineComment::~SingleLineComment(){};
+SingleLineComment::~SingleLineComment(){}
 
 std::string Module::emitModuleHeader() {
   std::string module_header_str = "module " + name;
@@ -263,7 +263,7 @@ std::string Module::toString() {
   module_str += "endmodule\n";
   return module_str;
 }
-Module::~Module(){};
+Module::~Module(){}
 
 std::string StringBodyModule::toString() {
   std::string module_str = "";
@@ -273,7 +273,7 @@ std::string StringBodyModule::toString() {
   return module_str;
 }
 
-StringBodyModule::~StringBodyModule(){};
+StringBodyModule::~StringBodyModule(){}
 
 std::string ModuleInstantiation::toString() {
   std::string module_inst_str = "";
@@ -301,16 +301,17 @@ std::string ModuleInstantiation::toString() {
   return module_inst_str;
 }
 
-ModuleInstantiation::~ModuleInstantiation(){};
+ModuleInstantiation::~ModuleInstantiation(){}
 
 std::string Declaration::toString() {
   return decl + " " + variant_to_string(value) + ";";
 }
 
-Declaration::~Declaration(){};
+Declaration::~Declaration(){}
 
 std::string Wire::toString() { return Declaration::toString(); }
-Wire::~Wire(){};
+Wire::~Wire(){}
+
 std::string Reg::toString() { return Declaration::toString(); }
 
 std::string Assign::toString() {
