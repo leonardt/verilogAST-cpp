@@ -25,6 +25,11 @@ set(LIB_SOURCES src/verilogAST.cpp)
 
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
+target_include_directories(${LIBRARY_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE src
+)
 
 if (VERILOGAST_BUILD_TESTS)
     # Download and unpack googletest at configure time
