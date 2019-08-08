@@ -17,19 +17,16 @@ endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib") 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-include_directories(
-  ${PROJECT_SOURCE_DIR}/include/
-) 
-
 set(LIB_SOURCES src/verilogAST.cpp)
 
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
-target_include_directories(${LIBRARY_NAME} PUBLIC
+target_include_directories(
+    ${LIBRARY_NAME} PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     PRIVATE src
-)
+) 
 
 if (VERILOGAST_BUILD_TESTS)
     # Download and unpack googletest at configure time

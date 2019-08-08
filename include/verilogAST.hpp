@@ -52,6 +52,7 @@ class NumericLiteral : public Expression {
   NumericLiteral(std::string value)
       : value(value), size(32), _signed(false), radix(Radix::DECIMAL){};
   std::string toString() override;
+  ~NumericLiteral();
 };
 
 // TODO also need a string literal, as strings can be used as parameter values
@@ -63,7 +64,7 @@ class Identifier : public Expression {
   Identifier(std::string value) : value(value){};
 
   std::string toString() override;
-  ~Identifier(){};
+  ~Identifier();
 };
 
 class String : public Expression {
@@ -73,7 +74,7 @@ class String : public Expression {
   String(std::string value) : value(value){};
 
   std::string toString() override;
-  ~String(){};
+  ~String();
 };
 
 class Index : public Expression {
@@ -186,6 +187,7 @@ class Concat : public Expression {
   Concat(std::vector<std::unique_ptr<Expression>> args)
       : args(std::move(args)){};
   std::string toString();
+  ~Concat();
 };
 
 class NegEdge : public Expression {
@@ -223,7 +225,7 @@ class Vector : public Node {
          std::unique_ptr<Expression> lsb)
       : id(std::move(id)), msb(std::move(msb)), lsb(std::move(lsb)){};
   std::string toString() override;
-  ~Vector(){};
+  ~Vector();
 };
 
 class Port : public AbstractPort {
@@ -245,7 +247,7 @@ class Port : public AbstractPort {
         direction(std::move(direction)),
         data_type(std::move(data_type)){};
   std::string toString();
-  ~Port(){};
+  ~Port();
 };
 
 class StringPort : public AbstractPort {
@@ -313,7 +315,7 @@ class ModuleInstantiation : public StructuralStatement {
         instance_name(instance_name),
         connections(std::move(connections)){};
   std::string toString();
-  ~ModuleInstantiation(){};
+  ~ModuleInstantiation();
 };
 
 class Declaration : public Node {
@@ -331,7 +333,7 @@ class Declaration : public Node {
 
  public:
   std::string toString();
-  virtual ~Declaration() = default;
+  ~Declaration();
 };
 
 class Wire : public Declaration {
@@ -341,7 +343,7 @@ class Wire : public Declaration {
            value)
       : Declaration(std::move(value), "wire"){};
   std::string toString();
-  ~Wire(){};
+  ~Wire();
 };
 
 class Reg : public Declaration {
@@ -383,7 +385,7 @@ class Assign : public Node {
 
  public:
   std::string toString();
-  virtual ~Assign() = default;
+  ~Assign();
 };
 
 class ContinuousAssign : public StructuralStatement, public Assign {
@@ -394,7 +396,7 @@ class ContinuousAssign : public StructuralStatement, public Assign {
                    std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), "assign "){};
   std::string toString();
-  ~ContinuousAssign(){};
+  ~ContinuousAssign();
 };
 
 class BehavioralAssign : public BehavioralStatement {};
@@ -486,7 +488,7 @@ class Module : public AbstractModule {
         parameters(std::move(parameters)){};
 
   std::string toString();
-  ~Module(){};
+  ~Module();
 };
 
 class StringBodyModule : public Module {
@@ -498,7 +500,7 @@ class StringBodyModule : public Module {
                    std::string body, Parameters parameters)
       : Module(name, std::move(ports), std::move(parameters)), body(body){};
   std::string toString();
-  ~StringBodyModule(){};
+  ~StringBodyModule();
 };
 
 class StringModule : public AbstractModule {

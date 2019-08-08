@@ -41,10 +41,14 @@ std::string NumericLiteral::toString() {
   }
   return size_str + separator + signed_str + radix_str + value;
 }
+NumericLiteral::~NumericLiteral(){};
 
 std::string Identifier::toString() { return value; }
 
+Identifier::~Identifier(){};
+
 std::string String::toString() { return "\"" + value + "\""; }
+String::~String(){};
 
 std::string Index::toString() {
   return id->toString() + '[' + index->toString() + ']';
@@ -58,6 +62,8 @@ std::string Slice::toString() {
 std::string Vector::toString() {
   return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
 }
+
+Vector::~Vector(){};
 
 std::string BinaryOp::toString() {
   std::string op_str;
@@ -161,6 +167,8 @@ std::string Concat::toString() {
   return "{" + join(arg_strs, ",") + "}";
 }
 
+Concat::~Concat(){};
+
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
@@ -200,6 +208,8 @@ std::string Port::toString() {
   return direction_str + " " + data_type_str + value_str;
 }
 
+Port::~Port(){};
+
 std::string Module::emitModuleHeader() {
   std::string module_header_str = "module " + name;
 
@@ -238,6 +248,7 @@ std::string Module::toString() {
   module_str += "endmodule\n";
   return module_str;
 }
+Module::~Module(){};
 
 std::string StringBodyModule::toString() {
   std::string module_str = "";
@@ -246,6 +257,8 @@ std::string StringBodyModule::toString() {
   module_str += "\nendmodule\n";
   return module_str;
 }
+
+StringBodyModule::~StringBodyModule(){};
 
 std::string ModuleInstantiation::toString() {
   std::string module_inst_str = "";
@@ -273,11 +286,16 @@ std::string ModuleInstantiation::toString() {
   return module_inst_str;
 }
 
+ModuleInstantiation::~ModuleInstantiation(){};
+
 std::string Declaration::toString() {
   return decl + " " + variant_to_string(value) + ";";
 }
 
+Declaration::~Declaration() {};
+
 std::string Wire::toString() { return Declaration::toString(); }
+Wire::~Wire(){};
 std::string Reg::toString() { return Declaration::toString(); }
 
 std::string Assign::toString() {
@@ -285,8 +303,11 @@ std::string Assign::toString() {
          value->toString() + ";";
 }
 
+Assign::~Assign() {}
+
 // Multiple inheritance forces us to have to explicitly state this?
 std::string ContinuousAssign::toString() { return Assign::toString(); }
+ContinuousAssign::~ContinuousAssign(){};
 std::string BlockingAssign::toString() { return Assign::toString(); }
 std::string NonBlockingAssign::toString() { return Assign::toString(); }
 
