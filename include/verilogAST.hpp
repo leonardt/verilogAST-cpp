@@ -275,8 +275,8 @@ class BlockComment : public Statement {
 
  public:
   BlockComment(std::string value) : value(value){};
-  std::string toString() { return "/*\n" + value + "\n*/"; };
-  ~BlockComment(){};
+  std::string toString();
+  ~BlockComment();
 };
 
 class BehavioralStatement : public Statement {};
@@ -409,7 +409,7 @@ class BlockingAssign : public BehavioralAssign, public Assign {
                  std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), ""){};
   std::string toString();
-  ~BlockingAssign(){};
+  ~BlockingAssign();
 };
 
 class NonBlockingAssign : public BehavioralAssign, public Assign {
@@ -420,7 +420,7 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
                     std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), "", "<="){};
   std::string toString();
-  ~NonBlockingAssign(){};
+  ~NonBlockingAssign();
 };
 
 class Star : Node {

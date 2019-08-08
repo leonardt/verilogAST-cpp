@@ -225,6 +225,9 @@ StringPort::~StringPort(){}
 std::string SingleLineComment::toString() { return "// " + value; };
 SingleLineComment::~SingleLineComment(){}
 
+std::string BlockComment::toString() { return "/*\n" + value + "\n*/"; };
+BlockComment::~BlockComment(){}
+
 std::string Module::emitModuleHeader() {
   std::string module_header_str = "module " + name;
 
@@ -323,9 +326,11 @@ Assign::~Assign() {}
 
 // Multiple inheritance forces us to have to explicitly state this?
 std::string ContinuousAssign::toString() { return Assign::toString(); }
-ContinuousAssign::~ContinuousAssign(){};
+ContinuousAssign::~ContinuousAssign(){}
 std::string BlockingAssign::toString() { return Assign::toString(); }
+BlockingAssign::~BlockingAssign(){}
 std::string NonBlockingAssign::toString() { return Assign::toString(); }
+NonBlockingAssign::~NonBlockingAssign(){}
 
 std::string Always::toString() {
   std::string always_str = "";
