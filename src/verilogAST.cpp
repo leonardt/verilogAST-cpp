@@ -268,6 +268,9 @@ std::string Module::toString() {
 }
 Module::~Module(){}
 
+std::string StringModule::toString() { return definition; }
+StringModule::~StringModule(){}
+
 std::string StringBodyModule::toString() {
   std::string module_str = "";
   module_str += emitModuleHeader();
@@ -327,10 +330,15 @@ Assign::~Assign() {}
 // Multiple inheritance forces us to have to explicitly state this?
 std::string ContinuousAssign::toString() { return Assign::toString(); }
 ContinuousAssign::~ContinuousAssign(){}
+
 std::string BlockingAssign::toString() { return Assign::toString(); }
 BlockingAssign::~BlockingAssign(){}
+
 std::string NonBlockingAssign::toString() { return Assign::toString(); }
 NonBlockingAssign::~NonBlockingAssign(){}
+
+std::string Star::toString() { return "*"; }
+Star::~Star(){}
 
 std::string Always::toString() {
   std::string always_str = "";
@@ -354,6 +362,7 @@ std::string Always::toString() {
   always_str += "end\n";
   return always_str;
 }
+Always::~Always(){}
 
 std::string File::toString() {
   std::string file_str = "";
@@ -365,6 +374,7 @@ std::string File::toString() {
 
   return join(file_strs, "\n");
 }
+File::~File(){};
 
 std::unique_ptr<Identifier> make_id(std::string name) {
   return std::make_unique<Identifier>(name);

@@ -425,8 +425,8 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
 
 class Star : Node {
  public:
-  std::string toString() { return "*"; };
-  ~Star(){};
+  std::string toString();
+  ~Star();
 };
 
 class Always : public StructuralStatement {
@@ -454,7 +454,7 @@ class Always : public StructuralStatement {
     this->sensitivity_list = std::move(sensitivity_list);
   };
   std::string toString();
-  ~Always(){};
+  ~Always();
 };
 
 class AbstractModule : public Node {};
@@ -508,8 +508,8 @@ class StringModule : public AbstractModule {
 
  public:
   StringModule(std::string definition) : definition(definition){};
-  std::string toString() { return definition; };
-  ~StringModule(){};
+  std::string toString();
+  ~StringModule();
 };
 
 class File : public Node {
@@ -519,7 +519,7 @@ class File : public Node {
   File(std::vector<std::unique_ptr<AbstractModule>> &modules)
       : modules(std::move(modules)){};
   std::string toString();
-  ~File(){};
+  ~File();
 };
 
 // Helper functions for constructing unique pointers
