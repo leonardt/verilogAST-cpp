@@ -391,8 +391,7 @@ class ContinuousAssign : public StructuralStatement, public Assign {
                        target,
                    std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), "assign "){};
-  // Multiple inheritance forces us to have to explicitly state this?
-  std::string toString() { return Assign::toString(); };
+  std::string toString();
   ~ContinuousAssign(){};
 };
 
@@ -405,8 +404,7 @@ class BlockingAssign : public BehavioralAssign, public Assign {
                      target,
                  std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), ""){};
-  // Multiple inheritance forces us to have to explicitly state this?
-  std::string toString() { return Assign::toString(); };
+  std::string toString();
   ~BlockingAssign(){};
 };
 
@@ -417,8 +415,7 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
                         target,
                     std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), "", "<="){};
-  // Multiple inheritance forces us to have to explicitly state this?
-  std::string toString() { return Assign::toString(); };
+  std::string toString();
   ~NonBlockingAssign(){};
 };
 
