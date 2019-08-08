@@ -277,6 +277,9 @@ std::string Declaration::toString() {
   return decl + " " + variant_to_string(value) + ";";
 }
 
+std::string Wire::toString() { return Declaration::toString(); }
+std::string Reg::toString() { return Declaration::toString(); }
+
 std::string Assign::toString() {
   return prefix + variant_to_string(target) + " " + symbol + " " +
          value->toString() + ";";

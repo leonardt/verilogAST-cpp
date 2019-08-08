@@ -340,6 +340,7 @@ class Wire : public Declaration {
                     std::unique_ptr<Slice>, std::unique_ptr<Vector>>
            value)
       : Declaration(std::move(value), "wire"){};
+  std::string toString();
   ~Wire(){};
 };
 
@@ -349,6 +350,7 @@ class Reg : public Declaration {
                    std::unique_ptr<Slice>, std::unique_ptr<Vector>>
           value)
       : Declaration(std::move(value), "reg"){};
+  std::string toString();
   ~Reg(){};
 };
 
