@@ -52,7 +52,6 @@ class NumericLiteral : public Expression {
   NumericLiteral(std::string value)
       : value(value), size(32), _signed(false), radix(Radix::DECIMAL){};
   std::string toString() override;
-  ~NumericLiteral();
 };
 
 // TODO also need a string literal, as strings can be used as parameter values
@@ -64,7 +63,7 @@ class Identifier : public Expression {
   Identifier(std::string value) : value(value){};
 
   std::string toString() override;
-  ~Identifier();
+  ~Identifier(){};
 };
 
 class String : public Expression {
@@ -74,7 +73,7 @@ class String : public Expression {
   String(std::string value) : value(value){};
 
   std::string toString() override;
-  ~String();
+  ~String(){};
 };
 
 class Index : public Expression {
@@ -100,7 +99,7 @@ class Slice : public Expression {
         high_index(std::move(high_index)),
         low_index(std::move(low_index)){};
   std::string toString() override;
-  ~Slice();
+  ~Slice(){};
 };
 
 namespace BinOp {
@@ -133,7 +132,7 @@ class BinaryOp : public Expression {
            std::unique_ptr<Expression> right)
       : left(std::move(left)), op(op), right(std::move(right)){};
   std::string toString() override;
-  ~BinaryOp();
+  ~BinaryOp(){};
 };
 
 namespace UnOp {
@@ -161,7 +160,7 @@ class UnaryOp : public Expression {
   UnaryOp(std::unique_ptr<Expression> operand, UnOp::UnOp op)
       : operand(std::move(operand)), op(op){};
   std::string toString();
-  ~UnaryOp();
+  ~UnaryOp(){};
 };
 
 class TernaryOp : public Expression {
@@ -177,7 +176,7 @@ class TernaryOp : public Expression {
         true_value(std::move(true_value)),
         false_value(std::move(false_value)){};
   std::string toString();
-  ~TernaryOp();
+  ~TernaryOp(){};
 };
 
 class Concat : public Expression {
@@ -187,7 +186,6 @@ class Concat : public Expression {
   Concat(std::vector<std::unique_ptr<Expression>> args)
       : args(std::move(args)){};
   std::string toString();
-  ~Concat();
 };
 
 class NegEdge : public Expression {
@@ -196,7 +194,7 @@ class NegEdge : public Expression {
  public:
   NegEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
   std::string toString();
-  ~NegEdge();
+  ~NegEdge(){};
 };
 
 class PosEdge : public Expression {
@@ -205,7 +203,7 @@ class PosEdge : public Expression {
  public:
   PosEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
   std::string toString();
-  ~PosEdge();
+  ~PosEdge(){};
 };
 
 enum Direction { INPUT, OUTPUT, INOUT };
@@ -225,7 +223,7 @@ class Vector : public Node {
          std::unique_ptr<Expression> lsb)
       : id(std::move(id)), msb(std::move(msb)), lsb(std::move(lsb)){};
   std::string toString() override;
-  ~Vector();
+  ~Vector(){};
 };
 
 class Port : public AbstractPort {
@@ -247,7 +245,7 @@ class Port : public AbstractPort {
         direction(std::move(direction)),
         data_type(std::move(data_type)){};
   std::string toString();
-  ~Port();
+  ~Port(){};
 };
 
 class StringPort : public AbstractPort {
@@ -255,8 +253,8 @@ class StringPort : public AbstractPort {
 
  public:
   StringPort(std::string value) : value(value){};
-  std::string toString();
-  ~StringPort();
+  std::string toString() { return value; };
+  ~StringPort(){};
 };
 
 class Statement : public Node {};
@@ -266,8 +264,8 @@ class SingleLineComment : public Statement {
 
  public:
   SingleLineComment(std::string value) : value(value){};
-  std::string toString();
-  ~SingleLineComment();
+  std::string toString() { return "// " + value; };
+  ~SingleLineComment(){};
 };
 
 class BlockComment : public Statement {
@@ -275,8 +273,8 @@ class BlockComment : public Statement {
 
  public:
   BlockComment(std::string value) : value(value){};
-  std::string toString();
-  ~BlockComment();
+  std::string toString() { return "/*\n" + value + "\n*/"; };
+  ~BlockComment(){};
 };
 
 class BehavioralStatement : public Statement {};
@@ -315,7 +313,7 @@ class ModuleInstantiation : public StructuralStatement {
         instance_name(instance_name),
         connections(std::move(connections)){};
   std::string toString();
-  ~ModuleInstantiation();
+  ~ModuleInstantiation(){};
 };
 
 class Declaration : public Node {
@@ -333,7 +331,7 @@ class Declaration : public Node {
 
  public:
   std::string toString();
-  ~Declaration();
+  virtual ~Declaration() = default;
 };
 
 class Wire : public Declaration {
@@ -342,8 +340,7 @@ class Wire : public Declaration {
                     std::unique_ptr<Slice>, std::unique_ptr<Vector>>
            value)
       : Declaration(std::move(value), "wire"){};
-  std::string toString();
-  ~Wire();
+  ~Wire(){};
 };
 
 class Reg : public Declaration {
@@ -352,7 +349,6 @@ class Reg : public Declaration {
                    std::unique_ptr<Slice>, std::unique_ptr<Vector>>
           value)
       : Declaration(std::move(value), "reg"){};
-  std::string toString();
   ~Reg(){};
 };
 
@@ -385,7 +381,7 @@ class Assign : public Node {
 
  public:
   std::string toString();
-  ~Assign();
+  virtual ~Assign() = default;
 };
 
 class ContinuousAssign : public StructuralStatement, public Assign {
@@ -395,8 +391,9 @@ class ContinuousAssign : public StructuralStatement, public Assign {
                        target,
                    std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), "assign "){};
-  std::string toString();
-  ~ContinuousAssign();
+  // Multiple inheritance forces us to have to explicitly state this?
+  std::string toString() { return Assign::toString(); };
+  ~ContinuousAssign(){};
 };
 
 class BehavioralAssign : public BehavioralStatement {};
@@ -408,8 +405,9 @@ class BlockingAssign : public BehavioralAssign, public Assign {
                      target,
                  std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), ""){};
-  std::string toString();
-  ~BlockingAssign();
+  // Multiple inheritance forces us to have to explicitly state this?
+  std::string toString() { return Assign::toString(); };
+  ~BlockingAssign(){};
 };
 
 class NonBlockingAssign : public BehavioralAssign, public Assign {
@@ -419,14 +417,15 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
                         target,
                     std::unique_ptr<Expression> value)
       : Assign(std::move(target), std::move(value), "", "<="){};
-  std::string toString();
-  ~NonBlockingAssign();
+  // Multiple inheritance forces us to have to explicitly state this?
+  std::string toString() { return Assign::toString(); };
+  ~NonBlockingAssign(){};
 };
 
 class Star : Node {
  public:
-  std::string toString();
-  ~Star();
+  std::string toString() { return "*"; };
+  ~Star(){};
 };
 
 class Always : public StructuralStatement {
@@ -454,7 +453,7 @@ class Always : public StructuralStatement {
     this->sensitivity_list = std::move(sensitivity_list);
   };
   std::string toString();
-  ~Always();
+  ~Always(){};
 };
 
 class AbstractModule : public Node {};
@@ -488,7 +487,7 @@ class Module : public AbstractModule {
         parameters(std::move(parameters)){};
 
   std::string toString();
-  ~Module();
+  ~Module(){};
 };
 
 class StringBodyModule : public Module {
@@ -500,7 +499,7 @@ class StringBodyModule : public Module {
                    std::string body, Parameters parameters)
       : Module(name, std::move(ports), std::move(parameters)), body(body){};
   std::string toString();
-  ~StringBodyModule();
+  ~StringBodyModule(){};
 };
 
 class StringModule : public AbstractModule {
@@ -508,8 +507,8 @@ class StringModule : public AbstractModule {
 
  public:
   StringModule(std::string definition) : definition(definition){};
-  std::string toString();
-  ~StringModule();
+  std::string toString() { return definition; };
+  ~StringModule(){};
 };
 
 class File : public Node {
@@ -519,7 +518,7 @@ class File : public Node {
   File(std::vector<std::unique_ptr<AbstractModule>> &modules)
       : modules(std::move(modules)){};
   std::string toString();
-  ~File();
+  ~File(){};
 };
 
 // Helper functions for constructing unique pointers

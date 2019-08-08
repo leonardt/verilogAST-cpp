@@ -41,14 +41,10 @@ std::string NumericLiteral::toString() {
   }
   return size_str + separator + signed_str + radix_str + value;
 }
-NumericLiteral::~NumericLiteral() {}
 
 std::string Identifier::toString() { return value; }
 
-Identifier::~Identifier() {}
-
 std::string String::toString() { return "\"" + value + "\""; }
-String::~String() {}
 
 std::string Index::toString() {
   return id->toString() + '[' + index->toString() + ']';
@@ -59,13 +55,9 @@ std::string Slice::toString() {
          low_index->toString() + ']';
 }
 
-Slice::~Slice() {}
-
 std::string Vector::toString() {
   return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
 }
-
-Vector::~Vector() {}
 
 std::string BinaryOp::toString() {
   std::string op_str;
@@ -116,8 +108,6 @@ std::string BinaryOp::toString() {
   return left->toString() + ' ' + op_str + ' ' + right->toString();
 }
 
-BinaryOp::~BinaryOp() {}
-
 std::string UnaryOp::toString() {
   std::string op_str;
   switch (op) {
@@ -158,14 +148,10 @@ std::string UnaryOp::toString() {
   return op_str + ' ' + operand->toString();
 }
 
-UnaryOp::~UnaryOp() {}
-
 std::string TernaryOp::toString() {
   return cond->toString() + " ? " + true_value->toString() + " : " +
          false_value->toString();
 }
-
-TernaryOp::~TernaryOp() {}
 
 std::string Concat::toString() {
   std::vector<std::string> arg_strs;
@@ -175,13 +161,9 @@ std::string Concat::toString() {
   return "{" + join(arg_strs, ",") + "}";
 }
 
-Concat::~Concat() {}
-
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
-NegEdge::~NegEdge() {}
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
-PosEdge::~PosEdge() {}
 
 template <typename... Ts>
 std::string variant_to_string(std::variant<Ts...> &value) {
@@ -217,16 +199,6 @@ std::string Port::toString() {
   }
   return direction_str + " " + data_type_str + value_str;
 }
-
-Port::~Port() {}
-std::string StringPort::toString() { return value; }
-StringPort::~StringPort() {}
-
-std::string SingleLineComment::toString() { return "// " + value; }
-SingleLineComment::~SingleLineComment() {}
-
-std::string BlockComment::toString() { return "/*\n" + value + "\n*/"; }
-BlockComment::~BlockComment() {}
 
 std::string Module::emitModuleHeader() {
   std::string module_header_str = "module " + name;
@@ -266,10 +238,6 @@ std::string Module::toString() {
   module_str += "endmodule\n";
   return module_str;
 }
-Module::~Module() {}
-
-std::string StringModule::toString() { return definition; }
-StringModule::~StringModule() {}
 
 std::string StringBodyModule::toString() {
   std::string module_str = "";
@@ -278,8 +246,6 @@ std::string StringBodyModule::toString() {
   module_str += "\nendmodule\n";
   return module_str;
 }
-
-StringBodyModule::~StringBodyModule() {}
 
 std::string ModuleInstantiation::toString() {
   std::string module_inst_str = "";
@@ -307,38 +273,14 @@ std::string ModuleInstantiation::toString() {
   return module_inst_str;
 }
 
-ModuleInstantiation::~ModuleInstantiation() {}
-
 std::string Declaration::toString() {
   return decl + " " + variant_to_string(value) + ";";
 }
-
-Declaration::~Declaration() {}
-
-std::string Wire::toString() { return Declaration::toString(); }
-Wire::~Wire() {}
-
-std::string Reg::toString() { return Declaration::toString(); }
 
 std::string Assign::toString() {
   return prefix + variant_to_string(target) + " " + symbol + " " +
          value->toString() + ";";
 }
-
-Assign::~Assign() {}
-
-// Multiple inheritance forces us to have to explicitly state this?
-std::string ContinuousAssign::toString() { return Assign::toString(); }
-ContinuousAssign::~ContinuousAssign() {}
-
-std::string BlockingAssign::toString() { return Assign::toString(); }
-BlockingAssign::~BlockingAssign() {}
-
-std::string NonBlockingAssign::toString() { return Assign::toString(); }
-NonBlockingAssign::~NonBlockingAssign() {}
-
-std::string Star::toString() { return "*"; }
-Star::~Star() {}
 
 std::string Always::toString() {
   std::string always_str = "";
@@ -362,7 +304,6 @@ std::string Always::toString() {
   always_str += "end\n";
   return always_str;
 }
-Always::~Always() {}
 
 std::string File::toString() {
   std::string file_str = "";
@@ -374,8 +315,6 @@ std::string File::toString() {
 
   return join(file_strs, "\n");
 }
-
-File::~File() {}
 
 std::unique_ptr<Identifier> make_id(std::string name) {
   return std::make_unique<Identifier>(name);

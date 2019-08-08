@@ -1,64 +1,49 @@
 language: cpp
+
 matrix:
   include:
-  - os: linux
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-7
-    env:
-    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-  - os: osx
-    osx_image: xcode10.2
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+    - os: osx
+      osx_image: xcode10.2
+
+
 before_install:
-- eval "${MATRIX_EVAL}"
-- |
-  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
-    chmod +x miniconda.sh
-    ./miniconda.sh -b -p $TRAVIS_BUILD_DIR/miniconda
-    export PATH=$TRAVIS_BUILD_DIR/miniconda/bin:$PATH
-    hash -r
-    conda config --set always_yes yes --set changeps1 no
-    conda update -q conda
-    conda create -q -n test-env python=3.7
-    source activate test-env
-    conda install pip
-  fi
-- pip install --user cpp-coveralls
+  - eval "${MATRIX_EVAL}"
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      # Install later python for compatability with cpp-coveralls
+      export PYTHON=3.7.0;
+      pyenv install ${PYTHON};
+      export PYENV_VERSION=$PYTHON;
+      export PATH="/Users/travis/.pyenv/shims:${PATH}";
+    fi
+  - pip install --user cpp-coveralls
+
+
 script:
-- mkdir build
-- cd build
-- cmake -DCOVERAGE=1 -DVERILOGAST_BUILD_TESTS=ON ..
-- cmake --build .
-- ctest
-- sudo make install
-- "if [[ \"$TRAVIS_OS_NAME\" == \"osx\" ]]; then \n  test -f /usr/local/lib/libverilogAST.dylib
-  \nelse \n  test -f /usr/local/lib/libverilogAST.so \nfi\n"
-- test -f /usr/local/include/verilogAST.hpp
+  - mkdir build
+  - cd build
+  - cmake -DCOVERAGE=1 -DVERILOGAST_BUILD_TESTS=ON ..
+  - cmake --build .
+  - ctest
+  # Check that installation works
+  - sudo make install
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+      test -f /usr/local/lib/libverilogAST.dylib 
+    else 
+      test -f /usr/local/lib/libverilogAST.so 
+    fi
+  - test -f /usr/local/include/verilogAST.hpp
+
 after_success:
-- coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
-- cd ..
-before_deploy:
-- cd build
-- rm -rf *
-- cmake -DCMAKE_BUILD_TYPE=Release ..
-- cmake --build .
-- cd ..
-- "if [[ \"$TRAVIS_OS_NAME\" == \"osx\" ]]; then \n  cp build/lib/libverilogAST.dylib release
-  \nelse \n  cp build/lib/libverilogAST.so release \nfi\n"
-- cp include/verilogAST.hpp release
-- cp -r release libverilogAST-${TRAVIS_OS_NAME}
-- tar -zcvf libverilogAST-${TRAVIS_OS_NAME}.tar.gz libverilogAST-${TRAVIS_OS_NAME}
-deploy:
-  provider: releases
-  api_key:
-    secure: vLn5VVBaneKe36LtrwCx1yUWLTvEY21jcRW8W3iYqMQmy4EKaDZgn3Ibi1CoYwqBC8KwWiRneBM1VFhVVG+5di37r4RnFXFRPgx+gyYUJ4zJyetg/UuBi0xwZlyA1SbKxBA+9oOrPaiYPTZCxGn6S+NP9txFYRAh9nAYsBCTOoBbw6f8DMmdbTznJ18o5n5tWMqlPSX5fQKdzc9FBLL1/aUrkwP31Rkyv4J3gnPcDqX+HkqtGHMIoUV5wvmdZ+K1HQQb5J+y4l3Wgfe7bM2wv4bKJuUZk7FRQMuho2b3jzBcfk1bCqt5vRDqRm4WKlTMg1CAjVgWCppcOI8EQHww3D60DEt48aed41OJQEDG/2JlzNuaoNTGyt9dyMFjeN4wfQ34awyz7yHdB/wUlE2vWQTXxWpFsoB35A8RO/r5+0qfn034DZ1Oo+L47GmEjx0hrvMEaqnRkjTS0bVe2SV9UY+biWiArDgUOgpk4RX2Xeqw/fkZ2SulWY9eW6mpmzXkxAPNiKWThTIj2cLmwUdPZVK3NvpMEUd77G87tP6MmddkC9MT1KTuwqQJdKlMaGC7vIOqlgf4XvJFcVtwxUeJrQTwUqXFmU0ebxdIWoFfTRJk0H99JD3ey/4ebqokN6ZCQrcGKF8vfukqPguou4qhmdLqWVYhHecni52RK3RzVGc=
-  file: libverilogAST-${TRAVIS_OS_NAME}.tar.gz
-  skip_cleanup: true
-  on:
-    repo: leonardt/verilogAST-cpp
-    tags: true
-    branch: master
+  - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*"
