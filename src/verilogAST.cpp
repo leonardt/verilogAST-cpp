@@ -283,9 +283,9 @@ std::string Assign::toString() {
 }
 
 // Multiple inheritance forces us to have to explicitly state this?
-std::string ContinuousAssign::toString() { return Assign::toString(); }
-std::string BlockingAssign::toString() { return Assign::toString(); }
-std::string NonBlockingAssign::toString() { return Assign::toString(); }
+std::string ContinuousAssign::toString() { return Assign::toString(); };
+std::string BlockingAssign::toString() { return Assign::toString(); };
+std::string NonBlockingAssign::toString() { return Assign::toString(); };
 
 std::string Always::toString() {
   std::string always_str = "";
