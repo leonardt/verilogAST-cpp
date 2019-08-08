@@ -292,7 +292,7 @@ std::string Declaration::toString() {
   return decl + " " + variant_to_string(value) + ";";
 }
 
-Declaration::~Declaration() {};
+Declaration::~Declaration(){};
 
 std::string Wire::toString() { return Declaration::toString(); }
 Wire::~Wire(){};
