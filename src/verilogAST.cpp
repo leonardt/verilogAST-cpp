@@ -41,14 +41,14 @@ std::string NumericLiteral::toString() {
   }
   return size_str + separator + signed_str + radix_str + value;
 }
-NumericLiteral::~NumericLiteral(){};
+NumericLiteral::~NumericLiteral(){}
 
 std::string Identifier::toString() { return value; }
 
-Identifier::~Identifier(){};
+Identifier::~Identifier(){}
 
 std::string String::toString() { return "\"" + value + "\""; }
-String::~String(){};
+String::~String(){}
 
 std::string Index::toString() {
   return id->toString() + '[' + index->toString() + ']';
@@ -59,11 +59,13 @@ std::string Slice::toString() {
          low_index->toString() + ']';
 }
 
+Slice::~Slice(){}
+
 std::string Vector::toString() {
   return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
 }
 
-Vector::~Vector(){};
+Vector::~Vector(){}
 
 std::string BinaryOp::toString() {
   std::string op_str;
@@ -114,6 +116,8 @@ std::string BinaryOp::toString() {
   return left->toString() + ' ' + op_str + ' ' + right->toString();
 }
 
+BinaryOp::~BinaryOp(){}
+
 std::string UnaryOp::toString() {
   std::string op_str;
   switch (op) {
@@ -154,10 +158,14 @@ std::string UnaryOp::toString() {
   return op_str + ' ' + operand->toString();
 }
 
+UnaryOp::~UnaryOp(){}
+
 std::string TernaryOp::toString() {
   return cond->toString() + " ? " + true_value->toString() + " : " +
          false_value->toString();
 }
+
+TernaryOp::~TernaryOp(){}
 
 std::string Concat::toString() {
   std::vector<std::string> arg_strs;
@@ -167,11 +175,13 @@ std::string Concat::toString() {
   return "{" + join(arg_strs, ",") + "}";
 }
 
-Concat::~Concat(){};
+Concat::~Concat(){}
 
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
+NegEdge::~NegEdge(){}
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
+PosEdge::~PosEdge(){}
 
 template <typename... Ts>
 std::string variant_to_string(std::variant<Ts...> &value) {
@@ -209,6 +219,11 @@ std::string Port::toString() {
 }
 
 Port::~Port(){};
+std::string StringPort::toString() { return value; };
+StringPort::~StringPort(){};
+
+std::string SingleLineComment::toString() { return "// " + value; };
+SingleLineComment::~SingleLineComment(){};
 
 std::string Module::emitModuleHeader() {
   std::string module_header_str = "module " + name;

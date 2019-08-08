@@ -100,7 +100,7 @@ class Slice : public Expression {
         high_index(std::move(high_index)),
         low_index(std::move(low_index)){};
   std::string toString() override;
-  ~Slice(){};
+  ~Slice();
 };
 
 namespace BinOp {
@@ -133,7 +133,7 @@ class BinaryOp : public Expression {
            std::unique_ptr<Expression> right)
       : left(std::move(left)), op(op), right(std::move(right)){};
   std::string toString() override;
-  ~BinaryOp(){};
+  ~BinaryOp();
 };
 
 namespace UnOp {
@@ -161,7 +161,7 @@ class UnaryOp : public Expression {
   UnaryOp(std::unique_ptr<Expression> operand, UnOp::UnOp op)
       : operand(std::move(operand)), op(op){};
   std::string toString();
-  ~UnaryOp(){};
+  ~UnaryOp();
 };
 
 class TernaryOp : public Expression {
@@ -177,7 +177,7 @@ class TernaryOp : public Expression {
         true_value(std::move(true_value)),
         false_value(std::move(false_value)){};
   std::string toString();
-  ~TernaryOp(){};
+  ~TernaryOp();
 };
 
 class Concat : public Expression {
@@ -196,7 +196,7 @@ class NegEdge : public Expression {
  public:
   NegEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
   std::string toString();
-  ~NegEdge(){};
+  ~NegEdge();
 };
 
 class PosEdge : public Expression {
@@ -205,7 +205,7 @@ class PosEdge : public Expression {
  public:
   PosEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
   std::string toString();
-  ~PosEdge(){};
+  ~PosEdge();
 };
 
 enum Direction { INPUT, OUTPUT, INOUT };
@@ -255,8 +255,8 @@ class StringPort : public AbstractPort {
 
  public:
   StringPort(std::string value) : value(value){};
-  std::string toString() { return value; };
-  ~StringPort(){};
+  std::string toString();
+  ~StringPort();
 };
 
 class Statement : public Node {};
@@ -266,8 +266,8 @@ class SingleLineComment : public Statement {
 
  public:
   SingleLineComment(std::string value) : value(value){};
-  std::string toString() { return "// " + value; };
-  ~SingleLineComment(){};
+  std::string toString();
+  ~SingleLineComment();
 };
 
 class BlockComment : public Statement {
