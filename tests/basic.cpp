@@ -37,6 +37,16 @@ TEST(BasicTests, TestIdentifier) {
   EXPECT_EQ(id.toString(), "x");
 }
 
+TEST(BasicTests, TestIdentifierEscaped) {
+  vAST::Identifier id("instance[5]");
+  EXPECT_EQ(id.toString(), "\\instance[5] ");
+}
+
+TEST(BasicTests, TestIdentifierKeyword) {
+  vAST::Identifier id("or");
+  EXPECT_EQ(id.toString(), "\\or ");
+}
+
 TEST(BasicTests, TestString) {
   vAST::String str("mystring");
   EXPECT_EQ(str.toString(), "\"mystring\"");
