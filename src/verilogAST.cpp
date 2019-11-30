@@ -1,5 +1,8 @@
 #include "verilogAST.hpp"
 
+#include <regex>
+#include <unordered_set>
+
 // Helper function to join a vector of strings with a specified separator ala
 // Python's ",".join(...)
 std::string join(std::vector<std::string> vec, std::string separator) {
@@ -42,7 +45,61 @@ std::string NumericLiteral::toString() {
   return size_str + separator + signed_str + radix_str + value;
 }
 
-std::string Identifier::toString() { return value; }
+std::string Identifier::toString() {
+  static std::unordered_set<std::string> sKeywords{
+      // clang-format off
+      "accept_on",     "dist",          "local",                "randomize",       "task",
+      "alias",         "do",            "localparam",           "randsequence",    "this",
+      "always",        "edge",          "logic",                "rcmos",           "time",
+      "always_comb",   "else",          "longint",              "real",            "timeprecision",
+      "always_ff",     "end",           "macromodule",          "realtime",        "timeunit",
+      "always_latch",  "enum",          "matches",              "ref",             "tran",
+      "and",           "event",         "modport",              "reg",             "tranif0",
+      "assert",        "eventually",    "module",               "reject_on",       "tranif1",
+      "assign",        "expect",        "nand",                 "release",         "tri",
+      "assume",        "export",        "negedge",              "repeat",          "tri0",
+      "automatic",     "extends",       "nettype",              "restrict",        "tri1",
+      "begin",         "extern",        "new",                  "return",          "triand",
+      "bind",          "final",         "nexttime",             "rnmos",           "trior",
+      "bins",          "first_match",   "nmos",                 "rpmos",           "trireg",
+      "binsof",        "for",           "nor",                  "rtran",           "type",
+      "bit",           "force",         "noshowcancelled",      "rtranif0",        "type_option",
+      "break",         "foreach",       "not",                  "rtranif1",        "typedef",
+      "buf",           "forever",       "notif0",               "s_always",        "union",
+      "bufif0",        "fork",          "notif1",               "s_eventually",    "unique",
+      "bufif1",        "function",      "null",                 "s_nexttime",      "unique0",
+      "byte",          "generate",      "option",               "scalared",        "unsigned",
+      "case",          "genvar",        "or",                   "sequence",        "untyped",
+      "casex",         "global",        "output",               "shortint",        "use",
+      "casez",         "if",            "package",              "shortreal",       "uwire",
+      "cell",          "iff",           "packed",               "showcancelled",   "var",
+      "chandle",       "ifnone",        "parameter",            "signed",          "vectored",
+      "checker",       "ignore_bins",   "pmos",                 "soft",            "virtual",
+      "class",         "illegal_bins",  "posedge",              "solve",           "void",
+      "clocking",      "implements",    "primitive",            "specify",         "wait",
+      "cmos",          "import",        "priority",             "specparam",       "wait_order",
+      "config",        "initial",       "program",              "static",          "wand",
+      "const",         "inout",         "property",             "std",             "weak",
+      "constraint",    "input",         "property_expr",        "string",          "weak0",
+      "context",       "instance",      "protected",            "strong",          "weak1",
+      "continue",      "int",           "pull0",                "strong0",         "while",
+      "cover",         "integer",       "pull1",                "strong1",         "wildcard",
+      "covergroup",    "interconnect",  "pulldown",             "struct",          "wire",
+      "coverpoint",    "interface",     "pullup",               "super",           "with",
+      "cross",         "intersect",     "pulsestyle_ondetect",  "supply0",         "wor",
+      "deassign",      "join",          "pulsestyle_onevent",   "supply1",         "xnor",
+      "default",       "join_any",      "pure",                 "sync_accept_on",  "xor",
+      "defparam",      "join_none",     "rand",                 "sync_reject_on",
+      "design",        "let",           "randc",                "table",
+      "disable",       "liblist",       "randcase",             "tagged",
+      // clang-format on
+  };
+  static std::regex sSimpleIdentifierRE{"^[a-zA-Z$_][a-zA-Z$_0-9]*$"};
+  if (sKeywords.count(value) || !std::regex_match(value, sSimpleIdentifierRE))
+    return "\\" + value + " ";
+  else
+    return value;
+}
 
 std::string String::toString() { return "\"" + value + "\""; }
 
