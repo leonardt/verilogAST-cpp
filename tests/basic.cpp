@@ -30,6 +30,9 @@ TEST(BasicTests, TestNumericLiteral) {
 
   vAST::NumericLiteral n7("764", 8, true);
   EXPECT_EQ(n7.toString(), "8's764");
+
+  vAST::NumericLiteral n8("z", vAST::Radix::HEX);
+  EXPECT_EQ(n8.toString(), "'hz");
 }
 
 TEST(BasicTests, TestIdentifier) {
