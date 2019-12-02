@@ -104,11 +104,13 @@ class Slice : public Expression {
 
 namespace BinOp {
 enum BinOp {
-  // TODO Bitwise Logical ops like &, |,
   LSHIFT,
   RSHIFT,
   AND,
+  LAND,
   OR,
+  LOR,
+  XOR,
   EQ,
   NEQ,
   ADD,
