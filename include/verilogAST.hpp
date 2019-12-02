@@ -206,6 +206,24 @@ class PosEdge : public Expression {
   ~PosEdge(){};
 };
 
+class Call {
+  std::string func;
+  std::vector<std::unique_ptr<Expression>> args;
+
+ public:
+  Call(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      : func(func), args(std::move(args)){};
+  std::string toString();
+  ~Call(){};
+};
+
+class CallExpr : public Expression, public Call {
+ public:
+  CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      : Call(std::move(func), std::move(args)){};
+  std::string toString() { return Call::toString(); };
+};
+
 enum Direction { INPUT, OUTPUT, INOUT };
 
 // TODO: Unify with declarations?
@@ -420,6 +438,13 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
   // Multiple inheritance forces us to have to explicitly state this?
   std::string toString() { return Assign::toString(); };
   ~NonBlockingAssign(){};
+};
+
+class CallStmt : public BehavioralStatement, public Call {
+ public:
+  CallStmt(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      : Call(std::move(func), std::move(args)){};
+  std::string toString() { return Call::toString() + ";"; };
 };
 
 class Star : Node {

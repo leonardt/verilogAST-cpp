@@ -143,6 +143,20 @@ TEST(BasicTests, TestPosEdge) {
 
   EXPECT_EQ(pos_edge.toString(), "posedge clk");
 }
+TEST(BasicTests, TestCallExpr0) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_id("x"));
+  args.push_back(vAST::make_id("y"));
+  vAST::CallExpr my_func("my_func", std::move(args));
+  EXPECT_EQ(my_func.toString(), "my_func(x, y)");
+}
+
+TEST(BasicTests, TestCallExpr1) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_num("7"));
+  vAST::CallExpr clog2("$clog2", std::move(args));
+  EXPECT_EQ(clog2.toString(), "$clog2(7)");
+}
 
 TEST(BasicTests, TestPort) {
   vAST::Port i_port(vAST::make_id("i"), vAST::INPUT, vAST::WIRE);
@@ -285,6 +299,7 @@ TEST(BasicTests, TestAlways) {
       "always @(a, posedge b, negedge c) begin\n"
       "a = b;\n"
       "b <= c;\n"
+      "$display(\"b=%d, c=%d\", b, c);\n"
       "end\n";
   EXPECT_EQ(always.toString(), expected_str);
 }
@@ -301,6 +316,7 @@ TEST(BasicTests, TestAlwaysStar) {
       "always @(*) begin\n"
       "a = b;\n"
       "b <= c;\n"
+      "$display(\"b=%d, c=%d\", b, c);\n"
       "end\n";
   EXPECT_EQ(always_star.toString(), expected_str);
 }

@@ -222,6 +222,14 @@ std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
 
+std::string Call::toString() {
+  std::vector<std::string> arg_strs;
+  for (auto &arg : args) {
+    arg_strs.push_back(arg->toString());
+  }
+  return func + "(" + join(arg_strs, ", ") + ")";
+}
+
 template <typename... Ts>
 std::string variant_to_string(std::variant<Ts...> &value) {
   return std::visit(
