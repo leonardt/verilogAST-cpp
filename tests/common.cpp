@@ -11,15 +11,15 @@ vAST::Parameters make_simple_params() {
   return parameters;
 }
 
-std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                   std::unique_ptr<vAST::Index>,
-                                   std::unique_ptr<vAST::Slice>,
-                                   std::unique_ptr<vAST::Concat>>>
+std::map<std::string,
+         std::variant<
+             std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::Index>,
+             std::unique_ptr<vAST::Slice>, std::unique_ptr<vAST::Concat>>>
 make_simple_connections() {
-  std::map<std::string, std::variant<std::unique_ptr<vAST::Identifier>,
-                                     std::unique_ptr<vAST::Index>,
-                                     std::unique_ptr<vAST::Slice>,
-                                     std::unique_ptr<vAST::Concat>>>
+  std::map<std::string,
+           std::variant<
+               std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::Index>,
+               std::unique_ptr<vAST::Slice>, std::unique_ptr<vAST::Concat>>>
       connections;
   connections["a"] = vAST::make_id("a");
   connections["b"] =
@@ -65,6 +65,10 @@ make_simple_always_body() {
       std::make_unique<vAST::Identifier>("a"),
       std::make_unique<vAST::Identifier>("b")));
   body.push_back(std::make_unique<vAST::NonBlockingAssign>(
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("c")));
+  body.push_back(std::make_unique<vAST::CallStmt>(
+      "$display", std::make_unique<vAST::String>("b=%d, c=%d"),
       std::make_unique<vAST::Identifier>("b"),
       std::make_unique<vAST::Identifier>("c")));
 

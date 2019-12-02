@@ -299,6 +299,7 @@ TEST(BasicTests, TestAlways) {
       "always @(a, posedge b, negedge c) begin\n"
       "a = b;\n"
       "b <= c;\n"
+      "$display(\"b=%d, c=%d\", b, c);\n"
       "end\n";
   EXPECT_EQ(always.toString(), expected_str);
 }
@@ -315,6 +316,7 @@ TEST(BasicTests, TestAlwaysStar) {
       "always @(*) begin\n"
       "a = b;\n"
       "b <= c;\n"
+      "$display(\"b=%d, c=%d\", b, c);\n"
       "end\n";
   EXPECT_EQ(always_star.toString(), expected_str);
 }
