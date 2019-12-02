@@ -197,6 +197,16 @@ class Concat : public Expression {
   std::string toString();
 };
 
+class Replicate : public Expression {
+    std::unique_ptr<Expression> num;
+    std::unique_ptr<Expression> value;
+
+ public:
+  Replicate(std::unique_ptr<Expression> num, std::unique_ptr<Expression> value)
+      : num(std::move(num)), value(std::move(value)){};
+  std::string toString();
+};
+
 class NegEdge : public Expression {
   std::unique_ptr<Expression> value;
 

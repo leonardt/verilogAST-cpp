@@ -239,6 +239,10 @@ std::string Concat::toString() {
   return "{" + join(arg_strs, ",") + "}";
 }
 
+std::string Replicate::toString() {
+  return "{" + num->toString() + "{" + value->toString() + "}" + "}";
+}
+
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
 
 std::string PosEdge::toString() { return "posedge " + value->toString(); }
