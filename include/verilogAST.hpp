@@ -218,6 +218,8 @@ class Call {
 };
 
 class CallExpr : public Expression, public Call {
+  CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      : CallExpr(std::move(func), std::move(args)){};
   std::string toString() { return Call::toString(); };
 };
 
@@ -438,6 +440,8 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
 };
 
 class CallStmt : public BehavioralStatement, public Call {
+  CallStmt(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      : CallStmt(std::move(func), std::move(args)){};
   std::string toString() { return Call::toString(); };
 };
 
