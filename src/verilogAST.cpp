@@ -161,6 +161,18 @@ std::string BinaryOp::toString() {
     case BinOp::ARSHIFT:
       op_str = ">>>";
       break;
+    case BinOp::LT:
+      op_str = "<";
+      break;
+    case BinOp::LTE:
+      op_str = "<=";
+      break;
+    case BinOp::GT:
+      op_str = ">";
+      break;
+    case BinOp::GTE:
+      op_str = ">=";
+      break;
   }
   return left->toString() + ' ' + op_str + ' ' + right->toString();
 }

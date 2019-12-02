@@ -118,7 +118,11 @@ enum BinOp {
   POW,
   MOD,
   ALSHIFT,
-  ARSHIFT
+  ARSHIFT,
+  LT,
+  LTE,
+  GT,
+  GTE
 };
 }
 
