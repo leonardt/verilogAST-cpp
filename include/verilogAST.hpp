@@ -215,18 +215,13 @@ class Call {
       : func(func), args(std::move(args)){};
   std::string toString();
   ~Call(){};
-}
-
-class CallExpr : public Expression,
-                 public Call {
-  std::string toString() { return Call::toString(); };
-}
-
-enum Direction {
-  INPUT,
-  OUTPUT,
-  INOUT
 };
+
+class CallExpr : public Expression, public Call {
+  std::string toString() { return Call::toString(); };
+};
+
+enum Direction { INPUT, OUTPUT, INOUT };
 
 // TODO: Unify with declarations?
 enum PortType { WIRE, REG };
@@ -444,7 +439,7 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
 
 class CallStmt : public BehavioralStatement, public Call {
   std::string toString() { return Call::toString(); };
-}
+};
 
 class Star : Node {
  public:
