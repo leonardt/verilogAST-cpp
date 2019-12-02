@@ -206,7 +206,23 @@ class PosEdge : public Expression {
   ~PosEdge(){};
 };
 
-enum Direction { INPUT, OUTPUT, INOUT };
+class CallExpr : public Expression {
+  std::string func;
+  std::vector<std::unique_ptr<Expression>> args;
+
+ public:
+  CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      func(func),
+      args(std::move(args)){};
+  std::string toString();
+  ~CallExpr(){};
+}
+
+enum Direction {
+  INPUT,
+  OUTPUT,
+  INOUT
+};
 
 // TODO: Unify with declarations?
 enum PortType { WIRE, REG };
