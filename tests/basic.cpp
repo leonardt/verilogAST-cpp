@@ -86,6 +86,10 @@ TEST(BasicTests, TestBinaryOp) {
   ops.push_back(std::make_pair(vAST::BinOp::MOD, "%"));
   ops.push_back(std::make_pair(vAST::BinOp::ALSHIFT, "<<<"));
   ops.push_back(std::make_pair(vAST::BinOp::ARSHIFT, ">>>"));
+  ops.push_back(std::make_pair(vAST::BinOp::LT, "<"));
+  ops.push_back(std::make_pair(vAST::BinOp::LTE, "<="));
+  ops.push_back(std::make_pair(vAST::BinOp::GT, ">"));
+  ops.push_back(std::make_pair(vAST::BinOp::GTE, ">="));
   for (auto it : ops) {
     vAST::BinOp::BinOp op = it.first;
     std::string op_str = it.second;
