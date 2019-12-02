@@ -148,7 +148,7 @@ TEST(BasicTests, TestCallExpr0) {
   args.push_back(vAST::make_id("x"));
   args.push_back(vAST::make_id("y"));
   vAST::CallExpr my_func("my_func", std::move(args));
-  EXPECT_EQ(my_func.toString(), "my_func(x,y)");
+  EXPECT_EQ(my_func.toString(), "my_func(x, y)");
 }
 
 TEST(BasicTests, TestCallExpr1) {

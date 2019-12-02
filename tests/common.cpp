@@ -67,10 +67,11 @@ make_simple_always_body() {
   body.push_back(std::make_unique<vAST::NonBlockingAssign>(
       std::make_unique<vAST::Identifier>("b"),
       std::make_unique<vAST::Identifier>("c")));
-  body.push_back(std::make_unique<vAST::CallStmt>(
-      "$display", std::make_unique<vAST::String>("b=%d, c=%d"),
-      std::make_unique<vAST::Identifier>("b"),
-      std::make_unique<vAST::Identifier>("c")));
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(std::make_unique<vAST::String>("b=%d, c=%d"));
+  args.push_back(std::make_unique<vAST::Identifier>("b"));
+  args.push_back(std::make_unique<vAST::Identifier>("c"));
+  body.push_back(std::make_unique<vAST::CallStmt>("$display", std::move(args)));
 
   return body;
 }

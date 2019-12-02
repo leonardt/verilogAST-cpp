@@ -227,7 +227,7 @@ std::string Call::toString() {
   for (auto &arg : args) {
     arg_strs.push_back(arg->toString());
   }
-  return func + "(" + join(arg_strs, ",") + ")";
+  return func + "(" + join(arg_strs, ", ") + ")";
 }
 
 template <typename... Ts>
