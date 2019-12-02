@@ -74,8 +74,8 @@ TEST(BasicTests, TestBinaryOp) {
   std::vector<std::pair<vAST::BinOp::BinOp, std::string>> ops;
   ops.push_back(std::make_pair(vAST::BinOp::LSHIFT, "<<"));
   ops.push_back(std::make_pair(vAST::BinOp::RSHIFT, ">>"));
-  ops.push_back(std::make_pair(vAST::BinOp::AND, "&&"));
-  ops.push_back(std::make_pair(vAST::BinOp::OR, "||"));
+  ops.push_back(std::make_pair(vAST::BinOp::LAND, "&&"));
+  ops.push_back(std::make_pair(vAST::BinOp::LOR, "||"));
   ops.push_back(std::make_pair(vAST::BinOp::EQ, "=="));
   ops.push_back(std::make_pair(vAST::BinOp::NEQ, "!="));
   ops.push_back(std::make_pair(vAST::BinOp::ADD, "+"));
@@ -90,6 +90,9 @@ TEST(BasicTests, TestBinaryOp) {
   ops.push_back(std::make_pair(vAST::BinOp::LTE, "<="));
   ops.push_back(std::make_pair(vAST::BinOp::GT, ">"));
   ops.push_back(std::make_pair(vAST::BinOp::GTE, ">="));
+  ops.push_back(std::make_pair(vAST::BinOp::XOR, "^"));
+  ops.push_back(std::make_pair(vAST::BinOp::AND, "&"));
+  ops.push_back(std::make_pair(vAST::BinOp::OR, "|"));
   for (auto it : ops) {
     vAST::BinOp::BinOp op = it.first;
     std::string op_str = it.second;

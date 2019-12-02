@@ -126,10 +126,19 @@ std::string BinaryOp::toString() {
       op_str = ">>";
       break;
     case BinOp::AND:
+      op_str = "&";
+      break;
+    case BinOp::LAND:
       op_str = "&&";
       break;
     case BinOp::OR:
+      op_str = "|";
+      break;
+    case BinOp::LOR:
       op_str = "||";
+      break;
+    case BinOp::XOR:
+      op_str = "^";
       break;
     case BinOp::EQ:
       op_str = "==";
