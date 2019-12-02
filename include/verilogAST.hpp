@@ -206,16 +206,20 @@ class PosEdge : public Expression {
   ~PosEdge(){};
 };
 
-class CallExpr : public Expression {
+class Call {
   std::string func;
   std::vector<std::unique_ptr<Expression>> args;
 
  public:
-  CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
-      func(func),
-      args(std::move(args)){};
+  Call(std::string func, std::vector<std::unique_ptr<Expression>> args)
+      : func(func), args(std::move(args)){};
   std::string toString();
-  ~CallExpr(){};
+  ~Call(){};
+}
+
+class CallExpr : public Expression,
+                 public Call {
+  std::string toString() { return Call::toString(); };
 }
 
 enum Direction {
@@ -437,6 +441,10 @@ class NonBlockingAssign : public BehavioralAssign, public Assign {
   std::string toString() { return Assign::toString(); };
   ~NonBlockingAssign(){};
 };
+
+class CallStmt : public BehavioralStatement, public Call {
+  std::string toString() { return Call::toString(); };
+}
 
 class Star : Node {
  public:
