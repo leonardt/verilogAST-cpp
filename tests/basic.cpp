@@ -142,6 +142,19 @@ TEST(BasicTests, TestConcat) {
   EXPECT_EQ(concat.toString(), "{x,y}");
 }
 
+TEST(BasicTests, TestReplicate) {
+  vAST::Replicate replicate(vAST::make_num("3"), vAST::make_num("4"));
+  EXPECT_EQ(replicate.toString(), "{(3){4}}");
+}
+
+TEST(BasicTests, TestReplicateExpr) {
+  vAST::Replicate replicate(
+      vAST::make_binop(vAST::make_id("x"), vAST::BinOp::ADD,
+                       vAST::make_id("y")),
+      vAST::make_num("4"));
+  EXPECT_EQ(replicate.toString(), "{(x + y){4}}");
+}
+
 TEST(BasicTests, TestNegEdge) {
   vAST::NegEdge neg_edge(vAST::make_id("clk"));
 
