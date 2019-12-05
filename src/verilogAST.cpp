@@ -240,7 +240,8 @@ std::string Concat::toString() {
 }
 
 std::string Replicate::toString() {
-  return "{" + num->toString() + "{" + value->toString() + "}" + "}";
+  // TODO: Insert parens using precedence logic
+  return "{(" + num->toString() + "){" + value->toString() + "}" + "}";
 }
 
 std::string NegEdge::toString() { return "negedge " + value->toString(); }
