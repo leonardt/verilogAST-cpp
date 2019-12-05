@@ -148,7 +148,10 @@ TEST(BasicTests, TestReplicate) {
 }
 
 TEST(BasicTests, TestReplicateExpr) {
-  vAST::Replicate replicate(vAST::make_binop(vAST::make_id("x"), vAST::BinOp::ADD, vAST::make_id("y")), vAST::make_num("4"));
+  vAST::Replicate replicate(
+      vAST::make_binop(vAST::make_id("x"), vAST::BinOp::ADD,
+                       vAST::make_id("y")),
+      vAST::make_num("4"));
   EXPECT_EQ(replicate.toString(), "{(x + y){4}}");
 }
 
