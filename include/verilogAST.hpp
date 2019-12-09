@@ -637,40 +637,49 @@ class Transformer {
     }
     throw std::runtime_error("Unreachable");
     return node;
-  }
+  };
+
   std::unique_ptr<NumericLiteral> visit(std::unique_ptr<NumericLiteral> node) {
     return node;
   };
+
   std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node) {
     return node;
   };
+
   std::unique_ptr<String> visit(std::unique_ptr<String> node) { return node; };
+
   std::unique_ptr<Index> visit(std::unique_ptr<Index> node) {
     node->id = this->visit(std::move(node->id));
     node->index = this->visit(std::move(node->index));
     return node;
   };
+
   std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node) {
     node->id = this->visit(std::move(node->id));
     node->high_index = this->visit(std::move(node->high_index));
     node->low_index = this->visit(std::move(node->low_index));
     return node;
   };
+
   std::unique_ptr<BinaryOp> visit(std::unique_ptr<BinaryOp> node) {
     node->left = this->visit(std::move(node->left));
     node->right = this->visit(std::move(node->right));
     return node;
   };
+
   std::unique_ptr<UnaryOp> visit(std::unique_ptr<UnaryOp> node) {
     node->operand = this->visit(std::move(node->operand));
     return node;
   };
+
   std::unique_ptr<TernaryOp> visit(std::unique_ptr<TernaryOp> node) {
     node->cond = this->visit(std::move(node->cond));
     node->true_value = this->visit(std::move(node->true_value));
     node->false_value = this->visit(std::move(node->false_value));
     return node;
   };
+
   std::unique_ptr<Concat> visit(std::unique_ptr<Concat> node) {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (auto&& expr : node->args) {
@@ -679,17 +688,21 @@ class Transformer {
     node->args = std::move(new_args);
     return node;
   };
+
   std::unique_ptr<Replicate> visit(std::unique_ptr<Replicate> node) {
     node->num = this->visit(std::move(node->num));
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node) {
     return node;
   };
+
   std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node) {
     return node;
   };
+
   std::unique_ptr<CallExpr> visit(std::unique_ptr<CallExpr> node) {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (auto&& expr : node->args) {
@@ -698,6 +711,7 @@ class Transformer {
     node->args = std::move(new_args);
     return node;
   };
+
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> visit(
       std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node) {
     return std::visit(
@@ -716,31 +730,38 @@ class Transformer {
         },
         node);
   }
+
   std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
     node->id = this->visit(std::move(node->id));
     node->msb = this->visit(std::move(node->msb));
     node->lsb = this->visit(std::move(node->lsb));
     return node;
   };
+
   std::unique_ptr<Port> visit(std::unique_ptr<Port> node) {
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node) {
     return node;
   };
+
   std::unique_ptr<SingleLineComment> visit(
       std::unique_ptr<SingleLineComment> node) {
     return node;
   };
+
   std::unique_ptr<BlockComment> visit(std::unique_ptr<BlockComment> node) {
     return node;
   };
+
   template <typename T>
   T visit(T node) {
     return std::visit(
         [&](auto&& value) -> T { return this->visit(std::move(value)); }, node);
   };
+
   std::unique_ptr<ModuleInstantiation> visit(
       std::unique_ptr<ModuleInstantiation> node) {
     for (auto&& conn : node->connections) {
@@ -752,20 +773,24 @@ class Transformer {
     }
     return node;
   };
+
   std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node) {
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<Reg> visit(std::unique_ptr<Reg> node) {
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node) {
     node->target = this->visit(std::move(node->target));
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node) {
     if (auto ptr = dynamic_cast<Wire*>(node.get())) {
       node.release();
@@ -778,7 +803,9 @@ class Transformer {
     throw std::runtime_error("Unreachable");
     return node;
   };
-  std::unique_ptr<BehavioralStatement> visit(std::unique_ptr<BehavioralStatement> node) {
+
+  std::unique_ptr<BehavioralStatement> visit(
+      std::unique_ptr<BehavioralStatement> node) {
     if (auto ptr = dynamic_cast<BlockingAssign*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<BlockingAssign>(ptr));
@@ -794,17 +821,20 @@ class Transformer {
     throw std::runtime_error("Unreachable");
     return node;
   };
+
   std::unique_ptr<BlockingAssign> visit(std::unique_ptr<BlockingAssign> node) {
     node->target = this->visit(std::move(node->target));
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<NonBlockingAssign> visit(
       std::unique_ptr<NonBlockingAssign> node) {
     node->target = this->visit(std::move(node->target));
     node->value = this->visit(std::move(node->value));
     return node;
   };
+
   std::unique_ptr<CallStmt> visit(std::unique_ptr<CallStmt> node) {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (auto&& expr : node->args) {
@@ -813,7 +843,9 @@ class Transformer {
     node->args = std::move(new_args);
     return node;
   };
+
   std::unique_ptr<Star> visit(std::unique_ptr<Star> node) { return node; };
+
   std::unique_ptr<Always> visit(std::unique_ptr<Always> node) {
     std::vector<
         std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
@@ -832,6 +864,7 @@ class Transformer {
     node->body = std::move(new_body);
     return node;
   };
+
   std::unique_ptr<AbstractPort> visit(std::unique_ptr<AbstractPort> node) {
     if (auto ptr = dynamic_cast<Port*>(node.get())) {
       node.release();
@@ -843,8 +876,10 @@ class Transformer {
     }
     throw std::runtime_error("Unreachable");
     return node;
-  }
-  std::unique_ptr<StructuralStatement> visit(std::unique_ptr<StructuralStatement> node) {
+  };
+
+  std::unique_ptr<StructuralStatement> visit(
+      std::unique_ptr<StructuralStatement> node) {
     if (auto ptr = dynamic_cast<ModuleInstantiation*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<ModuleInstantiation>(ptr));
@@ -860,6 +895,7 @@ class Transformer {
     throw std::runtime_error("Unreachable");
     return node;
   };
+
   std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
     std::vector<std::unique_ptr<AbstractPort>> new_ports;
     for (auto&& item : node->ports) {
@@ -875,13 +911,16 @@ class Transformer {
     node->body = std::move(new_body);
     return node;
   };
+
   std::unique_ptr<StringBodyModule> visit(
       std::unique_ptr<StringBodyModule> node) {
     return node;
   };
+
   std::unique_ptr<StringModule> visit(std::unique_ptr<StringModule> node) {
     return node;
   };
+
   std::unique_ptr<AbstractModule> visit(std::unique_ptr<AbstractModule> node) {
     if (auto ptr = dynamic_cast<Module*>(node.get())) {
       node.release();
@@ -893,7 +932,8 @@ class Transformer {
     }
     throw std::runtime_error("Unreachable");
     return node;
-  }
+  };
+
   std::unique_ptr<File> visit(std::unique_ptr<File> node) {
     std::vector<std::unique_ptr<AbstractModule>> new_modules;
     for (auto&& item : node->modules) {
@@ -903,6 +943,5 @@ class Transformer {
     return node;
   };
 };
-
 }  // namespace verilogAST
 #endif
