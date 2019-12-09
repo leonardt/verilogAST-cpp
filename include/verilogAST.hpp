@@ -760,7 +760,7 @@ class Transformer {
   T visit(T node) {
     return std::visit(
         [&](auto&& value) -> T { return this->visit(std::move(value)); }, node);
-  };
+  }
 
   std::unique_ptr<ModuleInstantiation> visit(
       std::unique_ptr<ModuleInstantiation> node) {
