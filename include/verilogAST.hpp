@@ -729,7 +729,7 @@ class Transformer {
           return std::move(value);
         },
         node);
-  }
+  };
 
   std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
     node->id = this->visit(std::move(node->id));
