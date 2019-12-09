@@ -2,6 +2,7 @@
 #ifndef VERILOGAST_H
 #define VERILOGAST_H
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
@@ -26,6 +27,7 @@ class Expression : public Node {
 enum Radix { BINARY, OCTAL, HEX, DECIMAL };
 
 class NumericLiteral : public Expression {
+ public:
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
   //  convert it during code generation)
@@ -38,7 +40,6 @@ class NumericLiteral : public Expression {
   bool _signed;       // default false
   Radix radix;        // default decimal
 
- public:
   NumericLiteral(std::string value, unsigned int size, bool _signed,
                  Radix radix)
       : value(value), size(size), _signed(_signed), radix(radix){};
@@ -60,9 +61,9 @@ class NumericLiteral : public Expression {
 // TODO also need a string literal, as strings can be used as parameter values
 
 class Identifier : public Expression {
+ public:
   std::string value;
 
- public:
   Identifier(std::string value) : value(value){};
 
   std::string toString() override;
@@ -70,9 +71,9 @@ class Identifier : public Expression {
 };
 
 class String : public Expression {
+ public:
   std::string value;
 
- public:
   String(std::string value) : value(value){};
 
   std::string toString() override;
@@ -80,10 +81,10 @@ class String : public Expression {
 };
 
 class Index : public Expression {
+ public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> index;
 
- public:
   Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
       : id(std::move(id)), index(std::move(index)){};
   std::string toString() override;
@@ -91,11 +92,11 @@ class Index : public Expression {
 };
 
 class Slice : public Expression {
+ public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> high_index;
   std::unique_ptr<Expression> low_index;
 
- public:
   Slice(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> high_index,
         std::unique_ptr<Expression> low_index)
       : id(std::move(id)),
@@ -132,11 +133,11 @@ enum BinOp {
 }
 
 class BinaryOp : public Expression {
+ public:
   std::unique_ptr<Expression> left;
   BinOp::BinOp op;
   std::unique_ptr<Expression> right;
 
- public:
   BinaryOp(std::unique_ptr<Expression> left, BinOp::BinOp op,
            std::unique_ptr<Expression> right)
       : left(std::move(left)), op(op), right(std::move(right)){};
@@ -161,11 +162,11 @@ enum UnOp {
 }
 
 class UnaryOp : public Expression {
+ public:
   std::unique_ptr<Expression> operand;
 
   UnOp::UnOp op;
 
- public:
   UnaryOp(std::unique_ptr<Expression> operand, UnOp::UnOp op)
       : operand(std::move(operand)), op(op){};
   std::string toString();
@@ -173,11 +174,11 @@ class UnaryOp : public Expression {
 };
 
 class TernaryOp : public Expression {
+ public:
   std::unique_ptr<Expression> cond;
   std::unique_ptr<Expression> true_value;
   std::unique_ptr<Expression> false_value;
 
- public:
   TernaryOp(std::unique_ptr<Expression> cond,
             std::unique_ptr<Expression> true_value,
             std::unique_ptr<Expression> false_value)
@@ -189,47 +190,47 @@ class TernaryOp : public Expression {
 };
 
 class Concat : public Expression {
+ public:
   std::vector<std::unique_ptr<Expression>> args;
 
- public:
   Concat(std::vector<std::unique_ptr<Expression>> args)
       : args(std::move(args)){};
   std::string toString();
 };
 
 class Replicate : public Expression {
-    std::unique_ptr<Expression> num;
-    std::unique_ptr<Expression> value;
-
  public:
+  std::unique_ptr<Expression> num;
+  std::unique_ptr<Expression> value;
+
   Replicate(std::unique_ptr<Expression> num, std::unique_ptr<Expression> value)
       : num(std::move(num)), value(std::move(value)){};
   std::string toString();
 };
 
 class NegEdge : public Expression {
+ public:
   std::unique_ptr<Expression> value;
 
- public:
   NegEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
   std::string toString();
   ~NegEdge(){};
 };
 
 class PosEdge : public Expression {
+ public:
   std::unique_ptr<Expression> value;
 
- public:
   PosEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
   std::string toString();
   ~PosEdge(){};
 };
 
 class Call {
+ public:
   std::string func;
   std::vector<std::unique_ptr<Expression>> args;
 
- public:
   Call(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : func(func), args(std::move(args)){};
   std::string toString();
@@ -251,11 +252,11 @@ enum PortType { WIRE, REG };
 class AbstractPort : public Node {};
 
 class Vector : public Node {
+ public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> msb;
   std::unique_ptr<Expression> lsb;
 
- public:
   Vector(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
          std::unique_ptr<Expression> lsb)
       : id(std::move(id)), msb(std::move(msb)), lsb(std::move(lsb)){};
@@ -264,6 +265,7 @@ class Vector : public Node {
 };
 
 class Port : public AbstractPort {
+ public:
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value;
@@ -275,7 +277,6 @@ class Port : public AbstractPort {
   Direction direction;
   PortType data_type;
 
- public:
   Port(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
        Direction direction, PortType data_type)
       : value(std::move(value)),
@@ -286,9 +287,9 @@ class Port : public AbstractPort {
 };
 
 class StringPort : public AbstractPort {
+ public:
   std::string value;
 
- public:
   StringPort(std::string value) : value(value){};
   std::string toString() { return value; };
   ~StringPort(){};
@@ -297,18 +298,18 @@ class StringPort : public AbstractPort {
 class Statement : public Node {};
 
 class SingleLineComment : public Statement {
+ public:
   std::string value;
 
- public:
   SingleLineComment(std::string value) : value(value){};
   std::string toString() { return "// " + value; };
   ~SingleLineComment(){};
 };
 
 class BlockComment : public Statement {
+ public:
   std::string value;
 
- public:
   BlockComment(std::string value) : value(value){};
   std::string toString() { return "/*\n" + value + "\n*/"; };
   ~BlockComment(){};
@@ -322,6 +323,7 @@ typedef std::vector<
     Parameters;
 
 class ModuleInstantiation : public StructuralStatement {
+ public:
   std::string module_name;
 
   // parameter,value
@@ -336,7 +338,6 @@ class ModuleInstantiation : public StructuralStatement {
                         std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
       connections;
 
- public:
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
   ModuleInstantiation(
@@ -354,7 +355,7 @@ class ModuleInstantiation : public StructuralStatement {
 };
 
 class Declaration : public Node {
- protected:
+ public:
   std::string decl;
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
                std::unique_ptr<Slice>, std::unique_ptr<Vector>>
@@ -366,7 +367,6 @@ class Declaration : public Node {
               std::string decl)
       : decl(decl), value(std::move(value)){};
 
- public:
   std::string toString();
   virtual ~Declaration() = default;
 };
@@ -390,7 +390,7 @@ class Reg : public Declaration {
 };
 
 class Assign : public Node {
- protected:
+ public:
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
                std::unique_ptr<Slice>>
       target;
@@ -416,7 +416,6 @@ class Assign : public Node {
         prefix(prefix),
         symbol(symbol){};
 
- public:
   std::string toString();
   virtual ~Assign() = default;
 };
@@ -473,6 +472,7 @@ class Star : Node {
 };
 
 class Always : public StructuralStatement {
+ public:
   std::vector<
       std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                    std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
@@ -481,7 +481,6 @@ class Always : public StructuralStatement {
                            std::unique_ptr<Declaration>>>
       body;
 
- public:
   Always(std::vector<
              std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                           std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
@@ -503,7 +502,7 @@ class Always : public StructuralStatement {
 class AbstractModule : public Node {};
 
 class Module : public AbstractModule {
- protected:
+ public:
   std::string name;
   std::vector<std::unique_ptr<AbstractPort>> ports;
   std::vector<std::variant<std::unique_ptr<StructuralStatement>,
@@ -519,7 +518,6 @@ class Module : public AbstractModule {
         ports(std::move(ports)),
         parameters(std::move(parameters)){};
 
- public:
   Module(std::string name, std::vector<std::unique_ptr<AbstractPort>> ports,
          std::vector<std::variant<std::unique_ptr<StructuralStatement>,
                                   std::unique_ptr<Declaration>>>
@@ -535,9 +533,9 @@ class Module : public AbstractModule {
 };
 
 class StringBodyModule : public Module {
+ public:
   std::string body;
 
- public:
   StringBodyModule(std::string name,
                    std::vector<std::unique_ptr<AbstractPort>> ports,
                    std::string body, Parameters parameters)
@@ -547,19 +545,19 @@ class StringBodyModule : public Module {
 };
 
 class StringModule : public AbstractModule {
+ public:
   std::string definition;
 
- public:
   StringModule(std::string definition) : definition(definition){};
   std::string toString() { return definition; };
   ~StringModule(){};
 };
 
 class File : public Node {
+ public:
   std::vector<std::unique_ptr<AbstractModule>> modules;
 
- public:
-  File(std::vector<std::unique_ptr<AbstractModule>> &modules)
+  File(std::vector<std::unique_ptr<AbstractModule>>& modules)
       : modules(std::move(modules)){};
   std::string toString();
   ~File(){};
@@ -581,6 +579,330 @@ std::unique_ptr<Port> make_port(
 std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
                                     std::unique_ptr<Expression> msb,
                                     std::unique_ptr<Expression> lsb);
+
+class Transformer {
+ public:
+  std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node) {
+    if (auto ptr = dynamic_cast<NumericLiteral*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<NumericLiteral>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Identifier*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Identifier>(ptr));
+    }
+    if (auto ptr = dynamic_cast<String*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<String>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Index*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Index>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Slice*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Slice>(ptr));
+    }
+    if (auto ptr = dynamic_cast<BinaryOp*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<BinaryOp>(ptr));
+    }
+    if (auto ptr = dynamic_cast<UnaryOp*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<UnaryOp>(ptr));
+    }
+    if (auto ptr = dynamic_cast<TernaryOp*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<TernaryOp>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Concat*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Concat>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Replicate*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Replicate>(ptr));
+    }
+    if (auto ptr = dynamic_cast<NegEdge*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<NegEdge>(ptr));
+    }
+    if (auto ptr = dynamic_cast<PosEdge*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<PosEdge>(ptr));
+    }
+    if (auto ptr = dynamic_cast<CallExpr*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<CallExpr>(ptr));
+    }
+    throw std::runtime_error("Unreachable");
+    return node;
+  }
+  std::unique_ptr<NumericLiteral> visit(std::unique_ptr<NumericLiteral> node) {
+    return node;
+  };
+  std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node) {
+    return node;
+  };
+  std::unique_ptr<String> visit(std::unique_ptr<String> node) { return node; };
+  std::unique_ptr<Index> visit(std::unique_ptr<Index> node) {
+    node->id = this->visit(std::move(node->id));
+    node->index = this->visit(std::move(node->index));
+    return node;
+  };
+  std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node) {
+    node->id = this->visit(std::move(node->id));
+    node->high_index = this->visit(std::move(node->high_index));
+    node->low_index = this->visit(std::move(node->low_index));
+    return node;
+  };
+  std::unique_ptr<BinaryOp> visit(std::unique_ptr<BinaryOp> node) {
+    node->left = this->visit(std::move(node->left));
+    node->right = this->visit(std::move(node->right));
+    return node;
+  };
+  std::unique_ptr<UnaryOp> visit(std::unique_ptr<UnaryOp> node) {
+    node->operand = this->visit(std::move(node->operand));
+    return node;
+  };
+  std::unique_ptr<TernaryOp> visit(std::unique_ptr<TernaryOp> node) {
+    node->cond = this->visit(std::move(node->cond));
+    node->true_value = this->visit(std::move(node->true_value));
+    node->false_value = this->visit(std::move(node->false_value));
+    return node;
+  };
+  std::unique_ptr<Concat> visit(std::unique_ptr<Concat> node) {
+    std::vector<std::unique_ptr<Expression>> new_args;
+    for (auto&& expr : node->args) {
+      new_args.push_back(this->visit(std::move(expr)));
+    }
+    node->args = std::move(new_args);
+    return node;
+  };
+  std::unique_ptr<Replicate> visit(std::unique_ptr<Replicate> node) {
+    node->num = this->visit(std::move(node->num));
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node) {
+    return node;
+  };
+  std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node) {
+    return node;
+  };
+  std::unique_ptr<CallExpr> visit(std::unique_ptr<CallExpr> node) {
+    std::vector<std::unique_ptr<Expression>> new_args;
+    for (auto&& expr : node->args) {
+      new_args.push_back(this->visit(std::move(expr)));
+    }
+    node->args = std::move(new_args);
+    return node;
+  };
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> visit(
+      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node) {
+    return std::visit(
+        [&](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
+                                          std::unique_ptr<Vector>> {
+          if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
+            value.release();
+            return this->visit(std::unique_ptr<Identifier>(ptr));
+          }
+          if (auto ptr = dynamic_cast<Vector*>(value.get())) {
+            value.release();
+            return this->visit(std::unique_ptr<Vector>(ptr));
+          }
+          throw std::runtime_error("Unreachable");
+          return std::move(value);
+        },
+        node);
+  }
+  std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
+    node->id = this->visit(std::move(node->id));
+    node->msb = this->visit(std::move(node->msb));
+    node->lsb = this->visit(std::move(node->lsb));
+    return node;
+  };
+  std::unique_ptr<Port> visit(std::unique_ptr<Port> node) {
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node) {
+    return node;
+  };
+  std::unique_ptr<SingleLineComment> visit(
+      std::unique_ptr<SingleLineComment> node) {
+    return node;
+  };
+  std::unique_ptr<BlockComment> visit(std::unique_ptr<BlockComment> node) {
+    return node;
+  };
+  template <typename T>
+  T visit(T node) {
+    return std::visit(
+        [&](auto&& value) -> T { return this->visit(std::move(value)); }, node);
+  };
+  std::unique_ptr<ModuleInstantiation> visit(
+      std::unique_ptr<ModuleInstantiation> node) {
+    for (auto&& conn : node->connections) {
+      conn.second = this->visit(std::move(conn.second));
+    }
+    for (auto&& param : node->parameters) {
+      param.first = this->visit(std::move(param.first));
+      param.second = this->visit(std::move(param.second));
+    }
+    return node;
+  };
+  std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node) {
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<Reg> visit(std::unique_ptr<Reg> node) {
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<ContinuousAssign> visit(
+      std::unique_ptr<ContinuousAssign> node) {
+    node->target = this->visit(std::move(node->target));
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node) {
+    if (auto ptr = dynamic_cast<Wire*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Wire>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Reg*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Reg>(ptr));
+    }
+    throw std::runtime_error("Unreachable");
+    return node;
+  };
+  std::unique_ptr<BehavioralStatement> visit(std::unique_ptr<BehavioralStatement> node) {
+    if (auto ptr = dynamic_cast<BlockingAssign*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<BlockingAssign>(ptr));
+    }
+    if (auto ptr = dynamic_cast<NonBlockingAssign*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<NonBlockingAssign>(ptr));
+    }
+    if (auto ptr = dynamic_cast<CallStmt*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<CallStmt>(ptr));
+    }
+    throw std::runtime_error("Unreachable");
+    return node;
+  };
+  std::unique_ptr<BlockingAssign> visit(std::unique_ptr<BlockingAssign> node) {
+    node->target = this->visit(std::move(node->target));
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<NonBlockingAssign> visit(
+      std::unique_ptr<NonBlockingAssign> node) {
+    node->target = this->visit(std::move(node->target));
+    node->value = this->visit(std::move(node->value));
+    return node;
+  };
+  std::unique_ptr<CallStmt> visit(std::unique_ptr<CallStmt> node) {
+    std::vector<std::unique_ptr<Expression>> new_args;
+    for (auto&& expr : node->args) {
+      new_args.push_back(this->visit(std::move(expr)));
+    }
+    node->args = std::move(new_args);
+    return node;
+  };
+  std::unique_ptr<Star> visit(std::unique_ptr<Star> node) { return node; };
+  std::unique_ptr<Always> visit(std::unique_ptr<Always> node) {
+    std::vector<
+        std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
+                     std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
+        new_sensitivity_list;
+    for (auto&& item : node->sensitivity_list) {
+      new_sensitivity_list.push_back(this->visit(std::move(item)));
+    }
+    node->sensitivity_list = std::move(new_sensitivity_list);
+    std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
+                             std::unique_ptr<Declaration>>>
+        new_body;
+    for (auto&& item : node->body) {
+      new_body.push_back(this->visit(std::move(item)));
+    }
+    node->body = std::move(new_body);
+    return node;
+  };
+  std::unique_ptr<AbstractPort> visit(std::unique_ptr<AbstractPort> node) {
+    if (auto ptr = dynamic_cast<Port*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Port>(ptr));
+    }
+    if (auto ptr = dynamic_cast<StringPort*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<StringPort>(ptr));
+    }
+    throw std::runtime_error("Unreachable");
+    return node;
+  }
+  std::unique_ptr<StructuralStatement> visit(std::unique_ptr<StructuralStatement> node) {
+    if (auto ptr = dynamic_cast<ModuleInstantiation*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<ModuleInstantiation>(ptr));
+    }
+    if (auto ptr = dynamic_cast<ContinuousAssign*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<ContinuousAssign>(ptr));
+    }
+    if (auto ptr = dynamic_cast<Always*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Always>(ptr));
+    }
+    throw std::runtime_error("Unreachable");
+    return node;
+  };
+  std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
+    std::vector<std::unique_ptr<AbstractPort>> new_ports;
+    for (auto&& item : node->ports) {
+      new_ports.push_back(this->visit(std::move(item)));
+    }
+    node->ports = std::move(new_ports);
+    std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                             std::unique_ptr<Declaration>>>
+        new_body;
+    for (auto&& item : node->body) {
+      new_body.push_back(this->visit(std::move(item)));
+    }
+    node->body = std::move(new_body);
+    return node;
+  };
+  std::unique_ptr<StringBodyModule> visit(
+      std::unique_ptr<StringBodyModule> node) {
+    return node;
+  };
+  std::unique_ptr<StringModule> visit(std::unique_ptr<StringModule> node) {
+    return node;
+  };
+  std::unique_ptr<AbstractModule> visit(std::unique_ptr<AbstractModule> node) {
+    if (auto ptr = dynamic_cast<Module*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<Module>(ptr));
+    }
+    if (auto ptr = dynamic_cast<StringModule*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<StringModule>(ptr));
+    }
+    throw std::runtime_error("Unreachable");
+    return node;
+  }
+  std::unique_ptr<File> visit(std::unique_ptr<File> node) {
+    std::vector<std::unique_ptr<AbstractModule>> new_modules;
+    for (auto&& item : node->modules) {
+      new_modules.push_back(this->visit(std::move(item)));
+    }
+    node->modules = std::move(new_modules);
+    return node;
+  };
+};
 
 }  // namespace verilogAST
 #endif
