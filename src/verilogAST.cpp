@@ -277,7 +277,7 @@ std::string variant_to_string(std::variant<Ts...> &value) {
 
 std::string Port::toString() {
   std::string value_str =
-      variant_to_string<std::unique_ptr<Expression>, std::unique_ptr<Vector>>(
+      variant_to_string<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>(
           value);
   std::string direction_str;
   switch (direction) {
@@ -368,7 +368,8 @@ std::string ModuleInstantiation::toString() {
   if (!connections.empty()) {
     std::vector<std::string> param_strs;
     for (auto &it : connections) {
-      param_strs.push_back("." + it.first + "(" + it.second->toString() + ")");
+      param_strs.push_back("." + it.first + "(" + variant_to_string(it.second) +
+                           ")");
     }
     module_inst_str += join(param_strs, ", ");
   }
@@ -392,7 +393,7 @@ std::string Always::toString() {
   // emit sensitivity string
   std::vector<std::string> sensitivity_strs;
   for (auto &it : sensitivity_list) {
-    sensitivity_strs.push_back(it->toString());
+    sensitivity_strs.push_back(variant_to_string(it));
   }
   always_str += join(sensitivity_strs, ", ");
   always_str += ") begin\n";
@@ -434,12 +435,12 @@ std::unique_ptr<BinaryOp> make_binop(std::unique_ptr<Expression> left,
 }
 
 std::unique_ptr<Port> make_port(
-    std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>> value,
+    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
     Direction direction, PortType data_type) {
   return std::make_unique<Port>(std::move(value), direction, data_type);
 }
 
-std::unique_ptr<Vector> make_vector(std::unique_ptr<Expression> id,
+std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
                                     std::unique_ptr<Expression> msb,
                                     std::unique_ptr<Expression> lsb) {
   return std::make_unique<Vector>(std::move(id), std::move(msb),
