@@ -183,7 +183,20 @@ std::string BinaryOp::toString() {
       op_str = ">=";
       break;
   }
-  return left->toString() + ' ' + op_str + ' ' + right->toString();
+  std::string lstr = left->toString();
+  std::string rstr = right->toString();
+  // TODO Precedence logic, for now we just insert parens if not symbol or num
+  if (auto ptr = dynamic_cast<Identifier*>(left.get())) {
+  } else if (auto ptr = dynamic_cast<NumericLiteral*>(left.get())) {
+  } else {
+      lstr = "(" + lstr + ")";
+  }
+  if (auto ptr = dynamic_cast<Identifier*>(right.get())) {
+  } else if (auto ptr = dynamic_cast<NumericLiteral*>(right.get())) {
+  } else {
+      rstr = "(" + rstr + ")";
+  }
+  return lstr + ' ' + op_str + ' ' + rstr;
 }
 
 std::string UnaryOp::toString() {
@@ -264,7 +277,7 @@ std::string variant_to_string(std::variant<Ts...> &value) {
 
 std::string Port::toString() {
   std::string value_str =
-      variant_to_string<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>(
+      variant_to_string<std::unique_ptr<Expression>, std::unique_ptr<Vector>>(
           value);
   std::string direction_str;
   switch (direction) {
@@ -355,8 +368,7 @@ std::string ModuleInstantiation::toString() {
   if (!connections.empty()) {
     std::vector<std::string> param_strs;
     for (auto &it : connections) {
-      param_strs.push_back("." + it.first + "(" + variant_to_string(it.second) +
-                           ")");
+      param_strs.push_back("." + it.first + "(" + it.second->toString() + ")");
     }
     module_inst_str += join(param_strs, ", ");
   }
@@ -380,7 +392,7 @@ std::string Always::toString() {
   // emit sensitivity string
   std::vector<std::string> sensitivity_strs;
   for (auto &it : sensitivity_list) {
-    sensitivity_strs.push_back(variant_to_string(it));
+    sensitivity_strs.push_back(it->toString());
   }
   always_str += join(sensitivity_strs, ", ");
   always_str += ") begin\n";
@@ -422,12 +434,12 @@ std::unique_ptr<BinaryOp> make_binop(std::unique_ptr<Expression> left,
 }
 
 std::unique_ptr<Port> make_port(
-    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
+    std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>> value,
     Direction direction, PortType data_type) {
   return std::make_unique<Port>(std::move(value), direction, data_type);
 }
 
-std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
+std::unique_ptr<Vector> make_vector(std::unique_ptr<Expression> id,
                                     std::unique_ptr<Expression> msb,
                                     std::unique_ptr<Expression> lsb) {
   return std::make_unique<Vector>(std::move(id), std::move(msb),

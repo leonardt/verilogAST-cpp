@@ -308,10 +308,7 @@ TEST(BasicTests, TestAssign) {
 }
 
 TEST(BasicTests, TestAlways) {
-  std::vector<std::variant<
-      std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
-      std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
-      sensitivity_list;
+  std::vector<std::unique_ptr<vAST::Expression>> sensitivity_list;
   sensitivity_list.push_back(std::make_unique<vAST::Identifier>("a"));
   sensitivity_list.push_back(
       std::make_unique<vAST::PosEdge>(std::make_unique<vAST::Identifier>("b")));
@@ -328,10 +325,7 @@ TEST(BasicTests, TestAlways) {
 }
 
 TEST(BasicTests, TestAlwaysStar) {
-  std::vector<std::variant<
-      std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
-      std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
-      sensitivity_list;
+  std::vector<std::unique_ptr<vAST::Expression>> sensitivity_list;
   sensitivity_list.push_back(std::make_unique<vAST::Star>());
   vAST::Always always_star(std::move(sensitivity_list),
                            make_simple_always_body());
@@ -345,10 +339,7 @@ TEST(BasicTests, TestAlwaysStar) {
 }
 
 TEST(BasicTests, TestAlwaysEmpty) {
-  std::vector<std::variant<
-      std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
-      std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
-      sensitivity_list;
+  std::vector<std::unique_ptr<vAST::Expression>> sensitivity_list;
   std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body;

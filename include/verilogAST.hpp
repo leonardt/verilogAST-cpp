@@ -82,10 +82,10 @@ class String : public Expression {
 
 class Index : public Expression {
  public:
-  std::unique_ptr<Identifier> id;
+  std::unique_ptr<Expression> id;
   std::unique_ptr<Expression> index;
 
-  Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
+  Index(std::unique_ptr<Expression> id, std::unique_ptr<Expression> index)
       : id(std::move(id)), index(std::move(index)){};
   std::string toString() override;
   ~Index(){};
@@ -93,11 +93,11 @@ class Index : public Expression {
 
 class Slice : public Expression {
  public:
-  std::unique_ptr<Identifier> id;
+  std::unique_ptr<Expression> id;
   std::unique_ptr<Expression> high_index;
   std::unique_ptr<Expression> low_index;
 
-  Slice(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> high_index,
+  Slice(std::unique_ptr<Expression> id, std::unique_ptr<Expression> high_index,
         std::unique_ptr<Expression> low_index)
       : id(std::move(id)),
         high_index(std::move(high_index)),
@@ -253,11 +253,11 @@ class AbstractPort : public Node {};
 
 class Vector : public Node {
  public:
-  std::unique_ptr<Identifier> id;
+  std::unique_ptr<Expression> id;
   std::unique_ptr<Expression> msb;
   std::unique_ptr<Expression> lsb;
 
-  Vector(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
+  Vector(std::unique_ptr<Expression> id, std::unique_ptr<Expression> msb,
          std::unique_ptr<Expression> lsb)
       : id(std::move(id)), msb(std::move(msb)), lsb(std::move(lsb)){};
   std::string toString() override;
@@ -268,7 +268,7 @@ class Port : public AbstractPort {
  public:
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value;
+  std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>> value;
 
   // technically the following are optional (e.g. port direction/data type
   // can be declared in the body of the definition), but for now let's force
@@ -277,7 +277,7 @@ class Port : public AbstractPort {
   Direction direction;
   PortType data_type;
 
-  Port(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
+  Port(std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>> value,
        Direction direction, PortType data_type)
       : value(std::move(value)),
         direction(std::move(direction)),
@@ -319,7 +319,7 @@ class BehavioralStatement : public Statement {};
 class StructuralStatement : public Statement {};
 
 typedef std::vector<
-    std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
+    std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>>
     Parameters;
 
 class ModuleInstantiation : public StructuralStatement {
@@ -333,19 +333,13 @@ class ModuleInstantiation : public StructuralStatement {
 
   // map from instance port names to connection expression
   // NOTE: anonymous style of module connections is not supported
-  std::map<std::string,
-           std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
-                        std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
-      connections;
+  std::map<std::string, std::unique_ptr<Expression>> connections;
 
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
   ModuleInstantiation(
       std::string module_name, Parameters parameters, std::string instance_name,
-      std::map<std::string,
-               std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
-                            std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
-          connections)
+      std::map<std::string, std::unique_ptr<Expression>> connections)
       : module_name(module_name),
         parameters(std::move(parameters)),
         instance_name(instance_name),
@@ -357,11 +351,11 @@ class ModuleInstantiation : public StructuralStatement {
 class Declaration : public Node {
  public:
   std::string decl;
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                std::unique_ptr<Slice>, std::unique_ptr<Vector>>
       value;
 
-  Declaration(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  Declaration(std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                            std::unique_ptr<Slice>, std::unique_ptr<Vector>>
                   value,
               std::string decl)
@@ -373,7 +367,7 @@ class Declaration : public Node {
 
 class Wire : public Declaration {
  public:
-  Wire(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  Wire(std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                     std::unique_ptr<Slice>, std::unique_ptr<Vector>>
            value)
       : Declaration(std::move(value), "wire"){};
@@ -382,7 +376,7 @@ class Wire : public Declaration {
 
 class Reg : public Declaration {
  public:
-  Reg(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  Reg(std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                    std::unique_ptr<Slice>, std::unique_ptr<Vector>>
           value)
       : Declaration(std::move(value), "reg"){};
@@ -391,14 +385,14 @@ class Reg : public Declaration {
 
 class Assign : public Node {
  public:
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                std::unique_ptr<Slice>>
       target;
   std::unique_ptr<Expression> value;
   std::string prefix;
   std::string symbol;
 
-  Assign(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  Assign(std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                       std::unique_ptr<Slice>>
              target,
          std::unique_ptr<Expression> value, std::string prefix)
@@ -406,7 +400,7 @@ class Assign : public Node {
         value(std::move(value)),
         prefix(prefix),
         symbol("="){};
-  Assign(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  Assign(std::variant<std::unique_ptr<Expression>, std::unique_ptr<Index>,
                       std::unique_ptr<Slice>>
              target,
          std::unique_ptr<Expression> value, std::string prefix,
@@ -422,7 +416,7 @@ class Assign : public Node {
 
 class ContinuousAssign : public StructuralStatement, public Assign {
  public:
-  ContinuousAssign(std::variant<std::unique_ptr<Identifier>,
+  ContinuousAssign(std::variant<std::unique_ptr<Expression>,
                                 std::unique_ptr<Index>, std::unique_ptr<Slice>>
                        target,
                    std::unique_ptr<Expression> value)
@@ -436,7 +430,7 @@ class BehavioralAssign : public BehavioralStatement {};
 
 class BlockingAssign : public BehavioralAssign, public Assign {
  public:
-  BlockingAssign(std::variant<std::unique_ptr<Identifier>,
+  BlockingAssign(std::variant<std::unique_ptr<Expression>,
                               std::unique_ptr<Index>, std::unique_ptr<Slice>>
                      target,
                  std::unique_ptr<Expression> value)
@@ -448,7 +442,7 @@ class BlockingAssign : public BehavioralAssign, public Assign {
 
 class NonBlockingAssign : public BehavioralAssign, public Assign {
  public:
-  NonBlockingAssign(std::variant<std::unique_ptr<Identifier>,
+  NonBlockingAssign(std::variant<std::unique_ptr<Expression>,
                                  std::unique_ptr<Index>, std::unique_ptr<Slice>>
                         target,
                     std::unique_ptr<Expression> value)
@@ -465,7 +459,7 @@ class CallStmt : public BehavioralStatement, public Call {
   std::string toString() { return Call::toString() + ";"; };
 };
 
-class Star : Node {
+class Star : public Expression {
  public:
   std::string toString() { return "*"; };
   ~Star(){};
@@ -473,18 +467,12 @@ class Star : Node {
 
 class Always : public StructuralStatement {
  public:
-  std::vector<
-      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
-                   std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
-      sensitivity_list;
+  std::vector<std::unique_ptr<Expression>> sensitivity_list;
   std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
                            std::unique_ptr<Declaration>>>
       body;
 
-  Always(std::vector<
-             std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
-                          std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
-             sensitivity_list,
+  Always(std::vector<std::unique_ptr<Expression>> sensitivity_list,
          std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
                                   std::unique_ptr<Declaration>>>
              body)
@@ -573,16 +561,16 @@ std::unique_ptr<BinaryOp> make_binop(std::unique_ptr<Expression> left,
                                      std::unique_ptr<Expression> right);
 
 std::unique_ptr<Port> make_port(
-    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
+    std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>> value,
     Direction direction, PortType data_type);
 
-std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
+std::unique_ptr<Vector> make_vector(std::unique_ptr<Expression> id,
                                     std::unique_ptr<Expression> msb,
                                     std::unique_ptr<Expression> lsb);
 
 class Transformer {
  public:
-  std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node) {
+  virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node) {
     if (auto ptr = dynamic_cast<NumericLiteral*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<NumericLiteral>(ptr));
@@ -639,48 +627,51 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<NumericLiteral> visit(std::unique_ptr<NumericLiteral> node) {
+  virtual std::unique_ptr<NumericLiteral> visit(
+      std::unique_ptr<NumericLiteral> node) {
     return node;
   };
 
-  std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node) {
+  virtual std::unique_ptr<Expression> visit(std::unique_ptr<Identifier> node) {
     return node;
   };
 
-  std::unique_ptr<String> visit(std::unique_ptr<String> node) { return node; };
+  virtual std::unique_ptr<String> visit(std::unique_ptr<String> node) {
+    return node;
+  };
 
-  std::unique_ptr<Index> visit(std::unique_ptr<Index> node) {
+  virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node) {
     node->id = this->visit(std::move(node->id));
     node->index = this->visit(std::move(node->index));
     return node;
   };
 
-  std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node) {
+  virtual std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node) {
     node->id = this->visit(std::move(node->id));
     node->high_index = this->visit(std::move(node->high_index));
     node->low_index = this->visit(std::move(node->low_index));
     return node;
   };
 
-  std::unique_ptr<BinaryOp> visit(std::unique_ptr<BinaryOp> node) {
+  virtual std::unique_ptr<BinaryOp> visit(std::unique_ptr<BinaryOp> node) {
     node->left = this->visit(std::move(node->left));
     node->right = this->visit(std::move(node->right));
     return node;
   };
 
-  std::unique_ptr<UnaryOp> visit(std::unique_ptr<UnaryOp> node) {
+  virtual std::unique_ptr<UnaryOp> visit(std::unique_ptr<UnaryOp> node) {
     node->operand = this->visit(std::move(node->operand));
     return node;
   };
 
-  std::unique_ptr<TernaryOp> visit(std::unique_ptr<TernaryOp> node) {
+  virtual std::unique_ptr<TernaryOp> visit(std::unique_ptr<TernaryOp> node) {
     node->cond = this->visit(std::move(node->cond));
     node->true_value = this->visit(std::move(node->true_value));
     node->false_value = this->visit(std::move(node->false_value));
     return node;
   };
 
-  std::unique_ptr<Concat> visit(std::unique_ptr<Concat> node) {
+  virtual std::unique_ptr<Concat> visit(std::unique_ptr<Concat> node) {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (auto&& expr : node->args) {
       new_args.push_back(this->visit(std::move(expr)));
@@ -689,21 +680,21 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<Replicate> visit(std::unique_ptr<Replicate> node) {
+  virtual std::unique_ptr<Replicate> visit(std::unique_ptr<Replicate> node) {
     node->num = this->visit(std::move(node->num));
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node) {
+  virtual std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node) {
     return node;
   };
 
-  std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node) {
+  virtual std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node) {
     return node;
   };
 
-  std::unique_ptr<CallExpr> visit(std::unique_ptr<CallExpr> node) {
+  virtual std::unique_ptr<CallExpr> visit(std::unique_ptr<CallExpr> node) {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (auto&& expr : node->args) {
       new_args.push_back(this->visit(std::move(expr)));
@@ -712,14 +703,15 @@ class Transformer {
     return node;
   };
 
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> visit(
-      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node) {
+  virtual std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>>
+  visit(
+      std::variant<std::unique_ptr<Expression>, std::unique_ptr<Vector>> node) {
     return std::visit(
-        [&](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
+        [&](auto&& value) -> std::variant<std::unique_ptr<Expression>,
                                           std::unique_ptr<Vector>> {
-          if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
+          if (auto ptr = dynamic_cast<Expression*>(value.get())) {
             value.release();
-            return this->visit(std::unique_ptr<Identifier>(ptr));
+            return this->visit(std::unique_ptr<Expression>(ptr));
           }
           if (auto ptr = dynamic_cast<Vector*>(value.get())) {
             value.release();
@@ -731,28 +723,29 @@ class Transformer {
         node);
   };
 
-  std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
+  virtual std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
     node->id = this->visit(std::move(node->id));
     node->msb = this->visit(std::move(node->msb));
     node->lsb = this->visit(std::move(node->lsb));
     return node;
   };
 
-  std::unique_ptr<Port> visit(std::unique_ptr<Port> node) {
+  virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node) {
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node) {
+  virtual std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node) {
     return node;
   };
 
-  std::unique_ptr<SingleLineComment> visit(
+  virtual std::unique_ptr<SingleLineComment> visit(
       std::unique_ptr<SingleLineComment> node) {
     return node;
   };
 
-  std::unique_ptr<BlockComment> visit(std::unique_ptr<BlockComment> node) {
+  virtual std::unique_ptr<BlockComment> visit(
+      std::unique_ptr<BlockComment> node) {
     return node;
   };
 
@@ -762,7 +755,7 @@ class Transformer {
         [&](auto&& value) -> T { return this->visit(std::move(value)); }, node);
   }
 
-  std::unique_ptr<ModuleInstantiation> visit(
+  virtual std::unique_ptr<ModuleInstantiation> visit(
       std::unique_ptr<ModuleInstantiation> node) {
     for (auto&& conn : node->connections) {
       conn.second = this->visit(std::move(conn.second));
@@ -774,24 +767,25 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node) {
+  virtual std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node) {
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<Reg> visit(std::unique_ptr<Reg> node) {
+  virtual std::unique_ptr<Reg> visit(std::unique_ptr<Reg> node) {
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<ContinuousAssign> visit(
+  virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node) {
     node->target = this->visit(std::move(node->target));
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node) {
+  virtual std::unique_ptr<Declaration> visit(
+      std::unique_ptr<Declaration> node) {
     if (auto ptr = dynamic_cast<Wire*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<Wire>(ptr));
@@ -804,7 +798,7 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<BehavioralStatement> visit(
+  virtual std::unique_ptr<BehavioralStatement> visit(
       std::unique_ptr<BehavioralStatement> node) {
     if (auto ptr = dynamic_cast<BlockingAssign*>(node.get())) {
       node.release();
@@ -822,20 +816,21 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<BlockingAssign> visit(std::unique_ptr<BlockingAssign> node) {
+  virtual std::unique_ptr<BlockingAssign> visit(
+      std::unique_ptr<BlockingAssign> node) {
     node->target = this->visit(std::move(node->target));
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<NonBlockingAssign> visit(
+  virtual std::unique_ptr<NonBlockingAssign> visit(
       std::unique_ptr<NonBlockingAssign> node) {
     node->target = this->visit(std::move(node->target));
     node->value = this->visit(std::move(node->value));
     return node;
   };
 
-  std::unique_ptr<CallStmt> visit(std::unique_ptr<CallStmt> node) {
+  virtual std::unique_ptr<CallStmt> visit(std::unique_ptr<CallStmt> node) {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (auto&& expr : node->args) {
       new_args.push_back(this->visit(std::move(expr)));
@@ -844,13 +839,12 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<Star> visit(std::unique_ptr<Star> node) { return node; };
+  virtual std::unique_ptr<Star> visit(std::unique_ptr<Star> node) {
+    return node;
+  };
 
-  std::unique_ptr<Always> visit(std::unique_ptr<Always> node) {
-    std::vector<
-        std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
-                     std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
-        new_sensitivity_list;
+  virtual std::unique_ptr<Always> visit(std::unique_ptr<Always> node) {
+    std::vector<std::unique_ptr<Expression>> new_sensitivity_list;
     for (auto&& item : node->sensitivity_list) {
       new_sensitivity_list.push_back(this->visit(std::move(item)));
     }
@@ -865,7 +859,8 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<AbstractPort> visit(std::unique_ptr<AbstractPort> node) {
+  virtual std::unique_ptr<AbstractPort> visit(
+      std::unique_ptr<AbstractPort> node) {
     if (auto ptr = dynamic_cast<Port*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<Port>(ptr));
@@ -878,7 +873,7 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<StructuralStatement> visit(
+  virtual std::unique_ptr<StructuralStatement> visit(
       std::unique_ptr<StructuralStatement> node) {
     if (auto ptr = dynamic_cast<ModuleInstantiation*>(node.get())) {
       node.release();
@@ -896,7 +891,7 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
+  virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
     std::vector<std::unique_ptr<AbstractPort>> new_ports;
     for (auto&& item : node->ports) {
       new_ports.push_back(this->visit(std::move(item)));
@@ -912,16 +907,18 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<StringBodyModule> visit(
+  virtual std::unique_ptr<StringBodyModule> visit(
       std::unique_ptr<StringBodyModule> node) {
     return node;
   };
 
-  std::unique_ptr<StringModule> visit(std::unique_ptr<StringModule> node) {
+  virtual std::unique_ptr<StringModule> visit(
+      std::unique_ptr<StringModule> node) {
     return node;
   };
 
-  std::unique_ptr<AbstractModule> visit(std::unique_ptr<AbstractModule> node) {
+  virtual std::unique_ptr<AbstractModule> visit(
+      std::unique_ptr<AbstractModule> node) {
     if (auto ptr = dynamic_cast<Module*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<Module>(ptr));
@@ -934,7 +931,7 @@ class Transformer {
     return node;
   };
 
-  std::unique_ptr<File> visit(std::unique_ptr<File> node) {
+  virtual std::unique_ptr<File> visit(std::unique_ptr<File> node) {
     std::vector<std::unique_ptr<AbstractModule>> new_modules;
     for (auto&& item : node->modules) {
       new_modules.push_back(this->visit(std::move(item)));
