@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "verilogAST.hpp"
+#include "common.cpp"
 
 namespace vAST = verilogAST;
 
@@ -33,6 +34,20 @@ class ReplaceNameWithExpr : public vAST::Transformer {
   };
 };
 
+class AlwaysTransformer : public vAST::Transformer {
+ public:
+  using vAST::Transformer::visit;
+  virtual std::unique_ptr<vAST::Identifier> visit(
+      std::unique_ptr<vAST::Identifier> node) {
+    if (node->value == "a") {
+      return vAST::make_id("z");
+    } else if (node->value == "b") {
+      return vAST::make_id("y");
+    }
+    return node;
+  };
+};
+
 namespace {
 TEST(TransformerTests, TestXtoZ) {
   std::vector<std::unique_ptr<vAST::Expression>> concat_args;
@@ -56,6 +71,29 @@ TEST(TransformerTests, TestReplaceNameWithExpr) {
       vAST::make_id("x"), vAST::BinOp::MUL, vAST::make_id("y"));
   ReplaceNameWithExpr transformer;
   EXPECT_EQ(transformer.visit(std::move(expr))->toString(), "(z - w) * y");
+}
+TEST(TransformerTests, TestAlways) {
+  std::vector<std::variant<
+      std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
+      std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
+      sensitivity_list;
+  sensitivity_list.push_back(std::make_unique<vAST::Identifier>("a"));
+  sensitivity_list.push_back(
+      std::make_unique<vAST::PosEdge>(std::make_unique<vAST::Identifier>("b")));
+  sensitivity_list.push_back(
+      std::make_unique<vAST::NegEdge>(std::make_unique<vAST::Identifier>("c")));
+  sensitivity_list.push_back(
+      std::make_unique<vAST::Star>());
+  std::unique_ptr<vAST::Always> always = std::make_unique<vAST::Always>(std::move(sensitivity_list),
+          make_simple_always_body());
+  std::string expected_str =
+      "always @(z, posedge y, negedge c, *) begin\n"
+      "z = y;\n"
+      "y <= c;\n"
+      "$display(\"b=%d, c=%d\", y, c);\n"
+      "end\n";
+  AlwaysTransformer transformer;
+  EXPECT_EQ(transformer.visit(std::move(always))->toString(), expected_str);
 }
 }  // namespace
 

@@ -699,10 +699,12 @@ class Transformer {
   };
 
   virtual std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node) {
+    node->value = this->visit(std::move(node->value));
     return node;
   };
 
   virtual std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node) {
+    node->value = this->visit(std::move(node->value));
     return node;
   };
 
