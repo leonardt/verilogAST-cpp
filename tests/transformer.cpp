@@ -118,13 +118,22 @@ TEST(TransformerTests, TestAlways) {
   sensitivity_list.push_back(
       std::make_unique<vAST::NegEdge>(std::make_unique<vAST::Identifier>("c")));
   sensitivity_list.push_back(std::make_unique<vAST::Star>());
+
+  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+                               always_body = make_simple_always_body();
+  always_body.push_back(std::make_unique<vAST::SingleLineComment>("Test comment"));
+  always_body.push_back(std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
+
   std::unique_ptr<vAST::Always> always = std::make_unique<vAST::Always>(
-      std::move(sensitivity_list), make_simple_always_body());
+      std::move(sensitivity_list), std::move(always_body));
   std::string expected_str =
       "always @(z, posedge y, negedge c, *) begin\n"
       "z = y;\n"
       "y <= c;\n"
       "$display(\"b=%d, c=%d\", y, c);\n"
+      "// Test comment\n"
+      "/*\nTest comment\non multiple lines\n*/\n"
       "end\n";
   AlwaysTransformer transformer;
   EXPECT_EQ(transformer.visit(std::move(always))->toString(), expected_str);
