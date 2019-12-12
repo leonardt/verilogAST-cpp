@@ -125,6 +125,13 @@ TEST(BasicTests, TestUnaryOp) {
   }
 }
 
+TEST(BasicTests, TestUnaryParens) {
+  vAST::UnaryOp un_op(vAST::make_binop(vAST::make_id("x"), vAST::BinOp::ADD,
+                                       vAST::make_id("y")),
+                      vAST::UnOp::INVERT);
+  EXPECT_EQ(un_op.toString(), "~ (x + y)");
+}
+
 TEST(BasicTests, TestTernaryOp) {
   vAST::UnaryOp un_op(std::make_unique<vAST::Identifier>("x"),
                       vAST::UnOp::INVERT);

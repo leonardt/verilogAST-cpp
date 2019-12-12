@@ -240,7 +240,16 @@ std::string UnaryOp::toString() {
       op_str = "-";
       break;
   }
-  return op_str + ' ' + operand->toString();
+  std::string operand_str = operand->toString();
+  // TODO Precedence logic, for now we just insert parens if not symbol or num
+  if (dynamic_cast<Identifier*>(operand.get())) {
+  } else if (dynamic_cast<NumericLiteral*>(operand.get())) {
+  } else if (dynamic_cast<Index*>(operand.get())) {
+  } else if (dynamic_cast<Slice*>(operand.get())) {
+  } else {
+      operand_str = "(" + operand_str + ")";
+  }
+  return op_str + ' ' + operand_str;
 }
 
 std::string TernaryOp::toString() {
