@@ -627,8 +627,8 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<CallExpr>(ptr));
     }
-    throw std::runtime_error("Unreachable");
-    return node;
+    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+    return node;  // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<NumericLiteral> visit(
@@ -723,8 +723,8 @@ class Transformer {
             value.release();
             return this->visit(std::unique_ptr<Vector>(ptr));
           }
-          throw std::runtime_error("Unreachable");
-          return std::move(value);
+          throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+          return std::move(value);  // LCOV_EXCL_LINE
         },
         node);
   };
@@ -800,8 +800,8 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<Reg>(ptr));
     }
-    throw std::runtime_error("Unreachable");
-    return node;
+    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+    return node;  // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<BehavioralStatement> visit(
@@ -818,8 +818,8 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<CallStmt>(ptr));
     }
-    throw std::runtime_error("Unreachable");
-    return node;
+    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+    return node;  // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<BlockingAssign> visit(
@@ -878,8 +878,8 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<StringPort>(ptr));
     }
-    throw std::runtime_error("Unreachable");
-    return node;
+    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+    return node;  // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<StructuralStatement> visit(
@@ -896,8 +896,8 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<Always>(ptr));
     }
-    throw std::runtime_error("Unreachable");
-    return node;
+    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+    return node;  // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
@@ -944,8 +944,8 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<StringBodyModule>(ptr));
     }
-    throw std::runtime_error("Unreachable");
-    return node;
+    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+    return node;  // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<File> visit(std::unique_ptr<File> node) {
