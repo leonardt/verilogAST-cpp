@@ -123,14 +123,26 @@ TEST(TransformerTests, TestModule) {
       std::make_unique<vAST::Vector>(vAST::make_id("o"), vAST::make_num("3"),
                                      vAST::make_id("c")),
       vAST::OUTPUT, vAST::WIRE));
-  std::unique_ptr<vAST::AbstractModule> module =
-      std::make_unique<vAST::Module>("test_module0", std::move(ports),
-                                     make_simple_body(), make_simple_params());
+
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body = make_simple_body();
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("c"),
+      std::make_unique<vAST::Identifier>("b")));
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("c")));
+
+  body.push_back(std::make_unique<vAST::Reg>(std::make_unique<vAST::Identifier>("c")));
+
+  std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
+      "test_module0", std::move(ports), std::move(body), make_simple_params());
   std::string expected_str =
       "module test_module0 #(parameter y = 0, parameter param1 = "
       "1) (input i, output [3:g] o);\nother_module #(.y(0), "
       ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
-      ".c(g[31:0]));\nendmodule\n";
+      ".c(g[31:0]));\nassign g = b;\nwire g;\nreg g;\nendmodule\n";
 
   ModuleTransformer transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
