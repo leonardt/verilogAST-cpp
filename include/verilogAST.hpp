@@ -644,7 +644,7 @@ class Transformer {
     return node;
   };
 
-  virtual std::unique_ptr<Expression> visit(std::unique_ptr<Identifier> node) {
+  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node) {
     return node;
   };
 
@@ -653,25 +653,13 @@ class Transformer {
   };
 
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node) {
-    std::unique_ptr<Expression> expr = this->visit(std::move(node->id));
-    if (auto ptr = dynamic_cast<Identifier*>(expr.get())) {
-      expr.release();
-      node->id = std::unique_ptr<Identifier>(ptr);
-    } else {
-      throw std::runtime_error("Visitor returned non Identifier for Index.id");
-    }
+    node->id = this->visit(std::move(node->id));
     node->index = this->visit(std::move(node->index));
     return node;
   };
 
   virtual std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node) {
-    std::unique_ptr<Expression> expr = this->visit(std::move(node->id));
-    if (auto ptr = dynamic_cast<Identifier*>(expr.get())) {
-      expr.release();
-      node->id = std::unique_ptr<Identifier>(ptr);
-    } else {
-      throw std::runtime_error("Visitor returned non Identifier for Slice.id");
-    }
+    node->id = this->visit(std::move(node->id));
     node->high_index = this->visit(std::move(node->high_index));
     node->low_index = this->visit(std::move(node->low_index));
     return node;
@@ -735,14 +723,7 @@ class Transformer {
                                           std::unique_ptr<Vector>> {
           if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
             value.release();
-            std::unique_ptr<Expression> expr = this->visit(std::unique_ptr<Identifier>(ptr));
-            if (auto ptr = dynamic_cast<Identifier*>(expr.get())) {
-              expr.release();
-              return std::unique_ptr<Identifier>(ptr);
-            } else {
-              throw std::runtime_error("Visitor returned non Identifier for variant");
-              return std::move(value);
-            }
+            return this->visit(std::unique_ptr<Identifier>(ptr));
           }
           if (auto ptr = dynamic_cast<Vector*>(value.get())) {
             value.release();
@@ -755,13 +736,7 @@ class Transformer {
   };
 
   virtual std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
-    std::unique_ptr<Expression> expr = this->visit(std::move(node->id));
-    if (auto ptr = dynamic_cast<Identifier*>(expr.get())) {
-      expr.release();
-      node->id = std::unique_ptr<Identifier>(ptr);
-    } else {
-      throw std::runtime_error("Visitor returned non Identifier for Vector.id");
-    }
+    node->id = this->visit(std::move(node->id));
     node->msb = this->visit(std::move(node->msb));
     node->lsb = this->visit(std::move(node->lsb));
     return node;
@@ -798,13 +773,7 @@ class Transformer {
       conn.second = this->visit(std::move(conn.second));
     }
     for (auto&& param : node->parameters) {
-      std::unique_ptr<Expression> expr = this->visit(std::move(param.first));
-      if (auto ptr = dynamic_cast<Identifier*>(expr.get())) {
-        expr.release();
-        param.first = std::unique_ptr<Identifier>(ptr);
-      } else {
-        throw std::runtime_error("Visitor returned non Identifier for Index.id");
-      }
+      param.first = this->visit(std::move(param.first));
       param.second = this->visit(std::move(param.second));
     }
     return node;

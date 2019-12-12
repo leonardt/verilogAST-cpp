@@ -4,9 +4,9 @@
 namespace vAST = verilogAST;
 
 class XtoZ : public vAST::Transformer {
-  public:
+ public:
   using vAST::Transformer::visit;
-  virtual std::unique_ptr<vAST::Expression> visit(
+  virtual std::unique_ptr<vAST::Identifier> visit(
       std::unique_ptr<vAST::Identifier> node) {
     if (node->value == "x") {
       return vAST::make_id("z");
@@ -16,18 +16,20 @@ class XtoZ : public vAST::Transformer {
 };
 
 class ReplaceNameWithExpr : public vAST::Transformer {
-  public:
+ public:
   using vAST::Transformer::visit;
   virtual std::unique_ptr<vAST::Expression> visit(
-      std::unique_ptr<vAST::Identifier> node) {
-    if (node->value == "x") {
-      return vAST::make_binop(
-              vAST::make_id("z"),
-              vAST::BinOp::SUB,
-              vAST::make_id("w")
-      );
+      std::unique_ptr<vAST::Expression> node) {
+    if (auto ptr = dynamic_cast<vAST::Identifier *>(node.get())) {
+      node.release();
+      std::unique_ptr<vAST::Identifier> id(ptr);
+      if (id->value == "x") {
+        return vAST::make_binop(vAST::make_id("z"), vAST::BinOp::SUB,
+                                vAST::make_id("w"));
+      }
+      return vAST::Transformer::visit(std::move(id));
     }
-    return node;
+    return vAST::Transformer::visit(std::move(node));
   };
 };
 
