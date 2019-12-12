@@ -2,6 +2,7 @@
 #ifndef VERILOGAST_H
 #define VERILOGAST_H
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
@@ -26,6 +27,7 @@ class Expression : public Node {
 enum Radix { BINARY, OCTAL, HEX, DECIMAL };
 
 class NumericLiteral : public Expression {
+ public:
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
   //  convert it during code generation)
@@ -38,7 +40,6 @@ class NumericLiteral : public Expression {
   bool _signed;       // default false
   Radix radix;        // default decimal
 
- public:
   NumericLiteral(std::string value, unsigned int size, bool _signed,
                  Radix radix)
       : value(value), size(size), _signed(_signed), radix(radix){};
@@ -60,9 +61,9 @@ class NumericLiteral : public Expression {
 // TODO also need a string literal, as strings can be used as parameter values
 
 class Identifier : public Expression {
+ public:
   std::string value;
 
- public:
   Identifier(std::string value) : value(value){};
 
   std::string toString() override;
@@ -70,9 +71,9 @@ class Identifier : public Expression {
 };
 
 class String : public Expression {
+ public:
   std::string value;
 
- public:
   String(std::string value) : value(value){};
 
   std::string toString() override;
@@ -80,10 +81,10 @@ class String : public Expression {
 };
 
 class Index : public Expression {
+ public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> index;
 
- public:
   Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
       : id(std::move(id)), index(std::move(index)){};
   std::string toString() override;
@@ -91,11 +92,11 @@ class Index : public Expression {
 };
 
 class Slice : public Expression {
+ public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> high_index;
   std::unique_ptr<Expression> low_index;
 
- public:
   Slice(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> high_index,
         std::unique_ptr<Expression> low_index)
       : id(std::move(id)),
@@ -132,11 +133,11 @@ enum BinOp {
 }
 
 class BinaryOp : public Expression {
+ public:
   std::unique_ptr<Expression> left;
   BinOp::BinOp op;
   std::unique_ptr<Expression> right;
 
- public:
   BinaryOp(std::unique_ptr<Expression> left, BinOp::BinOp op,
            std::unique_ptr<Expression> right)
       : left(std::move(left)), op(op), right(std::move(right)){};
@@ -161,11 +162,11 @@ enum UnOp {
 }
 
 class UnaryOp : public Expression {
+ public:
   std::unique_ptr<Expression> operand;
 
   UnOp::UnOp op;
 
- public:
   UnaryOp(std::unique_ptr<Expression> operand, UnOp::UnOp op)
       : operand(std::move(operand)), op(op){};
   std::string toString();
@@ -173,11 +174,11 @@ class UnaryOp : public Expression {
 };
 
 class TernaryOp : public Expression {
+ public:
   std::unique_ptr<Expression> cond;
   std::unique_ptr<Expression> true_value;
   std::unique_ptr<Expression> false_value;
 
- public:
   TernaryOp(std::unique_ptr<Expression> cond,
             std::unique_ptr<Expression> true_value,
             std::unique_ptr<Expression> false_value)
@@ -189,47 +190,47 @@ class TernaryOp : public Expression {
 };
 
 class Concat : public Expression {
+ public:
   std::vector<std::unique_ptr<Expression>> args;
 
- public:
   Concat(std::vector<std::unique_ptr<Expression>> args)
       : args(std::move(args)){};
   std::string toString();
 };
 
 class Replicate : public Expression {
-    std::unique_ptr<Expression> num;
-    std::unique_ptr<Expression> value;
-
  public:
+  std::unique_ptr<Expression> num;
+  std::unique_ptr<Expression> value;
+
   Replicate(std::unique_ptr<Expression> num, std::unique_ptr<Expression> value)
       : num(std::move(num)), value(std::move(value)){};
   std::string toString();
 };
 
-class NegEdge : public Expression {
-  std::unique_ptr<Expression> value;
-
+class NegEdge : public Node {
  public:
-  NegEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
+  std::unique_ptr<Identifier> value;
+
+  NegEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
   std::string toString();
   ~NegEdge(){};
 };
 
-class PosEdge : public Expression {
-  std::unique_ptr<Expression> value;
-
+class PosEdge : public Node {
  public:
-  PosEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
+  std::unique_ptr<Identifier> value;
+
+  PosEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
   std::string toString();
   ~PosEdge(){};
 };
 
 class Call {
+ public:
   std::string func;
   std::vector<std::unique_ptr<Expression>> args;
 
- public:
   Call(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : func(func), args(std::move(args)){};
   std::string toString();
@@ -251,11 +252,11 @@ enum PortType { WIRE, REG };
 class AbstractPort : public Node {};
 
 class Vector : public Node {
+ public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> msb;
   std::unique_ptr<Expression> lsb;
 
- public:
   Vector(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
          std::unique_ptr<Expression> lsb)
       : id(std::move(id)), msb(std::move(msb)), lsb(std::move(lsb)){};
@@ -264,6 +265,7 @@ class Vector : public Node {
 };
 
 class Port : public AbstractPort {
+ public:
   // Required
   // `<name>` or `<name>[n]` or `name[n:m]`
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value;
@@ -275,7 +277,6 @@ class Port : public AbstractPort {
   Direction direction;
   PortType data_type;
 
- public:
   Port(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
        Direction direction, PortType data_type)
       : value(std::move(value)),
@@ -286,9 +287,9 @@ class Port : public AbstractPort {
 };
 
 class StringPort : public AbstractPort {
+ public:
   std::string value;
 
- public:
   StringPort(std::string value) : value(value){};
   std::string toString() { return value; };
   ~StringPort(){};
@@ -296,32 +297,34 @@ class StringPort : public AbstractPort {
 
 class Statement : public Node {};
 
-class SingleLineComment : public Statement {
+class BehavioralStatement : public Statement {};
+class StructuralStatement : public Statement {};
+
+class SingleLineComment : public StructuralStatement,
+                          public BehavioralStatement {
+ public:
   std::string value;
 
- public:
   SingleLineComment(std::string value) : value(value){};
   std::string toString() { return "// " + value; };
   ~SingleLineComment(){};
 };
 
-class BlockComment : public Statement {
+class BlockComment : public StructuralStatement, public BehavioralStatement {
+ public:
   std::string value;
 
- public:
   BlockComment(std::string value) : value(value){};
   std::string toString() { return "/*\n" + value + "\n*/"; };
   ~BlockComment(){};
 };
-
-class BehavioralStatement : public Statement {};
-class StructuralStatement : public Statement {};
 
 typedef std::vector<
     std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
     Parameters;
 
 class ModuleInstantiation : public StructuralStatement {
+ public:
   std::string module_name;
 
   // parameter,value
@@ -336,7 +339,6 @@ class ModuleInstantiation : public StructuralStatement {
                         std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
       connections;
 
- public:
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
   ModuleInstantiation(
@@ -354,7 +356,7 @@ class ModuleInstantiation : public StructuralStatement {
 };
 
 class Declaration : public Node {
- protected:
+ public:
   std::string decl;
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
                std::unique_ptr<Slice>, std::unique_ptr<Vector>>
@@ -366,7 +368,6 @@ class Declaration : public Node {
               std::string decl)
       : decl(decl), value(std::move(value)){};
 
- public:
   std::string toString();
   virtual ~Declaration() = default;
 };
@@ -390,7 +391,7 @@ class Reg : public Declaration {
 };
 
 class Assign : public Node {
- protected:
+ public:
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
                std::unique_ptr<Slice>>
       target;
@@ -416,7 +417,6 @@ class Assign : public Node {
         prefix(prefix),
         symbol(symbol){};
 
- public:
   std::string toString();
   virtual ~Assign() = default;
 };
@@ -473,6 +473,7 @@ class Star : Node {
 };
 
 class Always : public StructuralStatement {
+ public:
   std::vector<
       std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                    std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
@@ -481,7 +482,6 @@ class Always : public StructuralStatement {
                            std::unique_ptr<Declaration>>>
       body;
 
- public:
   Always(std::vector<
              std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                           std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
@@ -503,7 +503,7 @@ class Always : public StructuralStatement {
 class AbstractModule : public Node {};
 
 class Module : public AbstractModule {
- protected:
+ public:
   std::string name;
   std::vector<std::unique_ptr<AbstractPort>> ports;
   std::vector<std::variant<std::unique_ptr<StructuralStatement>,
@@ -519,7 +519,6 @@ class Module : public AbstractModule {
         ports(std::move(ports)),
         parameters(std::move(parameters)){};
 
- public:
   Module(std::string name, std::vector<std::unique_ptr<AbstractPort>> ports,
          std::vector<std::variant<std::unique_ptr<StructuralStatement>,
                                   std::unique_ptr<Declaration>>>
@@ -535,9 +534,9 @@ class Module : public AbstractModule {
 };
 
 class StringBodyModule : public Module {
+ public:
   std::string body;
 
- public:
   StringBodyModule(std::string name,
                    std::vector<std::unique_ptr<AbstractPort>> ports,
                    std::string body, Parameters parameters)
@@ -547,19 +546,19 @@ class StringBodyModule : public Module {
 };
 
 class StringModule : public AbstractModule {
+ public:
   std::string definition;
 
- public:
   StringModule(std::string definition) : definition(definition){};
   std::string toString() { return definition; };
   ~StringModule(){};
 };
 
 class File : public Node {
+ public:
   std::vector<std::unique_ptr<AbstractModule>> modules;
 
- public:
-  File(std::vector<std::unique_ptr<AbstractModule>> &modules)
+  File(std::vector<std::unique_ptr<AbstractModule>>& modules)
       : modules(std::move(modules)){};
   std::string toString();
   ~File(){};

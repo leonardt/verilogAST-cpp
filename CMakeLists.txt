@@ -21,7 +21,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include/
 ) 
 
-set(LIB_SOURCES src/verilogAST.cpp)
+set(LIB_SOURCES src/verilogAST.cpp src/transformer.cpp)
 
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
@@ -57,6 +57,10 @@ if (VERILOGAST_BUILD_TESTS)
     add_executable(parameterized_module tests/parameterized_module.cpp)
     target_link_libraries(parameterized_module gtest_main ${LIBRARY_NAME})
     add_test(NAME parameterized_module_tests COMMAND parameterized_module)
+
+    add_executable(transformer tests/transformer.cpp)
+    target_link_libraries(transformer gtest_main ${LIBRARY_NAME})
+    add_test(NAME transformer_tests COMMAND transformer)
 endif()
 
 install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
