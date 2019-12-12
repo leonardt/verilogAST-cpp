@@ -914,6 +914,10 @@ class Transformer {
       new_ports.push_back(this->visit(std::move(item)));
     }
     node->ports = std::move(new_ports);
+    for (auto&& param : node->parameters) {
+      param.first = this->visit(std::move(param.first));
+      param.second = this->visit(std::move(param.second));
+    }
     std::vector<std::variant<std::unique_ptr<StructuralStatement>,
                              std::unique_ptr<Declaration>>>
         new_body;

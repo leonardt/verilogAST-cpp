@@ -48,6 +48,20 @@ class AlwaysTransformer : public vAST::Transformer {
   };
 };
 
+class ModuleTransformer : public vAST::Transformer {
+ public:
+  using vAST::Transformer::visit;
+  virtual std::unique_ptr<vAST::Identifier> visit(
+      std::unique_ptr<vAST::Identifier> node) {
+    if (node->value == "c") {
+      return vAST::make_id("g");
+    } else if (node->value == "param0") {
+      return vAST::make_id("y");
+    }
+    return node;
+  };
+};
+
 namespace {
 TEST(TransformerTests, TestXtoZ) {
   std::vector<std::unique_ptr<vAST::Expression>> concat_args;
@@ -94,6 +108,19 @@ TEST(TransformerTests, TestAlways) {
       "end\n";
   AlwaysTransformer transformer;
   EXPECT_EQ(transformer.visit(std::move(always))->toString(), expected_str);
+}
+TEST(TransformerTests, TestModule) {
+  std::unique_ptr<vAST::AbstractModule> module =
+      std::make_unique<vAST::Module>( "test_module0", make_simple_ports(),
+              make_simple_body(), make_simple_params());
+  std::string expected_str =
+      "module test_module0 #(parameter y = 0, parameter param1 = "
+      "1) (input i, output o);\nother_module #(.y(0), "
+      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
+      ".c(g[31:0]));\nendmodule\n";
+
+  ModuleTransformer transformer;
+  EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
 }
 }  // namespace
 
