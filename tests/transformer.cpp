@@ -67,7 +67,8 @@ TEST(TransformerTests, TestXtoZ) {
   std::vector<std::unique_ptr<vAST::Expression>> concat_args;
   concat_args.push_back(vAST::make_id("x"));
   concat_args.push_back(vAST::make_id("b"));
-  std::unique_ptr<vAST::Expression> expr = std::make_unique<vAST::TernaryOp>(
+  std::vector<std::unique_ptr<vAST::Expression>> call_args;
+  call_args.push_back(std::make_unique<vAST::TernaryOp>(
       std::make_unique<vAST::Concat>(std::move(concat_args)),
       vAST::make_binop(
           std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("3"),
@@ -78,10 +79,13 @@ TEST(TransformerTests, TestXtoZ) {
                                             vAST::make_num("1")),
               vAST::UnOp::INVERT)),
       std::make_unique<vAST::Replicate>(vAST::make_num("2"),
-                                        vAST::make_id("x")));
+                                        vAST::make_id("x"))));
+  call_args.push_back(vAST::make_id("x"));
+  std::unique_ptr<vAST::Expression> expr =
+      std::make_unique<vAST::CallExpr>("my_func", std::move(call_args));
   XtoZ transformer;
   EXPECT_EQ(transformer.visit(std::move(expr))->toString(),
-            "{z,b} ? z[3:1] + (~ y[1]) : {(2){z}}");
+            "my_func({z,b} ? z[3:1] + (~ y[1]) : {(2){z}}, z)");
 }
 TEST(TransformerTests, TestReplaceNameWithExpr) {
   std::unique_ptr<vAST::Expression> expr = vAST::make_binop(
