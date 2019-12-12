@@ -297,7 +297,11 @@ class StringPort : public AbstractPort {
 
 class Statement : public Node {};
 
-class SingleLineComment : public Statement {
+class BehavioralStatement : public Statement {};
+class StructuralStatement : public Statement {};
+
+class SingleLineComment : public StructuralStatement,
+                          public BehavioralStatement {
  public:
   std::string value;
 
@@ -306,7 +310,7 @@ class SingleLineComment : public Statement {
   ~SingleLineComment(){};
 };
 
-class BlockComment : public Statement {
+class BlockComment : public StructuralStatement, public BehavioralStatement {
  public:
   std::string value;
 
@@ -314,9 +318,6 @@ class BlockComment : public Statement {
   std::string toString() { return "/*\n" + value + "\n*/"; };
   ~BlockComment(){};
 };
-
-class BehavioralStatement : public Statement {};
-class StructuralStatement : public Statement {};
 
 typedef std::vector<
     std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
@@ -628,7 +629,7 @@ class Transformer {
       return this->visit(std::unique_ptr<CallExpr>(ptr));
     }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;  // LCOV_EXCL_LINE
+    return node;                              // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<NumericLiteral> visit(
@@ -724,7 +725,7 @@ class Transformer {
             return this->visit(std::unique_ptr<Vector>(ptr));
           }
           throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-          return std::move(value);  // LCOV_EXCL_LINE
+          return std::move(value);                  // LCOV_EXCL_LINE
         },
         node);
   };
@@ -801,7 +802,7 @@ class Transformer {
       return this->visit(std::unique_ptr<Reg>(ptr));
     }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;  // LCOV_EXCL_LINE
+    return node;                              // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<BehavioralStatement> visit(
@@ -818,8 +819,16 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<CallStmt>(ptr));
     }
+    if (auto ptr = dynamic_cast<SingleLineComment*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<SingleLineComment>(ptr));
+    }
+    if (auto ptr = dynamic_cast<BlockComment*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<BlockComment>(ptr));
+    }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;  // LCOV_EXCL_LINE
+    return node;                              // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<BlockingAssign> visit(
@@ -879,7 +888,7 @@ class Transformer {
       return this->visit(std::unique_ptr<StringPort>(ptr));
     }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;  // LCOV_EXCL_LINE
+    return node;                              // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<StructuralStatement> visit(
@@ -896,8 +905,16 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<Always>(ptr));
     }
+    if (auto ptr = dynamic_cast<SingleLineComment*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<SingleLineComment>(ptr));
+    }
+    if (auto ptr = dynamic_cast<BlockComment*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<BlockComment>(ptr));
+    }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;  // LCOV_EXCL_LINE
+    return node;                              // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
@@ -945,7 +962,7 @@ class Transformer {
       return this->visit(std::unique_ptr<StringBodyModule>(ptr));
     }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;  // LCOV_EXCL_LINE
+    return node;                              // LCOV_EXCL_LINE
   };
 
   virtual std::unique_ptr<File> visit(std::unique_ptr<File> node) {

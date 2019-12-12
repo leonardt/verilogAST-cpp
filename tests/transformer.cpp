@@ -164,6 +164,9 @@ TEST(TransformerTests, TestModule) {
   body.push_back(std::make_unique<vAST::Always>(std::move(sensitivity_list),
                                                 make_simple_always_body()));
 
+
+  body.push_back(std::make_unique<vAST::SingleLineComment>("Test comment"));
+  body.push_back(std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module0", std::move(ports), std::move(body), make_simple_params());
   std::string expected_str =
@@ -176,6 +179,8 @@ TEST(TransformerTests, TestModule) {
       "b <= g;\n"
       "$display(\"b=%d, c=%d\", b, g);\n"
       "end\n\n"
+      "// Test comment\n"
+      "/*\nTest comment\non multiple lines\n*/\n"
       "endmodule\n";
 
   ModuleTransformer transformer;
