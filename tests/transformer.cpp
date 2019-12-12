@@ -1,6 +1,6 @@
 #include "common.cpp"
 #include "gtest/gtest.h"
-#include "verilogAST.hpp"
+#include "verilogAST/transformer.hpp"
 
 namespace vAST = verilogAST;
 
