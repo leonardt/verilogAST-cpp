@@ -21,7 +21,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include/
 ) 
 
-set(LIB_SOURCES src/verilogAST.cpp)
+set(LIB_SOURCES src/verilogAST.cpp src/transformer.cpp)
 
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})

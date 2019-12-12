@@ -583,405 +583,102 @@ std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
 
 class Transformer {
  public:
-  virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node) {
-    if (auto ptr = dynamic_cast<NumericLiteral*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<NumericLiteral>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Identifier*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Identifier>(ptr));
-    }
-    if (auto ptr = dynamic_cast<String*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<String>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Index*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Index>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Slice*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Slice>(ptr));
-    }
-    if (auto ptr = dynamic_cast<BinaryOp*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<BinaryOp>(ptr));
-    }
-    if (auto ptr = dynamic_cast<UnaryOp*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<UnaryOp>(ptr));
-    }
-    if (auto ptr = dynamic_cast<TernaryOp*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<TernaryOp>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Concat*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Concat>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Replicate*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Replicate>(ptr));
-    }
-    if (auto ptr = dynamic_cast<CallExpr*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<CallExpr>(ptr));
-    }
-    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;                              // LCOV_EXCL_LINE
-  };
-
-  virtual std::unique_ptr<NumericLiteral> visit(
-      std::unique_ptr<NumericLiteral> node) {
-    return node;
-  };
-
-  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node) {
-    return node;
-  };
-
-  virtual std::unique_ptr<String> visit(std::unique_ptr<String> node) {
-    return node;
-  };
-
-  virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node) {
-    node->id = this->visit(std::move(node->id));
-    node->index = this->visit(std::move(node->index));
-    return node;
-  };
-
-  virtual std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node) {
-    node->id = this->visit(std::move(node->id));
-    node->high_index = this->visit(std::move(node->high_index));
-    node->low_index = this->visit(std::move(node->low_index));
-    return node;
-  };
-
-  virtual std::unique_ptr<BinaryOp> visit(std::unique_ptr<BinaryOp> node) {
-    node->left = this->visit(std::move(node->left));
-    node->right = this->visit(std::move(node->right));
-    return node;
-  };
-
-  virtual std::unique_ptr<UnaryOp> visit(std::unique_ptr<UnaryOp> node) {
-    node->operand = this->visit(std::move(node->operand));
-    return node;
-  };
-
-  virtual std::unique_ptr<TernaryOp> visit(std::unique_ptr<TernaryOp> node) {
-    node->cond = this->visit(std::move(node->cond));
-    node->true_value = this->visit(std::move(node->true_value));
-    node->false_value = this->visit(std::move(node->false_value));
-    return node;
-  };
-
-  virtual std::unique_ptr<Concat> visit(std::unique_ptr<Concat> node) {
-    std::vector<std::unique_ptr<Expression>> new_args;
-    for (auto&& expr : node->args) {
-      new_args.push_back(this->visit(std::move(expr)));
-    }
-    node->args = std::move(new_args);
-    return node;
-  };
-
-  virtual std::unique_ptr<Replicate> visit(std::unique_ptr<Replicate> node) {
-    node->num = this->visit(std::move(node->num));
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
-
-  virtual std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node) {
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
-
-  virtual std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node) {
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
-
-  virtual std::unique_ptr<CallExpr> visit(std::unique_ptr<CallExpr> node) {
-    std::vector<std::unique_ptr<Expression>> new_args;
-    for (auto&& expr : node->args) {
-      new_args.push_back(this->visit(std::move(expr)));
-    }
-    node->args = std::move(new_args);
-    return node;
-  };
-
-  virtual std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>
-  visit(
-      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node) {
-    return std::visit(
-        [&](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
-                                          std::unique_ptr<Vector>> {
-          if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
-            value.release();
-            return this->visit(std::unique_ptr<Identifier>(ptr));
-          }
-          if (auto ptr = dynamic_cast<Vector*>(value.get())) {
-            value.release();
-            return this->visit(std::unique_ptr<Vector>(ptr));
-          }
-          throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-          return std::move(value);                  // LCOV_EXCL_LINE
-        },
-        node);
-  };
-
-  virtual std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node) {
-    node->id = this->visit(std::move(node->id));
-    node->msb = this->visit(std::move(node->msb));
-    node->lsb = this->visit(std::move(node->lsb));
-    return node;
-  };
-
-  virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node) {
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
-
-  virtual std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node) {
-    return node;
-  };
-
-  virtual std::unique_ptr<SingleLineComment> visit(
-      std::unique_ptr<SingleLineComment> node) {
-    return node;
-  };
-
-  virtual std::unique_ptr<BlockComment> visit(
-      std::unique_ptr<BlockComment> node) {
-    return node;
-  };
-
   template <typename T>
   T visit(T node) {
     return std::visit(
         [&](auto&& value) -> T { return this->visit(std::move(value)); }, node);
   }
 
+  virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
+
+  virtual std::unique_ptr<NumericLiteral> visit(
+      std::unique_ptr<NumericLiteral> node);
+
+  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node);
+
+  virtual std::unique_ptr<String> visit(std::unique_ptr<String> node);
+
+  virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
+
+  virtual std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node);
+
+  virtual std::unique_ptr<BinaryOp> visit(std::unique_ptr<BinaryOp> node);
+
+  virtual std::unique_ptr<UnaryOp> visit(std::unique_ptr<UnaryOp> node);
+
+  virtual std::unique_ptr<TernaryOp> visit(std::unique_ptr<TernaryOp> node);
+
+  virtual std::unique_ptr<Concat> visit(std::unique_ptr<Concat> node);
+
+  virtual std::unique_ptr<Replicate> visit(std::unique_ptr<Replicate> node);
+
+  virtual std::unique_ptr<NegEdge> visit(std::unique_ptr<NegEdge> node);
+
+  virtual std::unique_ptr<PosEdge> visit(std::unique_ptr<PosEdge> node);
+
+  virtual std::unique_ptr<CallExpr> visit(std::unique_ptr<CallExpr> node);
+
+  virtual std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>
+  visit(
+      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node);
+
+  virtual std::unique_ptr<Vector> visit(std::unique_ptr<Vector> node);
+
+  virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
+
+  virtual std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node);
+
+  virtual std::unique_ptr<SingleLineComment> visit(
+      std::unique_ptr<SingleLineComment> node);
+
+  virtual std::unique_ptr<BlockComment> visit(
+      std::unique_ptr<BlockComment> node);
+
   virtual std::unique_ptr<ModuleInstantiation> visit(
-      std::unique_ptr<ModuleInstantiation> node) {
-    for (auto&& conn : node->connections) {
-      conn.second = this->visit(std::move(conn.second));
-    }
-    for (auto&& param : node->parameters) {
-      param.first = this->visit(std::move(param.first));
-      param.second = this->visit(std::move(param.second));
-    }
-    return node;
-  };
+      std::unique_ptr<ModuleInstantiation> node);
 
-  virtual std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node) {
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
+  virtual std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node);
 
-  virtual std::unique_ptr<Reg> visit(std::unique_ptr<Reg> node) {
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
+  virtual std::unique_ptr<Reg> visit(std::unique_ptr<Reg> node);
 
   virtual std::unique_ptr<ContinuousAssign> visit(
-      std::unique_ptr<ContinuousAssign> node) {
-    node->target = this->visit(std::move(node->target));
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
+      std::unique_ptr<ContinuousAssign> node);
 
-  virtual std::unique_ptr<Declaration> visit(
-      std::unique_ptr<Declaration> node) {
-    if (auto ptr = dynamic_cast<Wire*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Wire>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Reg*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Reg>(ptr));
-    }
-    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;                              // LCOV_EXCL_LINE
-  };
+  virtual std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node);
 
   virtual std::unique_ptr<BehavioralStatement> visit(
-      std::unique_ptr<BehavioralStatement> node) {
-    if (auto ptr = dynamic_cast<BlockingAssign*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<BlockingAssign>(ptr));
-    }
-    if (auto ptr = dynamic_cast<NonBlockingAssign*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<NonBlockingAssign>(ptr));
-    }
-    if (auto ptr = dynamic_cast<CallStmt*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<CallStmt>(ptr));
-    }
-    if (auto ptr = dynamic_cast<SingleLineComment*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<SingleLineComment>(ptr));
-    }
-    if (auto ptr = dynamic_cast<BlockComment*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<BlockComment>(ptr));
-    }
-    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;                              // LCOV_EXCL_LINE
-  };
+      std::unique_ptr<BehavioralStatement> node);
 
   virtual std::unique_ptr<BlockingAssign> visit(
-      std::unique_ptr<BlockingAssign> node) {
-    node->target = this->visit(std::move(node->target));
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
+      std::unique_ptr<BlockingAssign> node);
 
   virtual std::unique_ptr<NonBlockingAssign> visit(
-      std::unique_ptr<NonBlockingAssign> node) {
-    node->target = this->visit(std::move(node->target));
-    node->value = this->visit(std::move(node->value));
-    return node;
-  };
+      std::unique_ptr<NonBlockingAssign> node);
 
-  virtual std::unique_ptr<CallStmt> visit(std::unique_ptr<CallStmt> node) {
-    std::vector<std::unique_ptr<Expression>> new_args;
-    for (auto&& expr : node->args) {
-      new_args.push_back(this->visit(std::move(expr)));
-    }
-    node->args = std::move(new_args);
-    return node;
-  };
+  virtual std::unique_ptr<CallStmt> visit(std::unique_ptr<CallStmt> node);
 
-  virtual std::unique_ptr<Star> visit(std::unique_ptr<Star> node) {
-    return node;
-  };
+  virtual std::unique_ptr<Star> visit(std::unique_ptr<Star> node);
 
-  virtual std::unique_ptr<Always> visit(std::unique_ptr<Always> node) {
-    std::vector<
-        std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
-                     std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
-        new_sensitivity_list;
-    for (auto&& item : node->sensitivity_list) {
-      new_sensitivity_list.push_back(this->visit(std::move(item)));
-    }
-    node->sensitivity_list = std::move(new_sensitivity_list);
-    std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
-                             std::unique_ptr<Declaration>>>
-        new_body;
-    for (auto&& item : node->body) {
-      new_body.push_back(this->visit(std::move(item)));
-    }
-    node->body = std::move(new_body);
-    return node;
-  };
+  virtual std::unique_ptr<Always> visit(std::unique_ptr<Always> node);
 
   virtual std::unique_ptr<AbstractPort> visit(
-      std::unique_ptr<AbstractPort> node) {
-    if (auto ptr = dynamic_cast<Port*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Port>(ptr));
-    }
-    if (auto ptr = dynamic_cast<StringPort*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<StringPort>(ptr));
-    }
-    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;                              // LCOV_EXCL_LINE
-  };
+      std::unique_ptr<AbstractPort> node);
 
   virtual std::unique_ptr<StructuralStatement> visit(
-      std::unique_ptr<StructuralStatement> node) {
-    if (auto ptr = dynamic_cast<ModuleInstantiation*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<ModuleInstantiation>(ptr));
-    }
-    if (auto ptr = dynamic_cast<ContinuousAssign*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<ContinuousAssign>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Always*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Always>(ptr));
-    }
-    if (auto ptr = dynamic_cast<SingleLineComment*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<SingleLineComment>(ptr));
-    }
-    if (auto ptr = dynamic_cast<BlockComment*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<BlockComment>(ptr));
-    }
-    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;                              // LCOV_EXCL_LINE
-  };
+      std::unique_ptr<StructuralStatement> node);
 
-  virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node) {
-    std::vector<std::unique_ptr<AbstractPort>> new_ports;
-    for (auto&& item : node->ports) {
-      new_ports.push_back(this->visit(std::move(item)));
-    }
-    node->ports = std::move(new_ports);
-    for (auto&& param : node->parameters) {
-      param.first = this->visit(std::move(param.first));
-      param.second = this->visit(std::move(param.second));
-    }
-    std::vector<std::variant<std::unique_ptr<StructuralStatement>,
-                             std::unique_ptr<Declaration>>>
-        new_body;
-    for (auto&& item : node->body) {
-      new_body.push_back(this->visit(std::move(item)));
-    }
-    node->body = std::move(new_body);
-    return node;
-  };
+  virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node);
 
   virtual std::unique_ptr<StringBodyModule> visit(
-      std::unique_ptr<StringBodyModule> node) {
-    std::vector<std::unique_ptr<AbstractPort>> new_ports;
-    for (auto&& item : node->ports) {
-      new_ports.push_back(this->visit(std::move(item)));
-    }
-    node->ports = std::move(new_ports);
-    for (auto&& param : node->parameters) {
-      param.first = this->visit(std::move(param.first));
-      param.second = this->visit(std::move(param.second));
-    }
-    return node;
-  };
+      std::unique_ptr<StringBodyModule> node);
 
   virtual std::unique_ptr<StringModule> visit(
-      std::unique_ptr<StringModule> node) {
-    return node;
-  };
+      std::unique_ptr<StringModule> node);
 
   virtual std::unique_ptr<AbstractModule> visit(
-      std::unique_ptr<AbstractModule> node) {
-    if (auto ptr = dynamic_cast<StringBodyModule*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<StringBodyModule>(ptr));
-    }
-    if (auto ptr = dynamic_cast<Module*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<Module>(ptr));
-    }
-    if (auto ptr = dynamic_cast<StringModule*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<StringModule>(ptr));
-    }
-    throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-    return node;                              // LCOV_EXCL_LINE
-  };
+      std::unique_ptr<AbstractModule> node);
 
-  virtual std::unique_ptr<File> visit(std::unique_ptr<File> node) {
-    std::vector<std::unique_ptr<AbstractModule>> new_modules;
-    for (auto&& item : node->modules) {
-      new_modules.push_back(this->visit(std::move(item)));
-    }
-    node->modules = std::move(new_modules);
-    return node;
-  };
+  virtual std::unique_ptr<File> visit(std::unique_ptr<File> node);
 };
 }  // namespace verilogAST
 #endif
