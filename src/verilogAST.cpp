@@ -188,11 +188,15 @@ std::string BinaryOp::toString() {
   // TODO Precedence logic, for now we just insert parens if not symbol or num
   if (dynamic_cast<Identifier*>(left.get())) {
   } else if (dynamic_cast<NumericLiteral*>(left.get())) {
+  } else if (dynamic_cast<Index*>(left.get())) {
+  } else if (dynamic_cast<Slice*>(left.get())) {
   } else {
       lstr = "(" + lstr + ")";
   }
   if (dynamic_cast<Identifier*>(right.get())) {
   } else if (dynamic_cast<NumericLiteral*>(right.get())) {
+  } else if (dynamic_cast<Index*>(right.get())) {
+  } else if (dynamic_cast<Slice*>(right.get())) {
   } else {
       rstr = "(" + rstr + ")";
   }
