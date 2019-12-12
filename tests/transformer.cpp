@@ -73,12 +73,12 @@ TEST(TransformerTests, TestXtoZ) {
           std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("3"),
                                         vAST::make_num("1")),
           vAST::BinOp::ADD,
-          std::make_unique<vAST::UnaryOp>(vAST::make_id("y"),
+          std::make_unique<vAST::UnaryOp>(std::make_unique<vAST::Index>(vAST::make_id("y"), vAST::make_num("1")),
                                           vAST::UnOp::INVERT)),
       std::make_unique<vAST::Replicate>(vAST::make_num("2"),
                                         vAST::make_id("x")));
   XtoZ transformer;
-  EXPECT_EQ(transformer.visit(std::move(expr))->toString(), "{z,b} ? z[3:1] + (~ y) : {(2){z}}");
+  EXPECT_EQ(transformer.visit(std::move(expr))->toString(), "{z,b} ? z[3:1] + (~ y[1]) : {(2){z}}");
 }
 TEST(TransformerTests, TestReplaceNameWithExpr) {
   std::unique_ptr<vAST::Expression> expr = vAST::make_binop(
