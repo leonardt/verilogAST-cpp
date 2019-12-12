@@ -939,6 +939,15 @@ class Transformer {
 
   virtual std::unique_ptr<StringBodyModule> visit(
       std::unique_ptr<StringBodyModule> node) {
+    std::vector<std::unique_ptr<AbstractPort>> new_ports;
+    for (auto&& item : node->ports) {
+      new_ports.push_back(this->visit(std::move(item)));
+    }
+    node->ports = std::move(new_ports);
+    for (auto&& param : node->parameters) {
+      param.first = this->visit(std::move(param.first));
+      param.second = this->visit(std::move(param.second));
+    }
     return node;
   };
 
