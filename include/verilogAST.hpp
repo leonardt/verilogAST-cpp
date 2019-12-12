@@ -940,6 +940,10 @@ class Transformer {
       node.release();
       return this->visit(std::unique_ptr<StringModule>(ptr));
     }
+    if (auto ptr = dynamic_cast<StringBodyModule*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<StringBodyModule>(ptr));
+    }
     throw std::runtime_error("Unreachable");
     return node;
   };

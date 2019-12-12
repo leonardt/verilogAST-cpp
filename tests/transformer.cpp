@@ -62,6 +62,20 @@ class ModuleTransformer : public vAST::Transformer {
   };
 };
 
+class FileTransformer : public vAST::Transformer {
+ public:
+  using vAST::Transformer::visit;
+  virtual std::unique_ptr<vAST::Identifier> visit(
+      std::unique_ptr<vAST::Identifier> node) {
+    if (node->value == "o") {
+      return vAST::make_id("d");
+    } else if (node->value == "param0") {
+      return vAST::make_id("y");
+    }
+    return node;
+  };
+};
+
 namespace {
 TEST(TransformerTests, TestXtoZ) {
   std::vector<std::unique_ptr<vAST::Expression>> concat_args;
@@ -124,6 +138,9 @@ TEST(TransformerTests, TestModule) {
                                      vAST::make_id("c")),
       vAST::OUTPUT, vAST::WIRE));
 
+  ports.push_back(
+      std::make_unique<vAST::StringPort>("output reg [width-1:0] k"));
+
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body = make_simple_body();
@@ -132,20 +149,66 @@ TEST(TransformerTests, TestModule) {
       std::make_unique<vAST::Identifier>("c"),
       std::make_unique<vAST::Identifier>("b")));
 
-  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("c")));
+  body.push_back(
+      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("c")));
 
-  body.push_back(std::make_unique<vAST::Reg>(std::make_unique<vAST::Identifier>("c")));
+  body.push_back(
+      std::make_unique<vAST::Reg>(std::make_unique<vAST::Identifier>("c")));
+
+  std::vector<std::variant<
+      std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
+      std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
+      sensitivity_list;
+  sensitivity_list.push_back(std::make_unique<vAST::Identifier>("a"));
+
+  body.push_back(std::make_unique<vAST::Always>(std::move(sensitivity_list),
+                                                make_simple_always_body()));
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module0", std::move(ports), std::move(body), make_simple_params());
   std::string expected_str =
       "module test_module0 #(parameter y = 0, parameter param1 = "
-      "1) (input i, output [3:g] o);\nother_module #(.y(0), "
-      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
-      ".c(g[31:0]));\nassign g = b;\nwire g;\nreg g;\nendmodule\n";
+      "1) (input i, output [3:g] o, output reg [width-1:0] k);\nother_module "
+      "#(.y(0), .param1(1)) other_module_inst(.a(a), .b(b[0]), "
+      ".c(g[31:0]));\nassign g = b;\nwire g;\nreg g;\n"
+      "always @(a) begin\n"
+      "a = b;\n"
+      "b <= g;\n"
+      "$display(\"b=%d, c=%d\", b, g);\n"
+      "end\n\n"
+      "endmodule\n";
 
   ModuleTransformer transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
+}
+TEST(TransformerTests, File) {
+  std::vector<std::unique_ptr<vAST::AbstractModule>> modules;
+  vAST::Parameters parameters0;
+  std::string name = "test_module";
+
+  std::string module_name = "other_module";
+
+  std::string string_body = "reg d;\nassign d = a + b;\nassign c = d;";
+  modules.push_back(std::make_unique<vAST::StringBodyModule>(
+      name, make_simple_ports(), string_body, make_simple_params()));
+
+  std::string module_str =
+      "module string_module #(parameter param0 = 0, parameter param1 = "
+      "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
+      "d;\nendmodule\n";
+  modules.push_back(std::make_unique<vAST::StringModule>(module_str));
+
+  std::unique_ptr<vAST::File> file = std::make_unique<vAST::File>(modules);
+
+  std::string expected_str =
+      "module test_module #(parameter y = 0, parameter param1 = "
+      "1) (input i, output d);\nreg d;\nassign d = a + b;\nassign c = "
+      "d;\nendmodule\n\n"
+      "module string_module #(parameter param0 = 0, parameter param1 = "
+      "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
+      "d;\nendmodule\n";
+  FileTransformer transformer;
+  EXPECT_EQ(transformer.visit(std::move(file))->toString(), expected_str);
 }
 }  // namespace
 
