@@ -949,6 +949,10 @@ class Transformer {
 
   virtual std::unique_ptr<AbstractModule> visit(
       std::unique_ptr<AbstractModule> node) {
+    if (auto ptr = dynamic_cast<StringBodyModule*>(node.get())) {
+      node.release();
+      return this->visit(std::unique_ptr<StringBodyModule>(ptr));
+    }
     if (auto ptr = dynamic_cast<Module*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<Module>(ptr));
@@ -956,10 +960,6 @@ class Transformer {
     if (auto ptr = dynamic_cast<StringModule*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<StringModule>(ptr));
-    }
-    if (auto ptr = dynamic_cast<StringBodyModule*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<StringBodyModule>(ptr));
     }
     throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
     return node;                              // LCOV_EXCL_LINE
