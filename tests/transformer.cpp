@@ -1,6 +1,6 @@
+#include "common.cpp"
 #include "gtest/gtest.h"
 #include "verilogAST.hpp"
-#include "common.cpp"
 
 namespace vAST = verilogAST;
 
@@ -73,12 +73,15 @@ TEST(TransformerTests, TestXtoZ) {
           std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("3"),
                                         vAST::make_num("1")),
           vAST::BinOp::ADD,
-          std::make_unique<vAST::UnaryOp>(std::make_unique<vAST::Index>(vAST::make_id("y"), vAST::make_num("1")),
-                                          vAST::UnOp::INVERT)),
+          std::make_unique<vAST::UnaryOp>(
+              std::make_unique<vAST::Index>(vAST::make_id("y"),
+                                            vAST::make_num("1")),
+              vAST::UnOp::INVERT)),
       std::make_unique<vAST::Replicate>(vAST::make_num("2"),
                                         vAST::make_id("x")));
   XtoZ transformer;
-  EXPECT_EQ(transformer.visit(std::move(expr))->toString(), "{z,b} ? z[3:1] + (~ y[1]) : {(2){z}}");
+  EXPECT_EQ(transformer.visit(std::move(expr))->toString(),
+            "{z,b} ? z[3:1] + (~ y[1]) : {(2){z}}");
 }
 TEST(TransformerTests, TestReplaceNameWithExpr) {
   std::unique_ptr<vAST::Expression> expr = vAST::make_binop(
@@ -96,10 +99,9 @@ TEST(TransformerTests, TestAlways) {
       std::make_unique<vAST::PosEdge>(std::make_unique<vAST::Identifier>("b")));
   sensitivity_list.push_back(
       std::make_unique<vAST::NegEdge>(std::make_unique<vAST::Identifier>("c")));
-  sensitivity_list.push_back(
-      std::make_unique<vAST::Star>());
-  std::unique_ptr<vAST::Always> always = std::make_unique<vAST::Always>(std::move(sensitivity_list),
-          make_simple_always_body());
+  sensitivity_list.push_back(std::make_unique<vAST::Star>());
+  std::unique_ptr<vAST::Always> always = std::make_unique<vAST::Always>(
+      std::move(sensitivity_list), make_simple_always_body());
   std::string expected_str =
       "always @(z, posedge y, negedge c, *) begin\n"
       "z = y;\n"
@@ -111,8 +113,8 @@ TEST(TransformerTests, TestAlways) {
 }
 TEST(TransformerTests, TestModule) {
   std::unique_ptr<vAST::AbstractModule> module =
-      std::make_unique<vAST::Module>( "test_module0", make_simple_ports(),
-              make_simple_body(), make_simple_params());
+      std::make_unique<vAST::Module>("test_module0", make_simple_ports(),
+                                     make_simple_body(), make_simple_params());
   std::string expected_str =
       "module test_module0 #(parameter y = 0, parameter param1 = "
       "1) (input i, output o);\nother_module #(.y(0), "

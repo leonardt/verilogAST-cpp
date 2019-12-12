@@ -208,20 +208,20 @@ class Replicate : public Expression {
   std::string toString();
 };
 
-class NegEdge : public Expression {
+class NegEdge : public Node {
  public:
-  std::unique_ptr<Expression> value;
+  std::unique_ptr<Identifier> value;
 
-  NegEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
+  NegEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
   std::string toString();
   ~NegEdge(){};
 };
 
-class PosEdge : public Expression {
+class PosEdge : public Node {
  public:
-  std::unique_ptr<Expression> value;
+  std::unique_ptr<Identifier> value;
 
-  PosEdge(std::unique_ptr<Expression> value) : value(std::move(value)){};
+  PosEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
   std::string toString();
   ~PosEdge(){};
 };
@@ -622,14 +622,6 @@ class Transformer {
     if (auto ptr = dynamic_cast<Replicate*>(node.get())) {
       node.release();
       return this->visit(std::unique_ptr<Replicate>(ptr));
-    }
-    if (auto ptr = dynamic_cast<NegEdge*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<NegEdge>(ptr));
-    }
-    if (auto ptr = dynamic_cast<PosEdge*>(node.get())) {
-      node.release();
-      return this->visit(std::unique_ptr<PosEdge>(ptr));
     }
     if (auto ptr = dynamic_cast<CallExpr*>(node.get())) {
       node.release();
