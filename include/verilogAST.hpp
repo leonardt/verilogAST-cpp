@@ -13,20 +13,31 @@
 namespace verilogAST {
 
 class Node {
+ // protected:
+ //  virtual Node* clone_impl() const = 0;
  public:
   virtual std::string toString() = 0;
   virtual ~Node() = default;
+  // auto clone() const { return std::unique_ptr<Node>(clone_impl()); }
 };
 
 class Expression : public Node {
+ protected:
+  virtual Expression* clone_impl() const = 0;
  public:
   virtual std::string toString() = 0;
   virtual ~Expression() = default;
+  auto clone() const { return std::unique_ptr<Expression>(clone_impl()); }
 };
 
 enum Radix { BINARY, OCTAL, HEX, DECIMAL };
 
 class NumericLiteral : public Expression {
+ protected:
+  virtual NumericLiteral* clone_impl() const override {
+    return new NumericLiteral(this->value, this->size, this->_signed,
+            this->radix);
+  };
  public:
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
@@ -61,37 +72,62 @@ class NumericLiteral : public Expression {
 // TODO also need a string literal, as strings can be used as parameter values
 
 class Identifier : public Expression {
+ protected:
+  virtual Identifier* clone_impl() const override {
+    return new Identifier(*this);
+  };
  public:
   std::string value;
 
   Identifier(std::string value) : value(value){};
+  Identifier(const Identifier& rhs) : value(rhs.value){};
+  auto clone() const { return std::unique_ptr<Identifier>(clone_impl()); }
 
   std::string toString() override;
   ~Identifier(){};
 };
 
 class String : public Expression {
+ protected:
+  virtual String* clone_impl() const override {
+    return new String(*this);
+  };
  public:
   std::string value;
 
   String(std::string value) : value(value){};
+  String(const String& rhs) : value(rhs.value){};
 
   std::string toString() override;
   ~String(){};
+  auto clone() const { return std::unique_ptr<String>(clone_impl()); }
 };
 
 class Index : public Expression {
+ protected:
+  virtual Index* clone_impl() const override {
+    return new Index(this->id->clone(), this->index->clone());
+  };
  public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> index;
 
   Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
       : id(std::move(id)), index(std::move(index)){};
+
+  Index(const Index& rhs) : id(rhs.id->clone()), index(rhs.index->clone()){};
+
   std::string toString() override;
   ~Index(){};
+  auto clone() const { return std::unique_ptr<Index>(clone_impl()); }
 };
 
 class Slice : public Expression {
+ protected:
+  virtual Slice* clone_impl() const override {
+    return new Slice(this->id->clone(), this->high_index->clone(),
+            this->low_index->clone());
+  };
  public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> high_index;
@@ -104,6 +140,7 @@ class Slice : public Expression {
         low_index(std::move(low_index)){};
   std::string toString() override;
   ~Slice(){};
+  auto clone() const { return std::unique_ptr<Slice>(clone_impl()); }
 };
 
 namespace BinOp {
@@ -133,6 +170,10 @@ enum BinOp {
 }
 
 class BinaryOp : public Expression {
+ protected:
+  virtual BinaryOp* clone_impl() const override {
+    return new BinaryOp(this->left->clone(), this->op, this->right->clone());
+  };
  public:
   std::unique_ptr<Expression> left;
   BinOp::BinOp op;
@@ -143,6 +184,7 @@ class BinaryOp : public Expression {
       : left(std::move(left)), op(op), right(std::move(right)){};
   std::string toString() override;
   ~BinaryOp(){};
+  auto clone() const { return std::unique_ptr<BinaryOp>(clone_impl()); }
 };
 
 namespace UnOp {
@@ -162,6 +204,10 @@ enum UnOp {
 }
 
 class UnaryOp : public Expression {
+ protected:
+  virtual UnaryOp* clone_impl() const override {
+    return new UnaryOp(this->operand->clone(), this->op);
+  };
  public:
   std::unique_ptr<Expression> operand;
 
@@ -169,11 +215,17 @@ class UnaryOp : public Expression {
 
   UnaryOp(std::unique_ptr<Expression> operand, UnOp::UnOp op)
       : operand(std::move(operand)), op(op){};
-  std::string toString();
+  std::string toString() override;
   ~UnaryOp(){};
+  auto clone() const { return std::unique_ptr<UnaryOp>(clone_impl()); }
 };
 
 class TernaryOp : public Expression {
+ protected:
+  virtual TernaryOp* clone_impl() const override {
+    return new TernaryOp(this->cond->clone(), this->true_value->clone(),
+            this->false_value->clone());
+  };
  public:
   std::unique_ptr<Expression> cond;
   std::unique_ptr<Expression> true_value;
@@ -185,27 +237,42 @@ class TernaryOp : public Expression {
       : cond(std::move(cond)),
         true_value(std::move(true_value)),
         false_value(std::move(false_value)){};
-  std::string toString();
+  std::string toString() override;
   ~TernaryOp(){};
+  auto clone() const { return std::unique_ptr<TernaryOp>(clone_impl()); }
 };
 
 class Concat : public Expression {
+ protected:
+  virtual Concat* clone_impl() const override {
+    std::vector<std::unique_ptr<Expression>> new_args;
+    for (const auto& arg : this->args) {
+        new_args.push_back(arg->clone());
+    }
+    return new Concat(std::move(new_args));
+  };
  public:
   std::vector<std::unique_ptr<Expression>> args;
 
   Concat(std::vector<std::unique_ptr<Expression>> args)
       : args(std::move(args)){};
-  std::string toString();
+  std::string toString() override;
+  auto clone() const { return std::unique_ptr<Concat>(clone_impl()); }
 };
 
 class Replicate : public Expression {
+ protected:
+  virtual Replicate* clone_impl() const override {
+    return new Replicate(this->num->clone(), this->value->clone());
+  };
  public:
   std::unique_ptr<Expression> num;
   std::unique_ptr<Expression> value;
 
   Replicate(std::unique_ptr<Expression> num, std::unique_ptr<Expression> value)
       : num(std::move(num)), value(std::move(value)){};
-  std::string toString();
+  std::string toString() override;
+  auto clone() const { return std::unique_ptr<Replicate>(clone_impl()); }
 };
 
 class NegEdge : public Node {
@@ -238,10 +305,18 @@ class Call {
 };
 
 class CallExpr : public Expression, public Call {
+ protected:
+  virtual CallExpr* clone_impl() const override {
+    std::vector<std::unique_ptr<Expression>> new_args;
+    for (const auto& arg : this->args) {
+        new_args.push_back(arg->clone());
+    }
+    return new CallExpr(this->func, std::move(new_args));
+  };
  public:
   CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};
-  std::string toString() { return Call::toString(); };
+  std::string toString() override { return Call::toString(); };
 };
 
 enum Direction { INPUT, OUTPUT, INOUT };

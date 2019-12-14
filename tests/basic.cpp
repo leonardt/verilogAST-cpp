@@ -395,6 +395,29 @@ TEST(BasicTests, Comment) {
   EXPECT_EQ(block_comment.toString(),
             "/*\nTest comment\non multiple lines\n*/");
 }
+TEST(BasicTests, TestIdentifierCopy) {
+    std::unique_ptr<vAST::Identifier> x = std::make_unique<vAST::Identifier>("x");
+    std::unique_ptr<vAST::Identifier> x1 = std::make_unique<vAST::Identifier>(*x);
+    EXPECT_EQ(x->toString(), "x");
+    EXPECT_EQ(x1->toString(), "x");
+    x1->value = "y";
+    EXPECT_EQ(x->toString(), "x");
+    EXPECT_EQ(x1->toString(), "y");
+}
+
+TEST(BasicTests, TestIndexCopy) {
+    std::unique_ptr<vAST::Index> x = std::make_unique<vAST::Index>(
+            std::make_unique<vAST::Identifier>("x"),
+            std::make_unique<vAST::Identifier>("y")
+    );
+
+    std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
+    EXPECT_EQ(x->toString(), "x[y]");
+    EXPECT_EQ(x1->toString(), "x[y]");
+    x1->id->value = "z";
+    EXPECT_EQ(x->toString(), "x[y]");
+    EXPECT_EQ(x1->toString(), "z[y]");
+}
 
 }  // namespace
 
