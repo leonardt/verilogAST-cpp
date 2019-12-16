@@ -151,40 +151,8 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
       new_body.push_back(std::move(result));
     }
   }
-  // for (auto& stmt : node->body) {
-  //   std::visit(
-  //       [&](auto&& value) {
-  //         if (auto ptr = dynamic_cast<ContinuousAssign*>(value.get())) {
-  //           value.release();
-  //           std::unique_ptr<ContinuousAssign> assign_stmt(ptr);
-  //           if (auto ptr = dynamic_cast<Identifier*>(
-  //                   assign_stmt->target.get())) {
-  //             std::unique_ptr<Identifier> assign_stmt(ptr);
-  //             if (collector.read_count()) {
-  //               new_body.push_back(std::move(assign_stmt));
-  //             }
-  //           } else {
-  //             new_body.push_back(std::move(assign_stmt));
-  //           }
-  //         } else if (auto ptr = dynamic_cast<Wire*>(value.get())) {
-  //           value.release();
-  //           std::unique_ptr<Wire> wire_stmt(ptr);
-  //           WireReadCollector inner_collector;
-  //           wire_stmt->value =
-  //               inner_collector.visit(std::move(wire_stmt->value));
-  //           ASSERT(inner_collector.reads.size() == 1,
-  //                  "Should have exactly one read");
-  //           if (collector.reads.count(*inner_collector.reads.begin())) {
-  //             new_body.push_back(std::move(wire_stmt));
-  //           }
-  //         } else {
-  //           new_body.push_back(std::move(value));
-  //         }
-  //       },
-  //       std::move(stmt));
-  // }
   node->body = std::move(new_body);
   return node;
-}  // namespace verilogAST
+}
 
 }  // namespace verilogAST
