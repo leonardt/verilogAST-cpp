@@ -34,6 +34,16 @@ TEST(InlineAssignTests, TestBasic) {
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
+
+  std::string raw_str =
+      "module test_module (input i, output o);\n"
+      "wire x;\n"
+      "assign x = i;\n"
+      "assign o = x;\n"
+      "endmodule\n";
+
+  EXPECT_EQ(module->toString(), raw_str);
+
   std::string expected_str =
       "module test_module (input i, output o);\n"
       "assign o = i;\n"
@@ -87,6 +97,17 @@ TEST(InlineAssignTests, TestIndex) {
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
+
+  std::string raw_str =
+      "module test_module (input [1:0] i, output [1:0] o);\n"
+      "wire [1:0] x;\n"
+      "assign x[0] = i[0];\n"
+      "assign x[1] = i[1];\n"
+      "assign o[0] = x[0];\n"
+      "assign o[1] = x[1];\n"
+      "endmodule\n";
+  EXPECT_EQ(module->toString(), raw_str);
+
   std::string expected_str =
       "module test_module (input [1:0] i, output [1:0] o);\n"
       "assign o[0] = i[0];\n"
