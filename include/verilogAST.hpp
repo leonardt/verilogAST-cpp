@@ -34,12 +34,9 @@ std::string variant_to_string(std::variant<Ts...> &value) {
 }
 
 class Node {
-  // protected:
-  //  virtual Node* clone_impl() const = 0;
  public:
   virtual std::string toString() = 0;
   virtual ~Node() = default;
-  // auto clone() const { return std::unique_ptr<Node>(clone_impl()); }
 };
 
 class Expression : public Node {
