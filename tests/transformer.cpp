@@ -1,6 +1,6 @@
+#include "verilogAST/transformer.hpp"
 #include "common.cpp"
 #include "gtest/gtest.h"
-#include "verilogAST/transformer.hpp"
 
 namespace vAST = verilogAST;
 
@@ -121,9 +121,11 @@ TEST(TransformerTests, TestAlways) {
 
   std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
-                               always_body = make_simple_always_body();
-  always_body.push_back(std::make_unique<vAST::SingleLineComment>("Test comment"));
-  always_body.push_back(std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
+      always_body = make_simple_always_body();
+  always_body.push_back(
+      std::make_unique<vAST::SingleLineComment>("Test comment"));
+  always_body.push_back(
+      std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
 
   std::unique_ptr<vAST::Always> always = std::make_unique<vAST::Always>(
       std::move(sensitivity_list), std::move(always_body));
@@ -173,9 +175,9 @@ TEST(TransformerTests, TestModule) {
   body.push_back(std::make_unique<vAST::Always>(std::move(sensitivity_list),
                                                 make_simple_always_body()));
 
-
   body.push_back(std::make_unique<vAST::SingleLineComment>("Test comment"));
-  body.push_back(std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
+  body.push_back(
+      std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module0", std::move(ports), std::move(body), make_simple_params());
   std::string expected_str =

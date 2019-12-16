@@ -99,9 +99,7 @@ class Identifier : public Expression {
   Identifier(const Identifier& rhs) : value(rhs.value){};
   auto clone() const { return std::unique_ptr<Identifier>(clone_impl()); }
 
-  bool operator== (const Identifier &rhs) {
-      return (this->value == rhs.value);
-  }
+  bool operator==(const Identifier& rhs) { return (this->value == rhs.value); }
 
   std::string toString() override;
   ~Identifier(){};

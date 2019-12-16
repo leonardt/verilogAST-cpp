@@ -1,6 +1,6 @@
+#include "verilogAST/assign_inliner.hpp"
 #include "common.cpp"
 #include "gtest/gtest.h"
-#include "verilogAST/assign_inliner.hpp"
 
 namespace vAST = verilogAST;
 

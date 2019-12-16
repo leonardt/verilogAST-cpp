@@ -1,9 +1,9 @@
 #pragma once
 #ifndef VERILOGAST_ASSIGN_INLINER_H
 #define VERILOGAST_ASSIGN_INLINER_H
+#include <set>
 #include "verilogAST.hpp"
 #include "verilogAST/transformer.hpp"
-#include <set>
 
 namespace verilogAST {
 
@@ -46,12 +46,10 @@ class AssignInliner : public Transformer {
 
  public:
   using Transformer::visit;
-  virtual std::unique_ptr<Expression> visit(
-      std::unique_ptr<Expression> node);
+  virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
-  virtual std::unique_ptr<Wire> visit(
-      std::unique_ptr<Wire> node);
+  virtual std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node);
   virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
   virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node);
 };
