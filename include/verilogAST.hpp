@@ -192,6 +192,9 @@ class BinaryOp : public Expression {
   BinaryOp(std::unique_ptr<Expression> left, BinOp::BinOp op,
            std::unique_ptr<Expression> right)
       : left(std::move(left)), op(op), right(std::move(right)){};
+  BinaryOp(const BinaryOp& rhs)
+      : left(rhs.left->clone()), op(rhs.op), right(rhs.right->clone()){};
+
   std::string toString() override;
   ~BinaryOp(){};
   auto clone() const { return std::unique_ptr<BinaryOp>(clone_impl()); }
@@ -226,6 +229,8 @@ class UnaryOp : public Expression {
 
   UnaryOp(std::unique_ptr<Expression> operand, UnOp::UnOp op)
       : operand(std::move(operand)), op(op){};
+  UnaryOp(const UnaryOp& rhs) : operand(rhs.operand->clone()), op(rhs.op){};
+
   std::string toString() override;
   ~UnaryOp(){};
   auto clone() const { return std::unique_ptr<UnaryOp>(clone_impl()); }
@@ -249,6 +254,11 @@ class TernaryOp : public Expression {
       : cond(std::move(cond)),
         true_value(std::move(true_value)),
         false_value(std::move(false_value)){};
+  TernaryOp(const TernaryOp& rhs)
+      : cond(rhs.cond->clone()),
+        true_value(rhs.true_value->clone()),
+        false_value(rhs.false_value->clone()){};
+
   std::string toString() override;
   ~TernaryOp(){};
   auto clone() const { return std::unique_ptr<TernaryOp>(clone_impl()); }
@@ -269,6 +279,10 @@ class Concat : public Expression {
 
   Concat(std::vector<std::unique_ptr<Expression>> args)
       : args(std::move(args)){};
+  Concat(const Concat& rhs) {
+    for (const auto& arg : rhs.args) args.push_back(arg->clone());
+  };
+
   std::string toString() override;
   auto clone() const { return std::unique_ptr<Concat>(clone_impl()); }
 };
@@ -285,6 +299,9 @@ class Replicate : public Expression {
 
   Replicate(std::unique_ptr<Expression> num, std::unique_ptr<Expression> value)
       : num(std::move(num)), value(std::move(value)){};
+  Replicate(const Replicate& rhs)
+      : num(rhs.num->clone()), value(rhs.value->clone()){};
+
   std::string toString() override;
   auto clone() const { return std::unique_ptr<Replicate>(clone_impl()); }
 };
@@ -314,6 +331,7 @@ class Call {
 
   Call(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : func(func), args(std::move(args)){};
+  Call(std::string func) : func(func){};
   std::string toString();
   ~Call(){};
 };
@@ -331,6 +349,12 @@ class CallExpr : public Expression, public Call {
  public:
   CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};
+  CallExpr(const CallExpr& rhs) : Call(std::move(rhs.func)) {
+    for (const auto& arg : rhs.args) {
+      args.push_back(arg->clone());
+    }
+  };
+
   std::string toString() override { return Call::toString(); };
 };
 
