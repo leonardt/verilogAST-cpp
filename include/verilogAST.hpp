@@ -13,8 +13,8 @@
 namespace verilogAST {
 
 class Node {
- // protected:
- //  virtual Node* clone_impl() const = 0;
+  // protected:
+  //  virtual Node* clone_impl() const = 0;
  public:
   virtual std::string toString() = 0;
   virtual ~Node() = default;
@@ -24,6 +24,7 @@ class Node {
 class Expression : public Node {
  protected:
   virtual Expression* clone_impl() const = 0;
+
  public:
   virtual std::string toString() = 0;
   virtual ~Expression() = default;
@@ -36,8 +37,9 @@ class NumericLiteral : public Expression {
  protected:
   virtual NumericLiteral* clone_impl() const override {
     return new NumericLiteral(this->value, this->size, this->_signed,
-            this->radix);
+                              this->radix);
   };
+
  public:
   /// For now, we model values as strings because it depends on their radix
   // (alternatively, we could store an unsigned integer representation and
@@ -77,6 +79,7 @@ class Identifier : public Expression {
   virtual Identifier* clone_impl() const override {
     return new Identifier(*this);
   };
+
  public:
   std::string value;
 
@@ -90,9 +93,8 @@ class Identifier : public Expression {
 
 class String : public Expression {
  protected:
-  virtual String* clone_impl() const override {
-    return new String(*this);
-  };
+  virtual String* clone_impl() const override { return new String(*this); };
+
  public:
   std::string value;
 
@@ -109,6 +111,7 @@ class Index : public Expression {
   virtual Index* clone_impl() const override {
     return new Index(this->id->clone(), this->index->clone());
   };
+
  public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> index;
@@ -127,8 +130,9 @@ class Slice : public Expression {
  protected:
   virtual Slice* clone_impl() const override {
     return new Slice(this->id->clone(), this->high_index->clone(),
-            this->low_index->clone());
+                     this->low_index->clone());
   };
+
  public:
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> high_index;
@@ -139,6 +143,10 @@ class Slice : public Expression {
       : id(std::move(id)),
         high_index(std::move(high_index)),
         low_index(std::move(low_index)){};
+  Slice(const Slice& rhs)
+      : id(rhs.id->clone()),
+        high_index(rhs.high_index->clone()),
+        low_index(rhs.low_index->clone()){};
   std::string toString() override;
   ~Slice(){};
   auto clone() const { return std::unique_ptr<Slice>(clone_impl()); }
@@ -175,6 +183,7 @@ class BinaryOp : public Expression {
   virtual BinaryOp* clone_impl() const override {
     return new BinaryOp(this->left->clone(), this->op, this->right->clone());
   };
+
  public:
   std::unique_ptr<Expression> left;
   BinOp::BinOp op;
@@ -209,6 +218,7 @@ class UnaryOp : public Expression {
   virtual UnaryOp* clone_impl() const override {
     return new UnaryOp(this->operand->clone(), this->op);
   };
+
  public:
   std::unique_ptr<Expression> operand;
 
@@ -225,8 +235,9 @@ class TernaryOp : public Expression {
  protected:
   virtual TernaryOp* clone_impl() const override {
     return new TernaryOp(this->cond->clone(), this->true_value->clone(),
-            this->false_value->clone());
+                         this->false_value->clone());
   };
+
  public:
   std::unique_ptr<Expression> cond;
   std::unique_ptr<Expression> true_value;
@@ -248,10 +259,11 @@ class Concat : public Expression {
   virtual Concat* clone_impl() const override {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (const auto& arg : this->args) {
-        new_args.push_back(arg->clone());
+      new_args.push_back(arg->clone());
     }
     return new Concat(std::move(new_args));
   };
+
  public:
   std::vector<std::unique_ptr<Expression>> args;
 
@@ -266,6 +278,7 @@ class Replicate : public Expression {
   virtual Replicate* clone_impl() const override {
     return new Replicate(this->num->clone(), this->value->clone());
   };
+
  public:
   std::unique_ptr<Expression> num;
   std::unique_ptr<Expression> value;
@@ -310,10 +323,11 @@ class CallExpr : public Expression, public Call {
   virtual CallExpr* clone_impl() const override {
     std::vector<std::unique_ptr<Expression>> new_args;
     for (const auto& arg : this->args) {
-        new_args.push_back(arg->clone());
+      new_args.push_back(arg->clone());
     }
     return new CallExpr(this->func, std::move(new_args));
   };
+
  public:
   CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};

@@ -397,47 +397,65 @@ TEST(BasicTests, Comment) {
 }
 
 TEST(BasicTests, TestNumCopy) {
-    std::unique_ptr<vAST::NumericLiteral> x = std::make_unique<vAST::NumericLiteral>("32'hDEADBEEF");
-    std::unique_ptr<vAST::NumericLiteral> x1 = std::make_unique<vAST::NumericLiteral>(*x);
-    EXPECT_EQ(x->toString(), "32'hDEADBEEF");
-    EXPECT_EQ(x1->toString(), "32'hDEADBEEF");
-    x1->value = "3b010";
-    EXPECT_EQ(x->toString(), "32'hDEADBEEF");
-    EXPECT_EQ(x1->toString(),  "3b010");
+  std::unique_ptr<vAST::NumericLiteral> x =
+      std::make_unique<vAST::NumericLiteral>("32'hDEADBEEF");
+  std::unique_ptr<vAST::NumericLiteral> x1 =
+      std::make_unique<vAST::NumericLiteral>(*x);
+  EXPECT_EQ(x->toString(), "32'hDEADBEEF");
+  EXPECT_EQ(x1->toString(), "32'hDEADBEEF");
+  x1->value = "3b010";
+  EXPECT_EQ(x->toString(), "32'hDEADBEEF");
+  EXPECT_EQ(x1->toString(), "3b010");
 }
 
 TEST(BasicTests, TestIdentifierCopy) {
-    std::unique_ptr<vAST::Identifier> x = std::make_unique<vAST::Identifier>("x");
-    std::unique_ptr<vAST::Identifier> x1 = std::make_unique<vAST::Identifier>(*x);
-    EXPECT_EQ(x->toString(), "x");
-    EXPECT_EQ(x1->toString(), "x");
-    x1->value = "y";
-    EXPECT_EQ(x->toString(), "x");
-    EXPECT_EQ(x1->toString(), "y");
+  std::unique_ptr<vAST::Identifier> x = std::make_unique<vAST::Identifier>("x");
+  std::unique_ptr<vAST::Identifier> x1 = std::make_unique<vAST::Identifier>(*x);
+  EXPECT_EQ(x->toString(), "x");
+  EXPECT_EQ(x1->toString(), "x");
+  x1->value = "y";
+  EXPECT_EQ(x->toString(), "x");
+  EXPECT_EQ(x1->toString(), "y");
 }
 
 TEST(BasicTests, TestStringCopy) {
-    std::unique_ptr<vAST::String> x = std::make_unique<vAST::String>("str");
-    std::unique_ptr<vAST::String> x1 = std::make_unique<vAST::String>(*x);
-    EXPECT_EQ(x->toString(), "\"str\"");
-    EXPECT_EQ(x1->toString(), "\"str\"");
-    x1->value = "bar";
-    EXPECT_EQ(x->toString(), "\"str\"");
-    EXPECT_EQ(x1->toString(), "\"bar\"");
+  std::unique_ptr<vAST::String> x = std::make_unique<vAST::String>("str");
+  std::unique_ptr<vAST::String> x1 = std::make_unique<vAST::String>(*x);
+  EXPECT_EQ(x->toString(), "\"str\"");
+  EXPECT_EQ(x1->toString(), "\"str\"");
+  x1->value = "bar";
+  EXPECT_EQ(x->toString(), "\"str\"");
+  EXPECT_EQ(x1->toString(), "\"bar\"");
 }
 
 TEST(BasicTests, TestIndexCopy) {
-    std::unique_ptr<vAST::Index> x = std::make_unique<vAST::Index>(
-            std::make_unique<vAST::Identifier>("x"),
-            std::make_unique<vAST::Identifier>("y")
-    );
+  std::unique_ptr<vAST::Index> x =
+      std::make_unique<vAST::Index>(std::make_unique<vAST::Identifier>("x"),
+                                    std::make_unique<vAST::Identifier>("y"));
 
-    std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
-    EXPECT_EQ(x->toString(), "x[y]");
-    EXPECT_EQ(x1->toString(), "x[y]");
-    x1->id->value = "z";
-    EXPECT_EQ(x->toString(), "x[y]");
-    EXPECT_EQ(x1->toString(), "z[y]");
+  std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
+  EXPECT_EQ(x->toString(), "x[y]");
+  EXPECT_EQ(x1->toString(), "x[y]");
+  x1->id->value = "z";
+  x1->index = std::make_unique<vAST::Identifier>("a");
+  EXPECT_EQ(x->toString(), "x[y]");
+  EXPECT_EQ(x1->toString(), "z[a]");
+}
+
+TEST(BasicTests, TestSliceCopy) {
+  std::unique_ptr<vAST::Slice> x =
+      std::make_unique<vAST::Slice>(std::make_unique<vAST::Identifier>("x"),
+                                    std::make_unique<vAST::Identifier>("y"),
+                                    std::make_unique<vAST::Identifier>("z"));
+
+  std::unique_ptr<vAST::Slice> x1 = std::make_unique<vAST::Slice>(*x);
+  EXPECT_EQ(x->toString(), "x[y:z]");
+  EXPECT_EQ(x1->toString(), "x[y:z]");
+  x1->id = std::make_unique<vAST::Identifier>("a");
+  x1->high_index = std::make_unique<vAST::Identifier>("b");
+  x1->low_index = std::make_unique<vAST::Identifier>("c");
+  EXPECT_EQ(x->toString(), "x[y:z]");
+  EXPECT_EQ(x1->toString(), "a[b:c]");
 }
 
 }  // namespace
