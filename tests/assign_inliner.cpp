@@ -150,6 +150,60 @@ TEST(InlineAssignTests, TestBasicExpr) {
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
 }
 
+TEST(InlineAssignTests, TestExprChain) {
+  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT,
+                                               vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"), vAST::OUTPUT,
+                                               vAST::WIRE));
+
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body;
+
+  body.push_back(
+      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("x")));
+
+  body.push_back(
+      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("y")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("x"),
+      vAST::make_binop(std::make_unique<vAST::Identifier>("i"),
+                       vAST::BinOp::XOR,
+                       std::make_unique<vAST::NumericLiteral>("1"))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("y"),
+      std::make_unique<vAST::Identifier>("x")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("o"),
+      std::make_unique<vAST::Identifier>("y")));
+
+  std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
+      "test_module", std::move(ports), std::move(body));
+
+  std::string raw_str =
+      "module test_module (input i, output o);\n"
+      "wire x;\n"
+      "wire y;\n"
+      "assign x = i ^ 1;\n"
+      "assign y = x;\n"
+      "assign o = y;\n"
+      "endmodule\n";
+
+  EXPECT_EQ(module->toString(), raw_str);
+
+  std::string expected_str =
+      "module test_module (input i, output o);\n"
+      "assign o = i ^ 1;\n"
+      "endmodule\n";
+
+  vAST::AssignInliner transformer;
+  EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
+}
+
 TEST(InlineAssignTests, TestInlineFanOutId) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT,
