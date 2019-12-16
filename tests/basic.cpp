@@ -395,6 +395,17 @@ TEST(BasicTests, Comment) {
   EXPECT_EQ(block_comment.toString(),
             "/*\nTest comment\non multiple lines\n*/");
 }
+
+TEST(BasicTests, TestNumCopy) {
+    std::unique_ptr<vAST::NumericLiteral> x = std::make_unique<vAST::NumericLiteral>("32'hDEADBEEF");
+    std::unique_ptr<vAST::NumericLiteral> x1 = std::make_unique<vAST::NumericLiteral>(*x);
+    EXPECT_EQ(x->toString(), "32'hDEADBEEF");
+    EXPECT_EQ(x1->toString(), "32'hDEADBEEF");
+    x1->value = "3b010";
+    EXPECT_EQ(x->toString(), "32'hDEADBEEF");
+    EXPECT_EQ(x1->toString(),  "3b010");
+}
+
 TEST(BasicTests, TestIdentifierCopy) {
     std::unique_ptr<vAST::Identifier> x = std::make_unique<vAST::Identifier>("x");
     std::unique_ptr<vAST::Identifier> x1 = std::make_unique<vAST::Identifier>(*x);
@@ -403,6 +414,16 @@ TEST(BasicTests, TestIdentifierCopy) {
     x1->value = "y";
     EXPECT_EQ(x->toString(), "x");
     EXPECT_EQ(x1->toString(), "y");
+}
+
+TEST(BasicTests, TestStringCopy) {
+    std::unique_ptr<vAST::String> x = std::make_unique<vAST::String>("str");
+    std::unique_ptr<vAST::String> x1 = std::make_unique<vAST::String>(*x);
+    EXPECT_EQ(x->toString(), "\"str\"");
+    EXPECT_EQ(x1->toString(), "\"str\"");
+    x1->value = "bar";
+    EXPECT_EQ(x->toString(), "\"str\"");
+    EXPECT_EQ(x1->toString(), "\"bar\"");
 }
 
 TEST(BasicTests, TestIndexCopy) {

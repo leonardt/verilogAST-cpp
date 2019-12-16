@@ -67,6 +67,7 @@ class NumericLiteral : public Expression {
   NumericLiteral(std::string value, Radix radix)
       : value(value), size(32), _signed(false), radix(radix){};
   std::string toString() override;
+  auto clone() const { return std::unique_ptr<NumericLiteral>(clone_impl()); }
 };
 
 // TODO also need a string literal, as strings can be used as parameter values
