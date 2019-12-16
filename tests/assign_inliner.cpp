@@ -16,6 +16,10 @@ TEST(InlineAssignTests, TestBasic) {
                                                vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"), vAST::OUTPUT,
                                                vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o_vec"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -23,6 +27,9 @@ TEST(InlineAssignTests, TestBasic) {
 
   body.push_back(
       std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("x")));
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("x_vec"), vAST::make_num("1"), vAST::make_num("0"))));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("x"),
@@ -32,21 +39,37 @@ TEST(InlineAssignTests, TestBasic) {
       std::make_unique<vAST::Identifier>("o"),
       std::make_unique<vAST::Identifier>("x")));
 
+  std::vector<std::unique_ptr<vAST::Expression>> concat_args;
+  concat_args.push_back(std::make_unique<vAST::Identifier>("i"));
+  concat_args.push_back(std::make_unique<vAST::Identifier>("i"));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("x_vec"),
+      std::make_unique<vAST::Concat>(std::move(concat_args))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("o_vec"),
+      std::make_unique<vAST::Identifier>("x_vec")));
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (input i, output o, output [1:0] o_vec);\n"
       "wire x;\n"
+      "wire [1:0] x_vec;\n"
       "assign x = i;\n"
       "assign o = x;\n"
+      "assign x_vec = {i,i};\n"
+      "assign o_vec = x_vec;\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (input i, output o, output [1:0] o_vec);\n"
       "assign o = i;\n"
+      "assign o_vec = {i,i};\n"
       "endmodule\n";
 
   vAST::AssignInliner transformer;

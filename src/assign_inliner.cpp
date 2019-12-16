@@ -60,6 +60,15 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
               this->non_input_ports.count(ptr->toString()) == 0) {
             remove = true;
           };
+        } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
+          std::map<std::string, std::unique_ptr<Expression>>::iterator it =
+              this->assign_map.find(ptr->id->toString());
+          if (it != this->assign_map.end() &&
+              (this->read_count[ptr->id->toString()] == 1 ||
+               dynamic_cast<Identifier*>(it->second.get())) &&
+              this->non_input_ports.count(ptr->id->toString()) == 0) {
+            remove = true;
+          };
         }
       },
       node->value);
