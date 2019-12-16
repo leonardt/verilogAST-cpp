@@ -72,6 +72,11 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
 
 std::unique_ptr<ContinuousAssign> AssignInliner::visit(
     std::unique_ptr<ContinuousAssign> node) {
+  node->value = this->visit(std::move(node->value));
+  std::string key =
+      std::visit([](auto&& value) -> std::string { return value->toString(); },
+                 node->target);
+  this->assign_map[key] = node->value->clone();
   bool remove = false;
   std::visit(
       [&](auto&& value) {
@@ -90,11 +95,6 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
   if (remove) {
     return std::unique_ptr<ContinuousAssign>{};
   }
-  node->value = this->visit(std::move(node->value));
-  std::string key =
-      std::visit([](auto&& value) -> std::string { return value->toString(); },
-                 node->target);
-  this->assign_map[key] = node->value->clone();
   return node;
 }
 
