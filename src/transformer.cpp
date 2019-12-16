@@ -1,21 +1,6 @@
 #include "verilogAST/transformer.hpp"
 #include <iostream>
 
-#ifndef NDEBUG
-#define ASSERT(condition, message)                                       \
-  do {                                                                   \
-    if (!(condition)) {                                                  \
-      std::cerr << "Assertion `" #condition "` failed in " << __FILE__   \
-                << " line " << __LINE__ << ": " << message << std::endl; \
-      std::terminate();                                                  \
-    }                                                                    \
-  } while (false)
-#else
-#define ASSERT(condition, message) \
-  do {                             \
-  } while (false)
-#endif
-
 namespace verilogAST {
 
 std::unique_ptr<Expression> Transformer::visit(
@@ -412,108 +397,6 @@ std::unique_ptr<File> Transformer::visit(std::unique_ptr<File> node) {
     new_modules.push_back(this->visit(std::move(item)));
   }
   node->modules = std::move(new_modules);
-  return node;
-}
-
-std::unique_ptr<Identifier> WireReadCollector::visit(
-    std::unique_ptr<Identifier> node) {
-  this->reads.insert(node->toString());
-  return node;
-}
-
-std::unique_ptr<Declaration> WireReadCollector::visit(
-    std::unique_ptr<Declaration> node) {
-  return node;
-}
-
-std::unique_ptr<ContinuousAssign> WireReadCollector::visit(
-    std::unique_ptr<ContinuousAssign> node) {
-  node->value = this->visit(std::move(node->value));
-  return node;
-}
-
-std::unique_ptr<Expression> AssignInliner::visit(
-    std::unique_ptr<Expression> node) {
-  if (auto ptr = dynamic_cast<Identifier*>(node.get())) {
-    node.release();
-    std::unique_ptr<Identifier> id(ptr);
-    std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-        assign_map.find(id->toString());
-    if (it != assign_map.end()) {
-      return it->second->clone();
-    }
-    return id;
-  } else if (auto ptr = dynamic_cast<Slice*>(node.get())) {
-    node.release();
-    std::unique_ptr<Slice> slice(ptr);
-    std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-        assign_map.find(slice->toString());
-    if (it != assign_map.end()) {
-      return it->second->clone();
-    }
-    return slice;
-  } else if (auto ptr = dynamic_cast<Index*>(node.get())) {
-    node.release();
-    std::unique_ptr<Index> index(ptr);
-    std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-        assign_map.find(index->toString());
-    if (it != assign_map.end()) {
-      return it->second->clone();
-    }
-    return index;
-  }
-  return node;
-}
-
-std::unique_ptr<ContinuousAssign> AssignInliner::visit(
-    std::unique_ptr<ContinuousAssign> node) {
-  node = Transformer::visit(std::move(node));
-  std::string key =
-      std::visit([](auto&& value) -> std::string { return value->toString(); },
-                 node->target);
-  assign_map[key] = node->value->clone();
-  return node;
-}
-
-std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
-  node = Transformer::visit(std::move(node));
-  WireReadCollector collector;
-  node = collector.visit(std::move(node));
-  std::vector<std::variant<std::unique_ptr<StructuralStatement>,
-                           std::unique_ptr<Declaration>>>
-      new_body;
-  for (auto& stmt : node->body) {
-    std::visit(
-        [&](auto&& value) {
-          if (auto ptr = dynamic_cast<ContinuousAssign*>(value.get())) {
-            value.release();
-            std::unique_ptr<ContinuousAssign> assign_stmt(ptr);
-            WireReadCollector inner_collector;
-            assign_stmt->target =
-                inner_collector.visit(std::move(assign_stmt->target));
-            ASSERT(inner_collector.reads.size() == 1,
-                   "Should have exactly one read");
-            if (collector.reads.count(*inner_collector.reads.begin())) {
-              new_body.push_back(std::move(assign_stmt));
-            }
-          } else if (auto ptr = dynamic_cast<Wire*>(value.get())) {
-            value.release();
-            std::unique_ptr<Wire> wire_stmt(ptr);
-            WireReadCollector inner_collector;
-            wire_stmt->value =
-                inner_collector.visit(std::move(wire_stmt->value));
-            ASSERT(inner_collector.reads.size() == 1,
-                   "Should have exactly one read");
-            if (collector.reads.count(*inner_collector.reads.begin())) {
-              new_body.push_back(std::move(wire_stmt));
-            }
-          } else {
-            new_body.push_back(std::move(value));
-          }
-        },
-        std::move(stmt));
-  }
-  node->body = std::move(new_body);
   return node;
 }
 
