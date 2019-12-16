@@ -107,18 +107,18 @@ class Transformer {
 };
 
 class WireReadCollector : public Transformer {
+ // Collects wires that are read
  public:
   std::set<std::string> reads;
 
   using Transformer::visit;
+  // Add to `reads` set
   virtual std::unique_ptr<Identifier> visit(
       std::unique_ptr<Identifier> node);
-  virtual std::unique_ptr<Slice> visit(
-      std::unique_ptr<Slice> node);
-  virtual std::unique_ptr<Index> visit(
-      std::unique_ptr<Index> node);
+  // Skip target of assign (not read)
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
+  // Skip declarations (not read)
   virtual std::unique_ptr<Declaration> visit(
       std::unique_ptr<Declaration> node);
 };
