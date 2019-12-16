@@ -282,6 +282,12 @@ std::string Call::toString() {
   return func + "(" + join(arg_strs, ", ") + ")";
 }
 
+template <typename... Ts>
+std::string variant_to_string(std::variant<Ts...> &value) {
+  return std::visit(
+      [](auto &&value) -> std::string { return value->toString(); }, value);
+}
+
 std::string Port::toString() {
   std::string value_str =
       variant_to_string<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>(

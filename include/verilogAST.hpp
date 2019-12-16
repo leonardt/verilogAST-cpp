@@ -27,12 +27,6 @@
 
 namespace verilogAST {
 
-template <typename... Ts>
-std::string variant_to_string(std::variant<Ts...> &value) {
-  return std::visit(
-      [](auto &&value) -> std::string { return value->toString(); }, value);
-}
-
 class Node {
  public:
   virtual std::string toString() = 0;
