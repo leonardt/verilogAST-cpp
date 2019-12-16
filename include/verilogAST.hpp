@@ -349,6 +349,7 @@ class CallExpr : public Expression, public Call {
  public:
   CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};
+  CallExpr(std::string func) : Call(std::move(func)){};
   CallExpr(const CallExpr& rhs) : Call(std::move(rhs.func)) {
     for (const auto& arg : rhs.args) {
       args.push_back(arg->clone());
@@ -577,6 +578,7 @@ class CallStmt : public BehavioralStatement, public Call {
  public:
   CallStmt(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};
+  CallStmt(std::string func) : Call(std::move(func)){};
   std::string toString() { return Call::toString() + ";"; };
 };
 

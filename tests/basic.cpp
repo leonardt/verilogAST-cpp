@@ -173,6 +173,7 @@ TEST(BasicTests, TestPosEdge) {
 
   EXPECT_EQ(pos_edge.toString(), "posedge clk");
 }
+
 TEST(BasicTests, TestCallExpr0) {
   std::vector<std::unique_ptr<vAST::Expression>> args;
   args.push_back(vAST::make_id("x"));
@@ -186,6 +187,31 @@ TEST(BasicTests, TestCallExpr1) {
   args.push_back(vAST::make_num("7"));
   vAST::CallExpr clog2("$clog2", std::move(args));
   EXPECT_EQ(clog2.toString(), "$clog2(7)");
+}
+
+TEST(BasicTests, TestCallExprNoArgs) {
+  vAST::CallExpr foo("$foo");
+  EXPECT_EQ(foo.toString(), "$foo()");
+}
+
+TEST(BasicTests, TestCallStmt0) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_id("x"));
+  args.push_back(vAST::make_id("y"));
+  vAST::CallStmt my_func("my_func", std::move(args));
+  EXPECT_EQ(my_func.toString(), "my_func(x, y);");
+}
+
+TEST(BasicTests, TestCallStmt1) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_num("7"));
+  vAST::CallStmt clog2("$clog2", std::move(args));
+  EXPECT_EQ(clog2.toString(), "$clog2(7);");
+}
+
+TEST(BasicTests, TestCallStmtNoArgs) {
+  vAST::CallStmt foo("$foo");
+  EXPECT_EQ(foo.toString(), "$foo();");
 }
 
 TEST(BasicTests, TestPort) {
