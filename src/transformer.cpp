@@ -1,4 +1,5 @@
 #include "verilogAST/transformer.hpp"
+#include <iostream>
 
 namespace verilogAST {
 
@@ -62,8 +63,7 @@ std::unique_ptr<Identifier> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<String> Transformer::visit(
-    std::unique_ptr<String> node) {
+std::unique_ptr<String> Transformer::visit(std::unique_ptr<String> node) {
   return node;
 }
 
@@ -80,29 +80,25 @@ std::unique_ptr<Slice> Transformer::visit(std::unique_ptr<Slice> node) {
   return node;
 }
 
-std::unique_ptr<BinaryOp> Transformer::visit(
-    std::unique_ptr<BinaryOp> node) {
+std::unique_ptr<BinaryOp> Transformer::visit(std::unique_ptr<BinaryOp> node) {
   node->left = this->visit(std::move(node->left));
   node->right = this->visit(std::move(node->right));
   return node;
 }
 
-std::unique_ptr<UnaryOp> Transformer::visit(
-    std::unique_ptr<UnaryOp> node) {
+std::unique_ptr<UnaryOp> Transformer::visit(std::unique_ptr<UnaryOp> node) {
   node->operand = this->visit(std::move(node->operand));
   return node;
 }
 
-std::unique_ptr<TernaryOp> Transformer::visit(
-    std::unique_ptr<TernaryOp> node) {
+std::unique_ptr<TernaryOp> Transformer::visit(std::unique_ptr<TernaryOp> node) {
   node->cond = this->visit(std::move(node->cond));
   node->true_value = this->visit(std::move(node->true_value));
   node->false_value = this->visit(std::move(node->false_value));
   return node;
 }
 
-std::unique_ptr<Concat> Transformer::visit(
-    std::unique_ptr<Concat> node) {
+std::unique_ptr<Concat> Transformer::visit(std::unique_ptr<Concat> node) {
   std::vector<std::unique_ptr<Expression>> new_args;
   for (auto&& expr : node->args) {
     new_args.push_back(this->visit(std::move(expr)));
@@ -111,27 +107,23 @@ std::unique_ptr<Concat> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<Replicate> Transformer::visit(
-    std::unique_ptr<Replicate> node) {
+std::unique_ptr<Replicate> Transformer::visit(std::unique_ptr<Replicate> node) {
   node->num = this->visit(std::move(node->num));
   node->value = this->visit(std::move(node->value));
   return node;
 }
 
-std::unique_ptr<NegEdge> Transformer::visit(
-    std::unique_ptr<NegEdge> node) {
+std::unique_ptr<NegEdge> Transformer::visit(std::unique_ptr<NegEdge> node) {
   node->value = this->visit(std::move(node->value));
   return node;
 }
 
-std::unique_ptr<PosEdge> Transformer::visit(
-    std::unique_ptr<PosEdge> node) {
+std::unique_ptr<PosEdge> Transformer::visit(std::unique_ptr<PosEdge> node) {
   node->value = this->visit(std::move(node->value));
   return node;
 }
 
-std::unique_ptr<CallExpr> Transformer::visit(
-    std::unique_ptr<CallExpr> node) {
+std::unique_ptr<CallExpr> Transformer::visit(std::unique_ptr<CallExpr> node) {
   std::vector<std::unique_ptr<Expression>> new_args;
   for (auto&& expr : node->args) {
     new_args.push_back(this->visit(std::move(expr)));
@@ -141,7 +133,8 @@ std::unique_ptr<CallExpr> Transformer::visit(
 }
 
 std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>
-Transformer::visit(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node) {
+Transformer::visit(
+    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> node) {
   return std::visit(
       [&](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
                                         std::unique_ptr<Vector>> {
@@ -159,8 +152,7 @@ Transformer::visit(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vec
       node);
 }
 
-std::unique_ptr<Vector> Transformer::visit(
-    std::unique_ptr<Vector> node) {
+std::unique_ptr<Vector> Transformer::visit(std::unique_ptr<Vector> node) {
   node->id = this->visit(std::move(node->id));
   node->msb = this->visit(std::move(node->msb));
   node->lsb = this->visit(std::move(node->lsb));
@@ -270,8 +262,7 @@ std::unique_ptr<NonBlockingAssign> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<CallStmt> Transformer::visit(
-    std::unique_ptr<CallStmt> node) {
+std::unique_ptr<CallStmt> Transformer::visit(std::unique_ptr<CallStmt> node) {
   std::vector<std::unique_ptr<Expression>> new_args;
   for (auto&& expr : node->args) {
     new_args.push_back(this->visit(std::move(expr)));
@@ -284,8 +275,7 @@ std::unique_ptr<Star> Transformer::visit(std::unique_ptr<Star> node) {
   return node;
 }
 
-std::unique_ptr<Always> Transformer::visit(
-    std::unique_ptr<Always> node) {
+std::unique_ptr<Always> Transformer::visit(std::unique_ptr<Always> node) {
   std::vector<
       std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                    std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
@@ -344,8 +334,7 @@ std::unique_ptr<StructuralStatement> Transformer::visit(
   return node;                              // LCOV_EXCL_LINE
 }
 
-std::unique_ptr<Module> Transformer::visit(
-    std::unique_ptr<Module> node) {
+std::unique_ptr<Module> Transformer::visit(std::unique_ptr<Module> node) {
   std::vector<std::unique_ptr<AbstractPort>> new_ports;
   for (auto&& item : node->ports) {
     new_ports.push_back(this->visit(std::move(item)));
@@ -408,6 +397,88 @@ std::unique_ptr<File> Transformer::visit(std::unique_ptr<File> node) {
     new_modules.push_back(this->visit(std::move(item)));
   }
   node->modules = std::move(new_modules);
+  return node;
+}
+
+std::unique_ptr<Identifier> WireReadCollector::visit(
+    std::unique_ptr<Identifier> node) {
+  this->reads.insert(node->toString());
+  return node;
+}
+
+std::unique_ptr<Declaration> WireReadCollector::visit(
+    std::unique_ptr<Declaration> node) {
+  return node;
+}
+
+std::unique_ptr<Slice> WireReadCollector::visit(std::unique_ptr<Slice> node) {
+  this->reads.insert(node->toString());
+  return node;
+}
+
+std::unique_ptr<Index> WireReadCollector::visit(std::unique_ptr<Index> node) {
+  this->reads.insert(node->toString());
+  return node;
+}
+
+std::unique_ptr<ContinuousAssign> WireReadCollector::visit(
+    std::unique_ptr<ContinuousAssign> node) {
+  node->value = this->visit(std::move(node->value));
+  return node;
+}
+
+std::unique_ptr<Expression> AssignInliner::visit(
+    std::unique_ptr<Expression> node) {
+  if (auto ptr = dynamic_cast<Identifier*>(node.get())) {
+    node.release();
+    std::unique_ptr<Identifier> id(ptr);
+    std::map<std::string, std::unique_ptr<Expression>>::iterator it =
+        assign_map.find(id->toString());
+    if (it != assign_map.end()) {
+      return it->second->clone();
+    }
+    return id;
+  }
+  return node;
+}
+
+std::unique_ptr<ContinuousAssign> AssignInliner::visit(
+    std::unique_ptr<ContinuousAssign> node) {
+  node = Transformer::visit(std::move(node));
+  std::string key =
+      std::visit([](auto&& value) -> std::string { return value->toString(); },
+                 node->target);
+  assign_map[key] = node->value->clone();
+  return node;
+}
+
+std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
+  node = Transformer::visit(std::move(node));
+  WireReadCollector collector;
+  node = collector.visit(std::move(node));
+  std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                           std::unique_ptr<Declaration>>>
+      new_body;
+  for (auto& stmt : node->body) {
+    std::visit([&](auto&& value) {
+      if (auto ptr = dynamic_cast<ContinuousAssign*>(value.get())) {
+        value.release();
+        std::unique_ptr<ContinuousAssign> assign_stmt(ptr);
+        if (collector.reads.count(variant_to_string(assign_stmt->target))) {
+          new_body.push_back(std::move(assign_stmt));
+        }
+      } else if (auto ptr = dynamic_cast<Wire*>(value.get())) {
+        value.release();
+        std::unique_ptr<Wire> wire_stmt(ptr);
+        if (collector.reads.count(variant_to_string(wire_stmt->value))) {
+          new_body.push_back(std::move(wire_stmt));
+        }
+      } else {
+        new_body.push_back(std::move(value));
+      }
+    }, std::move(stmt));
+  }
+  node->body = std::move(new_body);
   return node;
 }
 

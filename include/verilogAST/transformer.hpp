@@ -2,6 +2,7 @@
 #ifndef VERILOGAST_TRANSFORMER_H
 #define VERILOGAST_TRANSFORMER_H
 #include "verilogAST.hpp"
+#include <set>
 
 namespace verilogAST {
 
@@ -103,6 +104,36 @@ class Transformer {
       std::unique_ptr<AbstractModule> node);
 
   virtual std::unique_ptr<File> visit(std::unique_ptr<File> node);
+};
+
+class WireReadCollector : public Transformer {
+ public:
+  std::set<std::string> reads;
+
+  using Transformer::visit;
+  virtual std::unique_ptr<Identifier> visit(
+      std::unique_ptr<Identifier> node);
+  virtual std::unique_ptr<Slice> visit(
+      std::unique_ptr<Slice> node);
+  virtual std::unique_ptr<Index> visit(
+      std::unique_ptr<Index> node);
+  virtual std::unique_ptr<ContinuousAssign> visit(
+      std::unique_ptr<ContinuousAssign> node);
+  virtual std::unique_ptr<Declaration> visit(
+      std::unique_ptr<Declaration> node);
+};
+
+class AssignInliner : public Transformer {
+  std::map<std::string, std::unique_ptr<Expression>>
+      assign_map;
+
+ public:
+  using Transformer::visit;
+  virtual std::unique_ptr<Expression> visit(
+      std::unique_ptr<Expression> node);
+  virtual std::unique_ptr<ContinuousAssign> visit(
+      std::unique_ptr<ContinuousAssign> node);
+  virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node);
 };
 
 }  // namespace verilogAST

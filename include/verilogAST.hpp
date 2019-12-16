@@ -12,6 +12,12 @@
 
 namespace verilogAST {
 
+template <typename... Ts>
+std::string variant_to_string(std::variant<Ts...> &value) {
+  return std::visit(
+      [](auto &&value) -> std::string { return value->toString(); }, value);
+}
+
 class Node {
   // protected:
   //  virtual Node* clone_impl() const = 0;
@@ -86,6 +92,10 @@ class Identifier : public Expression {
   Identifier(std::string value) : value(value){};
   Identifier(const Identifier& rhs) : value(rhs.value){};
   auto clone() const { return std::unique_ptr<Identifier>(clone_impl()); }
+
+  bool operator== (const Identifier &rhs) {
+      return (this->value == rhs.value);
+  }
 
   std::string toString() override;
   ~Identifier(){};
@@ -644,6 +654,12 @@ class Module : public AbstractModule {
         ports(std::move(ports)),
         body(std::move(body)),
         parameters(std::move(parameters)){};
+
+  Module(std::string name, std::vector<std::unique_ptr<AbstractPort>> ports,
+         std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                  std::unique_ptr<Declaration>>>
+             body)
+      : name(name), ports(std::move(ports)), body(std::move(body)){};
 
   std::string toString();
   ~Module(){};
