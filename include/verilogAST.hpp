@@ -371,6 +371,7 @@ class CallExpr : public Expression, public Call {
   };
 
   std::string toString() override { return Call::toString(); };
+  auto clone() const { return std::unique_ptr<CallExpr>(clone_impl()); }
 };
 
 enum Direction { INPUT, OUTPUT, INOUT };
