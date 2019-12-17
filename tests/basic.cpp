@@ -574,6 +574,7 @@ TEST(BasicTests, TestCallExprCopy) {
   x1->args[1] = vAST::make_id("b");
   EXPECT_EQ(x->toString(), "foo(x, y)");
   EXPECT_EQ(x1->toString(), "bar(a, b)");
+  EXPECT_EQ(x1->toString(), x1->clone()->toString());
 }
 
 }  // namespace
