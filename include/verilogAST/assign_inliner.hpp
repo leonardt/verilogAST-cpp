@@ -8,12 +8,14 @@
 namespace verilogAST {
 
 class AssignMapBuilder : public Transformer {
+  std::map<std::string, int> &assign_count;
   std::map<std::string, std::unique_ptr<Expression>> &assign_map;
 
  public:
   AssignMapBuilder(
+       std::map<std::string, int> &assign_count,
       std::map<std::string, std::unique_ptr<Expression>> &assign_map)
-      : assign_map(assign_map){};
+      : assign_count(assign_count), assign_map(assign_map){};
 
   using Transformer::visit;
   virtual std::unique_ptr<ContinuousAssign> visit(
@@ -41,6 +43,7 @@ class WireReadCounter : public Transformer {
 
 class AssignInliner : public Transformer {
   std::map<std::string, int> read_count;
+  std::map<std::string, int> assign_count;
   std::map<std::string, std::unique_ptr<Expression>> assign_map;
   std::set<std::string> non_input_ports;
 

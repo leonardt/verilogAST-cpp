@@ -27,6 +27,7 @@ std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
       std::visit([](auto&& value) -> std::string { return value->toString(); },
                  node->target);
   this->assign_map[key] = node->value->clone();
+  this->assign_count[key]++;
   return node;
 }
 
@@ -35,9 +36,10 @@ std::unique_ptr<Expression> AssignInliner::visit(
   if (auto ptr = dynamic_cast<Identifier*>(node.get())) {
     node.release();
     std::unique_ptr<Identifier> id(ptr);
+    std::string key = id->toString();
     std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-        assign_map.find(id->toString());
-    if (it != assign_map.end() &&
+        assign_map.find(key);
+    if (it != assign_map.end() && (this->assign_count[key] == 1) &&
         (this->read_count[id->toString()] == 1 ||
          dynamic_cast<Identifier*>(it->second.get()))) {
       return it->second->clone();
@@ -52,21 +54,23 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
   std::visit(
       [&](auto&& value) {
         if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
+          std::string key = ptr->toString();
           std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-              this->assign_map.find(ptr->toString());
-          if (it != this->assign_map.end() &&
-              (this->read_count[ptr->toString()] == 1 ||
+              this->assign_map.find(key);
+          if (it != assign_map.end() && (this->assign_count[key] == 1) &&
+              (this->read_count[key] == 1 ||
                dynamic_cast<Identifier*>(it->second.get())) &&
-              this->non_input_ports.count(ptr->toString()) == 0) {
+              this->non_input_ports.count(key) == 0) {
             remove = true;
           };
         } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
+          std::string key = ptr->id->toString();
           std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-              this->assign_map.find(ptr->id->toString());
-          if (it != this->assign_map.end() &&
-              (this->read_count[ptr->id->toString()] == 1 ||
+              this->assign_map.find(key);
+          if (it != assign_map.end() && (this->assign_count[key] == 1) &&
+              (this->read_count[key] == 1 ||
                dynamic_cast<Identifier*>(it->second.get())) &&
-              this->non_input_ports.count(ptr->id->toString()) == 0) {
+              this->non_input_ports.count(key) == 0) {
             remove = true;
           };
         }
@@ -85,18 +89,18 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
   std::string key =
       std::visit([](auto&& value) -> std::string { return value->toString(); },
                  node->target);
-  this->assign_map[key] = node->value->clone();
   bool remove = false;
   std::visit(
       [&](auto&& value) {
         if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
           std::map<std::string, std::unique_ptr<Expression>>::iterator it =
               this->assign_map.find(ptr->toString());
-          if (it != this->assign_map.end() &&
+          if (it != assign_map.end() && (this->assign_count[key] == 1) &&
               (this->read_count[ptr->toString()] == 1 ||
                dynamic_cast<Identifier*>(it->second.get())) &&
               this->non_input_ports.count(ptr->toString()) == 0) {
             remove = true;
+            this->assign_map[key] = node->value->clone();
           };
         }
       },
@@ -127,7 +131,7 @@ std::unique_ptr<Port> AssignInliner::visit(std::unique_ptr<Port> node) {
 std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
   // std::map<std::string, std::unique_ptr<Expression>>
   //     assign_map;
-  AssignMapBuilder builder(this->assign_map);
+  AssignMapBuilder builder(this->assign_count, this->assign_map);
   node = builder.visit(std::move(node));
 
   WireReadCounter counter(this->read_count);
