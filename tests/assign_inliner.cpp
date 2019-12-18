@@ -231,10 +231,22 @@ TEST(InlineAssignTests, TestInlineFanOutId) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT,
                                                vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("i_vec"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::INPUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o0"),
                                                vAST::OUTPUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o1"),
                                                vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o_vec0"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o_vec1"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -242,6 +254,9 @@ TEST(InlineAssignTests, TestInlineFanOutId) {
 
   body.push_back(
       std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("x")));
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("x_vec"), vAST::make_num("1"), vAST::make_num("0"))));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("x"),
@@ -255,23 +270,41 @@ TEST(InlineAssignTests, TestInlineFanOutId) {
       std::make_unique<vAST::Identifier>("o1"),
       std::make_unique<vAST::Identifier>("x")));
 
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("x_vec"),
+      std::make_unique<vAST::Identifier>("i_vec")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("o_vec0"),
+      std::make_unique<vAST::Identifier>("x_vec")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("o_vec1"),
+      std::make_unique<vAST::Identifier>("x_vec")));
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o0, output o1);\n"
+      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output [1:0] o_vec0, output [1:0] o_vec1);\n"
       "wire x;\n"
+      "wire [1:0] x_vec;\n"
       "assign x = i;\n"
       "assign o0 = x;\n"
       "assign o1 = x;\n"
+      "assign x_vec = i_vec;\n"
+      "assign o_vec0 = x_vec;\n"
+      "assign o_vec1 = x_vec;\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o0, output o1);\n"
+      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output [1:0] o_vec0, output [1:0] o_vec1);\n"
       "assign o0 = i;\n"
       "assign o1 = i;\n"
+      "assign o_vec0 = i_vec;\n"
+      "assign o_vec1 = i_vec;\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
