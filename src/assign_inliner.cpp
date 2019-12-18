@@ -41,12 +41,13 @@ std::unique_ptr<Expression> AssignInliner::visit(
         assign_map.find(key);
     if (it != assign_map.end() && (this->assign_count[key] == 1) &&
         (this->read_count[id->toString()] == 1 ||
-         dynamic_cast<Identifier*>(it->second.get()))) {
-      return it->second->clone();
+         dynamic_cast<Identifier*>(it->second.get()) ||
+         dynamic_cast<NumericLiteral*>(it->second.get()))) {
+      return this->visit(it->second->clone());
     }
     return id;
   }
-  return node;
+  return Transformer::visit(std::move(node));
 }
 
 std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
@@ -59,7 +60,8 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
               this->assign_map.find(key);
           if (it != assign_map.end() && (this->assign_count[key] == 1) &&
               (this->read_count[key] == 1 ||
-               dynamic_cast<Identifier*>(it->second.get())) &&
+               dynamic_cast<Identifier*>(it->second.get()) ||
+               dynamic_cast<NumericLiteral*>(it->second.get())) &&
               this->non_input_ports.count(key) == 0) {
             remove = true;
           };
@@ -69,7 +71,8 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
               this->assign_map.find(key);
           if (it != assign_map.end() && (this->assign_count[key] == 1) &&
               (this->read_count[key] == 1 ||
-               dynamic_cast<Identifier*>(it->second.get())) &&
+               dynamic_cast<Identifier*>(it->second.get()) ||
+               dynamic_cast<NumericLiteral*>(it->second.get())) &&
               this->non_input_ports.count(key) == 0) {
             remove = true;
           };
@@ -97,7 +100,8 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
               this->assign_map.find(ptr->toString());
           if (it != assign_map.end() && (this->assign_count[key] == 1) &&
               (this->read_count[ptr->toString()] == 1 ||
-               dynamic_cast<Identifier*>(it->second.get())) &&
+               dynamic_cast<Identifier*>(it->second.get()) ||
+               dynamic_cast<NumericLiteral*>(it->second.get())) &&
               this->non_input_ports.count(ptr->toString()) == 0) {
             remove = true;
             this->assign_map[key] = node->value->clone();

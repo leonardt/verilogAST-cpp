@@ -449,19 +449,13 @@ class ModuleInstantiation : public StructuralStatement {
 
   // map from instance port names to connection expression
   // NOTE: anonymous style of module connections is not supported
-  std::map<std::string,
-           std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
-                        std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
-      connections;
+  std::map<std::string, std::unique_ptr<Expression>> connections;
 
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
   ModuleInstantiation(
       std::string module_name, Parameters parameters, std::string instance_name,
-      std::map<std::string,
-               std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
-                            std::unique_ptr<Slice>, std::unique_ptr<Concat>>>
-          connections)
+      std::map<std::string, std::unique_ptr<Expression>> connections)
       : module_name(module_name),
         parameters(std::move(parameters)),
         instance_name(instance_name),
