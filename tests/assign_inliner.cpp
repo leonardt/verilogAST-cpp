@@ -332,6 +332,8 @@ TEST(InlineAssignTests, TestMultipleAssign) {
                                                vAST::INOUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("io1"),
                                                vAST::INOUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("io2"),
+                                               vAST::INOUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -348,14 +350,19 @@ TEST(InlineAssignTests, TestMultipleAssign) {
       std::make_unique<vAST::Identifier>("x"),
       std::make_unique<vAST::Identifier>("io1")));
 
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("io2"),
+      std::make_unique<vAST::Identifier>("x")));
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (inout io0, inout io1);\n"
+      "module test_module (inout io0, inout io1, inout io2);\n"
       "wire x;\n"
       "assign x = io0;\n"
       "assign x = io1;\n"
+      "assign io2 = x;\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
