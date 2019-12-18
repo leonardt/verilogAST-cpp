@@ -325,6 +325,46 @@ TEST(InlineAssignTests, TestNoInlineFanOutExpr) {
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
 }
 
+TEST(InlineAssignTests, TestMultipleAssign) {
+  // Should not inline a wire that is assigned multiple times
+  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("io0"),
+                                               vAST::INOUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("io1"),
+                                               vAST::INOUT, vAST::WIRE));
+
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body;
+
+  body.push_back(
+      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("x")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("x"),
+      std::make_unique<vAST::Identifier>("io0")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("x"),
+      std::make_unique<vAST::Identifier>("io1")));
+
+  std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
+      "test_module", std::move(ports), std::move(body));
+
+  std::string raw_str =
+      "module test_module (inout io0, inout io1);\n"
+      "wire x;\n"
+      "assign x = io0;\n"
+      "assign x = io1;\n"
+      "endmodule\n";
+
+  EXPECT_EQ(module->toString(), raw_str);
+
+  std::string expected_str = raw_str;
+  vAST::AssignInliner transformer;
+  EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
