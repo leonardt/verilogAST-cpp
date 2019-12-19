@@ -482,9 +482,7 @@ TEST(InlineAssignTests, TestInstConn) {
 
   std::string expected_str =
       "module test_module (input i, output o);\n"
-      "wire y;\n"
-      "inner_module inner_module_inst(.i(i), .o(y));\n"
-      "assign o = y;\n"
+      "inner_module inner_module_inst(.i(i), .o(o));\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);

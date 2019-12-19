@@ -10,14 +10,22 @@ namespace verilogAST {
 class AssignMapBuilder : public Transformer {
   std::map<std::string, int> &assign_count;
   std::map<std::string, std::unique_ptr<Expression>> &assign_map;
+  std::set<std::string> &non_input_ports;
+  std::set<std::string> &output_ports;
 
  public:
   AssignMapBuilder(
-       std::map<std::string, int> &assign_count,
-      std::map<std::string, std::unique_ptr<Expression>> &assign_map)
-      : assign_count(assign_count), assign_map(assign_map){};
+      std::map<std::string, int> &assign_count,
+      std::map<std::string, std::unique_ptr<Expression>> &assign_map,
+      std::set<std::string> &non_input_ports,
+      std::set<std::string> &output_ports)
+      : assign_count(assign_count),
+        assign_map(assign_map),
+        non_input_ports(non_input_ports),
+        output_ports(output_ports){};
 
   using Transformer::visit;
+  virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
 };
@@ -46,6 +54,14 @@ class AssignInliner : public Transformer {
   std::map<std::string, int> assign_count;
   std::map<std::string, std::unique_ptr<Expression>> assign_map;
   std::set<std::string> non_input_ports;
+  std::set<std::string> output_ports;
+  std::set<std::string> inlined_outputs;
+
+  std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                           std::unique_ptr<Declaration>>>
+  do_inline(std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                     std::unique_ptr<Declaration>>>
+                body);
 
  public:
   using Transformer::visit;
@@ -53,7 +69,6 @@ class AssignInliner : public Transformer {
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
   virtual std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node);
-  virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
   virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node);
 };
 

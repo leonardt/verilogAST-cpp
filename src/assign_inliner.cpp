@@ -20,6 +20,27 @@ std::unique_ptr<ContinuousAssign> WireReadCounter::visit(
   return node;
 }
 
+std::unique_ptr<Port> AssignMapBuilder::visit(std::unique_ptr<Port> node) {
+  if (node->direction != Direction::INPUT) {
+    std::string port_str = std::visit(
+        [](auto&& value) -> std::string {
+          if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
+            return ptr->toString();
+          } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
+            return ptr->id->toString();
+          }
+          throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+          return "";                                // LCOV_EXCL_LINE
+        },
+        node->value);
+    this->non_input_ports.insert(port_str);
+    if (node->direction == Direction::OUTPUT) {
+      this->output_ports.insert(port_str);
+    }
+  }
+  return node;
+}
+
 std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
     std::unique_ptr<ContinuousAssign> node) {
   node = Transformer::visit(std::move(node));
@@ -61,8 +82,7 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
           if (it != assign_map.end() && (this->assign_count[key] == 1) &&
               (this->read_count[key] == 1 ||
                dynamic_cast<Identifier*>(it->second.get()) ||
-               dynamic_cast<NumericLiteral*>(it->second.get())) &&
-              this->non_input_ports.count(key) == 0) {
+               dynamic_cast<NumericLiteral*>(it->second.get()))) {
             remove = true;
           };
         } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
@@ -72,8 +92,7 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
           if (it != assign_map.end() && (this->assign_count[key] == 1) &&
               (this->read_count[key] == 1 ||
                dynamic_cast<Identifier*>(it->second.get()) ||
-               dynamic_cast<NumericLiteral*>(it->second.get())) &&
-              this->non_input_ports.count(key) == 0) {
+               dynamic_cast<NumericLiteral*>(it->second.get()))) {
             remove = true;
           };
         }
@@ -104,7 +123,8 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
                dynamic_cast<NumericLiteral*>(it->second.get())) &&
               this->non_input_ports.count(ptr->toString()) == 0) {
             remove = true;
-            this->assign_map[key] = node->value->clone();
+          } else if (this->inlined_outputs.count(ptr->toString())) {
+            remove = true;
           };
         }
       },
@@ -115,42 +135,16 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
   return node;
 }
 
-std::unique_ptr<Port> AssignInliner::visit(std::unique_ptr<Port> node) {
-  if (node->direction != Direction::INPUT) {
-    this->non_input_ports.insert(std::visit(
-        [](auto&& value) -> std::string {
-          if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
-            return ptr->toString();
-          } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
-            return ptr->id->toString();
-          }
-          throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-          return "";                                // LCOV_EXCL_LINE
-        },
-        node->value));
-  }
-  return node;
-}  // namespace verilogAST
-
-std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
-  // std::map<std::string, std::unique_ptr<Expression>>
-  //     assign_map;
-  AssignMapBuilder builder(this->assign_count, this->assign_map);
-  node = builder.visit(std::move(node));
-
-  WireReadCounter counter(this->read_count);
-  node = counter.visit(std::move(node));
-
-  std::vector<std::unique_ptr<AbstractPort>> new_ports;
-  for (auto&& item : node->ports) {
-    new_ports.push_back(this->visit(std::move(item)));
-  }
-  node->ports = std::move(new_ports);
-
+std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                         std::unique_ptr<Declaration>>>
+AssignInliner::do_inline(
+    std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                             std::unique_ptr<Declaration>>>
+        body) {
   std::vector<std::variant<std::unique_ptr<StructuralStatement>,
                            std::unique_ptr<Declaration>>>
       new_body;
-  for (auto&& item : node->body) {
+  for (auto&& item : body) {
     std::variant<std::unique_ptr<StructuralStatement>,
                  std::unique_ptr<Declaration>>
         result = this->visit(std::move(item));
@@ -168,7 +162,35 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
       new_body.push_back(std::move(result));
     }
   }
-  node->body = std::move(new_body);
+  return new_body;
+}
+
+std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
+  AssignMapBuilder builder(this->assign_count, this->assign_map,
+                           this->non_input_ports, this->output_ports);
+  node = builder.visit(std::move(node));
+
+  WireReadCounter counter(this->read_count);
+  node = counter.visit(std::move(node));
+
+  std::vector<std::unique_ptr<AbstractPort>> new_ports;
+  for (auto&& item : node->ports) {
+    new_ports.push_back(this->visit(std::move(item)));
+  }
+  node->ports = std::move(new_ports);
+
+  node->body = this->do_inline(std::move(node->body));
+  for (auto output : this->output_ports) {
+    std::unique_ptr<Expression> value = this->assign_map[output]->clone();
+    this->assign_map.erase(output);
+    if (dynamic_cast<Identifier*>(value.get()) &&
+        this->assign_count[value->toString()] == 0) {
+      this->assign_map[value->toString()] = make_id(output);
+      this->assign_count[value->toString()]++;
+      this->inlined_outputs.insert(output);
+    }
+  }
+  node->body = this->do_inline(std::move(node->body));
   return node;
 }
 
