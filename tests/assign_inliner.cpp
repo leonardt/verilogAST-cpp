@@ -251,6 +251,14 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
       std::make_unique<vAST::Vector>(vAST::make_id("o_vec1"),
                                      vAST::make_num("1"), vAST::make_num("0")),
       vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o_vec2"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o_vec3"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -264,6 +272,9 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
 
   body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
       vAST::make_id("x_vec"), vAST::make_num("1"), vAST::make_num("0"))));
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("y_vec"), vAST::make_num("1"), vAST::make_num("0"))));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("x"),
@@ -294,6 +305,10 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
       std::make_unique<vAST::Identifier>("i_vec")));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("y_vec"),
+      std::make_unique<vAST::NumericLiteral>("2'b10")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("o_vec0"),
       std::make_unique<vAST::Identifier>("x_vec")));
 
@@ -301,14 +316,23 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
       std::make_unique<vAST::Identifier>("o_vec1"),
       std::make_unique<vAST::Identifier>("x_vec")));
 
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("o_vec2"),
+      std::make_unique<vAST::Identifier>("y_vec")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("o_vec3"),
+      std::make_unique<vAST::Identifier>("y_vec")));
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output o2, output o3, output [1:0] o_vec0, output [1:0] o_vec1);\n"
+      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output o2, output o3, output [1:0] o_vec0, output [1:0] o_vec1, output [1:0] o_vec2, output [1:0] o_vec3);\n"
       "wire x;\n"
       "wire y;\n"
       "wire [1:0] x_vec;\n"
+      "wire [1:0] y_vec;\n"
       "assign x = i;\n"
       "assign o0 = x;\n"
       "assign o1 = x;\n"
@@ -316,20 +340,25 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
       "assign o2 = y;\n"
       "assign o3 = y;\n"
       "assign x_vec = i_vec;\n"
+      "assign y_vec = 2'b10;\n"
       "assign o_vec0 = x_vec;\n"
       "assign o_vec1 = x_vec;\n"
+      "assign o_vec2 = y_vec;\n"
+      "assign o_vec3 = y_vec;\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output o2, output o3, output [1:0] o_vec0, output [1:0] o_vec1);\n"
+      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output o2, output o3, output [1:0] o_vec0, output [1:0] o_vec1, output [1:0] o_vec2, output [1:0] o_vec3);\n"
       "assign o0 = i;\n"
       "assign o1 = i;\n"
       "assign o2 = 1;\n"
       "assign o3 = 1;\n"
       "assign o_vec0 = i_vec;\n"
       "assign o_vec1 = i_vec;\n"
+      "assign o_vec2 = 2'b10;\n"
+      "assign o_vec3 = 2'b10;\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
