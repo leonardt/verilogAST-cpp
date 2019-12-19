@@ -180,6 +180,7 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
   node->ports = std::move(new_ports);
 
   node->body = this->do_inline(std::move(node->body));
+  // Now "reverse inline" output wires
   for (auto output : this->output_ports) {
     std::unique_ptr<Expression> value = this->assign_map[output]->clone();
     this->assign_map.erase(output);
