@@ -7,12 +7,6 @@ namespace verilogAST {
 
 class Transformer {
  public:
-  template <typename T>
-  T visit(T node) {
-    return std::visit(
-        [&](auto&& value) -> T { return this->visit(std::move(value)); }, node);
-  }
-
   virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
 
   virtual std::unique_ptr<NumericLiteral> visit(
