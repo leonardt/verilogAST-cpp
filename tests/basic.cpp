@@ -395,6 +395,14 @@ TEST(BasicTests, Comment) {
   EXPECT_EQ(block_comment.toString(),
             "/*\nTest comment\non multiple lines\n*/");
 }
+TEST(BasicTests, InlineVerilog) {
+  vAST::InlineVerilog inline_verilog(
+      "logic [1:0] x;\n"
+      "assign x = 2'b10;\n");
+  EXPECT_EQ(inline_verilog.toString(),
+            "logic [1:0] x;\n"
+            "assign x = 2'b10;\n");
+}
 
 }  // namespace
 

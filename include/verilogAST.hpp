@@ -319,6 +319,15 @@ class BlockComment : public StructuralStatement, public BehavioralStatement {
   ~BlockComment(){};
 };
 
+class InlineVerilog : public StructuralStatement, public BehavioralStatement {
+ public:
+  std::string value;
+
+  InlineVerilog(std::string value) : value(value){};
+  std::string toString() { return value; };
+  ~InlineVerilog(){};
+};
+
 typedef std::vector<
     std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
     Parameters;
