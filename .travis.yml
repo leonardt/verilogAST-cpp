@@ -51,4 +51,4 @@ script:
   - test -f /usr/local/include/verilogAST.hpp
 
 after_success:
-  - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*" -e miniconda
+  - coveralls --gcov gcov-7 --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*" -e miniconda
