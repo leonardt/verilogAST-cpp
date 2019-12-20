@@ -319,7 +319,11 @@ class BlockComment : public StructuralStatement, public BehavioralStatement {
   ~BlockComment(){};
 };
 
-class InlineVerilog : public StructuralStatement, public BehavioralStatement {
+class InlineVerilog : public StructuralStatement {
+  // Serializes into `value`, so allows the inclusion of arbitrary verilog
+  // statement(s) in the body of a module definition.  The contents of
+  // `value` must be a valid verilog statement inside a module body.  The
+  // contents are not validated.
  public:
   std::string value;
 
