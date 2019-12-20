@@ -394,6 +394,13 @@ TEST(BasicTests, Comment) {
   vAST::BlockComment block_comment("Test comment\non multiple lines");
   EXPECT_EQ(block_comment.toString(),
             "/*\nTest comment\non multiple lines\n*/");
+  std::unique_ptr<vAST::ContinuousAssign> cont_assign =
+      std::make_unique<vAST::ContinuousAssign>(
+          std::make_unique<vAST::Identifier>("a"),
+          std::make_unique<vAST::Identifier>("b"));
+  vAST::SingleLineComment stmt_with_comment("Test comment",
+                                            std::move(cont_assign));
+  EXPECT_EQ(stmt_with_comment.toString(), "assign a = b;  // Test comment");
 }
 
 }  // namespace
