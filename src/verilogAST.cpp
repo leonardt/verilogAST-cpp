@@ -466,6 +466,6 @@ std::string SingleLineComment::toString() {
     result += this->statement->toString() + "  ";
   }
   return result + "// " + value;
-};
+}
 
 }  // namespace verilogAST
