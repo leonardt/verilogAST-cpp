@@ -110,7 +110,6 @@ std::string Index::toString() {
 std::string Slice::toString() {
   std::string expr_str = expr->toString();
   if (dynamic_cast<Identifier *>(expr.get())) {
-  } else if (dynamic_cast<NumericLiteral *>(expr.get())) {
   } else if (dynamic_cast<Index *>(expr.get())) {
   } else if (dynamic_cast<Slice *>(expr.get())) {
   } else {
