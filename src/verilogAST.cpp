@@ -460,4 +460,12 @@ std::unique_ptr<Vector> make_vector(std::unique_ptr<Identifier> id,
                                   std::move(lsb));
 }
 
+std::string SingleLineComment::toString() {
+  std::string result = "";
+  if (this->statement) {
+    result += this->statement->toString() + "  ";
+  }
+  return result + "// " + value;
+}
+
 }  // namespace verilogAST

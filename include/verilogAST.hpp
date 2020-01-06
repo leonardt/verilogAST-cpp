@@ -419,9 +419,13 @@ class SingleLineComment : public StructuralStatement,
                           public BehavioralStatement {
  public:
   std::string value;
+  std::unique_ptr<Statement> statement;  // optional
 
-  SingleLineComment(std::string value) : value(value){};
-  std::string toString() { return "// " + value; };
+  SingleLineComment(std::string value)
+      : value(value), statement(std::unique_ptr<Statement>{}){};
+  SingleLineComment(std::string value, std::unique_ptr<Statement> statement)
+      : value(value), statement(std::move(statement)){};
+  std::string toString();
   ~SingleLineComment(){};
 };
 
