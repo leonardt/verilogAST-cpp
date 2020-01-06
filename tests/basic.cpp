@@ -173,6 +173,7 @@ TEST(BasicTests, TestPosEdge) {
 
   EXPECT_EQ(pos_edge.toString(), "posedge clk");
 }
+
 TEST(BasicTests, TestCallExpr0) {
   std::vector<std::unique_ptr<vAST::Expression>> args;
   args.push_back(vAST::make_id("x"));
@@ -186,6 +187,31 @@ TEST(BasicTests, TestCallExpr1) {
   args.push_back(vAST::make_num("7"));
   vAST::CallExpr clog2("$clog2", std::move(args));
   EXPECT_EQ(clog2.toString(), "$clog2(7)");
+}
+
+TEST(BasicTests, TestCallExprNoArgs) {
+  vAST::CallExpr foo("$foo");
+  EXPECT_EQ(foo.toString(), "$foo()");
+}
+
+TEST(BasicTests, TestCallStmt0) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_id("x"));
+  args.push_back(vAST::make_id("y"));
+  vAST::CallStmt my_func("my_func", std::move(args));
+  EXPECT_EQ(my_func.toString(), "my_func(x, y);");
+}
+
+TEST(BasicTests, TestCallStmt1) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_num("7"));
+  vAST::CallStmt clog2("$clog2", std::move(args));
+  EXPECT_EQ(clog2.toString(), "$clog2(7);");
+}
+
+TEST(BasicTests, TestCallStmtNoArgs) {
+  vAST::CallStmt foo("$foo");
+  EXPECT_EQ(foo.toString(), "$foo();");
 }
 
 TEST(BasicTests, TestPort) {
@@ -402,6 +428,161 @@ TEST(BasicTests, InlineVerilog) {
   EXPECT_EQ(inline_verilog.toString(),
             "logic [1:0] x;\n"
             "assign x = 2'b10;\n");
+}
+
+TEST(BasicTests, TestNumCopy) {
+  std::unique_ptr<vAST::NumericLiteral> x =
+      std::make_unique<vAST::NumericLiteral>("32'hDEADBEEF");
+  std::unique_ptr<vAST::NumericLiteral> x1 =
+      std::make_unique<vAST::NumericLiteral>(*x);
+  EXPECT_EQ(x->toString(), "32'hDEADBEEF");
+  EXPECT_EQ(x1->toString(), "32'hDEADBEEF");
+  x1->value = "3b010";
+  EXPECT_EQ(x->toString(), "32'hDEADBEEF");
+  EXPECT_EQ(x1->toString(), "3b010");
+}
+
+TEST(BasicTests, TestIdentifierCopy) {
+  std::unique_ptr<vAST::Identifier> x = std::make_unique<vAST::Identifier>("x");
+  std::unique_ptr<vAST::Identifier> x1 = std::make_unique<vAST::Identifier>(*x);
+  EXPECT_EQ(x->toString(), "x");
+  EXPECT_EQ(x1->toString(), "x");
+  x1->value = "y";
+  EXPECT_EQ(x->toString(), "x");
+  EXPECT_EQ(x1->toString(), "y");
+}
+
+TEST(BasicTests, TestStringCopy) {
+  std::unique_ptr<vAST::String> x = std::make_unique<vAST::String>("str");
+  std::unique_ptr<vAST::String> x1 = std::make_unique<vAST::String>(*x);
+  EXPECT_EQ(x->toString(), "\"str\"");
+  EXPECT_EQ(x1->toString(), "\"str\"");
+  x1->value = "bar";
+  EXPECT_EQ(x->toString(), "\"str\"");
+  EXPECT_EQ(x1->toString(), "\"bar\"");
+}
+
+TEST(BasicTests, TestIndexCopy) {
+  std::unique_ptr<vAST::Index> x =
+      std::make_unique<vAST::Index>(std::make_unique<vAST::Identifier>("x"),
+                                    std::make_unique<vAST::Identifier>("y"));
+
+  std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
+  EXPECT_EQ(x->toString(), "x[y]");
+  EXPECT_EQ(x1->toString(), "x[y]");
+  x1->id->value = "z";
+  x1->index = std::make_unique<vAST::Identifier>("a");
+  EXPECT_EQ(x->toString(), "x[y]");
+  EXPECT_EQ(x1->toString(), "z[a]");
+}
+
+TEST(BasicTests, TestSliceCopy) {
+  std::unique_ptr<vAST::Slice> x =
+      std::make_unique<vAST::Slice>(std::make_unique<vAST::Identifier>("x"),
+                                    std::make_unique<vAST::Identifier>("y"),
+                                    std::make_unique<vAST::Identifier>("z"));
+
+  std::unique_ptr<vAST::Slice> x1 = std::make_unique<vAST::Slice>(*x);
+  EXPECT_EQ(x->toString(), "x[y:z]");
+  EXPECT_EQ(x1->toString(), "x[y:z]");
+  x1->id = std::make_unique<vAST::Identifier>("a");
+  x1->high_index = std::make_unique<vAST::Identifier>("b");
+  x1->low_index = std::make_unique<vAST::Identifier>("c");
+  EXPECT_EQ(x->toString(), "x[y:z]");
+  EXPECT_EQ(x1->toString(), "a[b:c]");
+}
+
+TEST(BasicTests, TestBinOpCopy) {
+  std::unique_ptr<vAST::BinaryOp> x = std::make_unique<vAST::BinaryOp>(
+      std::make_unique<vAST::Identifier>("x"), vAST::BinOp::ADD,
+      std::make_unique<vAST::Identifier>("z"));
+
+  std::unique_ptr<vAST::BinaryOp> x1 = std::make_unique<vAST::BinaryOp>(*x);
+  EXPECT_EQ(x->toString(), "x + z");
+  EXPECT_EQ(x1->toString(), "x + z");
+  x1->left = std::make_unique<vAST::Identifier>("a");
+  x1->right = std::make_unique<vAST::Identifier>("b");
+  x1->op = vAST::BinOp::SUB;
+  EXPECT_EQ(x->toString(), "x + z");
+  EXPECT_EQ(x1->toString(), "a - b");
+}
+
+TEST(BasicTests, TestUnOpCopy) {
+  std::unique_ptr<vAST::UnaryOp> x = std::make_unique<vAST::UnaryOp>(
+      std::make_unique<vAST::Identifier>("z"), vAST::UnOp::INVERT);
+
+  std::unique_ptr<vAST::UnaryOp> x1 = std::make_unique<vAST::UnaryOp>(*x);
+  EXPECT_EQ(x->toString(), "~ z");
+  EXPECT_EQ(x1->toString(), "~ z");
+  x1->operand = std::make_unique<vAST::Identifier>("b");
+  x1->op = vAST::UnOp::MINUS;
+  EXPECT_EQ(x->toString(), "~ z");
+  EXPECT_EQ(x1->toString(), "- b");
+}
+
+TEST(BasicTests, TestTernaryOpCopy) {
+  std::unique_ptr<vAST::TernaryOp> x = std::make_unique<vAST::TernaryOp>(
+      std::make_unique<vAST::Identifier>("a"),
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("c"));
+
+  std::unique_ptr<vAST::TernaryOp> x1 = std::make_unique<vAST::TernaryOp>(*x);
+  EXPECT_EQ(x->toString(), "a ? b : c");
+  EXPECT_EQ(x1->toString(), "a ? b : c");
+  x1->cond = std::make_unique<vAST::Identifier>("x");
+  x1->true_value = std::make_unique<vAST::Identifier>("y");
+  x1->false_value = std::make_unique<vAST::Identifier>("z");
+  EXPECT_EQ(x->toString(), "a ? b : c");
+  EXPECT_EQ(x1->toString(), "x ? y : z");
+}
+
+TEST(BasicTests, TestConcatCopy) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_id("x"));
+  args.push_back(vAST::make_id("y"));
+  args.push_back(vAST::make_id("z"));
+  std::unique_ptr<vAST::Concat> x =
+      std::make_unique<vAST::Concat>(std::move(args));
+
+  std::unique_ptr<vAST::Concat> x1 = std::make_unique<vAST::Concat>(*x);
+  EXPECT_EQ(x->toString(), "{x,y,z}");
+  EXPECT_EQ(x1->toString(), "{x,y,z}");
+  x1->args[0] = vAST::make_id("a");
+  x1->args[1] = vAST::make_id("b");
+  x1->args[2] = vAST::make_id("c");
+  EXPECT_EQ(x->toString(), "{x,y,z}");
+  EXPECT_EQ(x1->toString(), "{a,b,c}");
+}
+
+TEST(BasicTests, TestReplicateCopy) {
+  std::unique_ptr<vAST::Replicate> x =
+      std::make_unique<vAST::Replicate>(vAST::make_id("a"), vAST::make_id("b"));
+
+  std::unique_ptr<vAST::Replicate> x1 = std::make_unique<vAST::Replicate>(*x);
+  EXPECT_EQ(x->toString(), "{(a){b}}");
+  EXPECT_EQ(x1->toString(), "{(a){b}}");
+  x1->num = vAST::make_id("x");
+  x1->value = vAST::make_id("y");
+  EXPECT_EQ(x->toString(), "{(a){b}}");
+  EXPECT_EQ(x1->toString(), "{(x){y}}");
+}
+
+TEST(BasicTests, TestCallExprCopy) {
+  std::vector<std::unique_ptr<vAST::Expression>> args;
+  args.push_back(vAST::make_id("x"));
+  args.push_back(vAST::make_id("y"));
+  std::unique_ptr<vAST::CallExpr> x =
+      std::make_unique<vAST::CallExpr>("foo", std::move(args));
+
+  std::unique_ptr<vAST::CallExpr> x1 = std::make_unique<vAST::CallExpr>(*x);
+  EXPECT_EQ(x->toString(), "foo(x, y)");
+  EXPECT_EQ(x1->toString(), "foo(x, y)");
+  x1->func = "bar";
+  x1->args[0] = vAST::make_id("a");
+  x1->args[1] = vAST::make_id("b");
+  EXPECT_EQ(x->toString(), "foo(x, y)");
+  EXPECT_EQ(x1->toString(), "bar(a, b)");
+  EXPECT_EQ(x1->toString(), x1->clone()->toString());
 }
 
 }  // namespace

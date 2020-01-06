@@ -10,10 +10,12 @@ matrix:
           packages:
             - g++-7
       env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && GCOV=gcov-7"
 
     - os: osx
       osx_image: xcode10.2
+      env:
+        - MATRIX_EVAL="GCOV=gcov"
 
 
 before_install:
@@ -51,4 +53,4 @@ script:
   - test -f /usr/local/include/verilogAST.hpp
 
 after_success:
-  - coveralls --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*" -e miniconda
+  - coveralls --gcov $GCOV --root .. -E ".*CMakeFiles.*" -E ".*googletest-src.*" -E ".*tests/.*.cpp.*" -e miniconda

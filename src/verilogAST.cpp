@@ -186,19 +186,19 @@ std::string BinaryOp::toString() {
   std::string lstr = left->toString();
   std::string rstr = right->toString();
   // TODO Precedence logic, for now we just insert parens if not symbol or num
-  if (dynamic_cast<Identifier*>(left.get())) {
-  } else if (dynamic_cast<NumericLiteral*>(left.get())) {
-  } else if (dynamic_cast<Index*>(left.get())) {
-  } else if (dynamic_cast<Slice*>(left.get())) {
+  if (dynamic_cast<Identifier *>(left.get())) {
+  } else if (dynamic_cast<NumericLiteral *>(left.get())) {
+  } else if (dynamic_cast<Index *>(left.get())) {
+  } else if (dynamic_cast<Slice *>(left.get())) {
   } else {
-      lstr = "(" + lstr + ")";
+    lstr = "(" + lstr + ")";
   }
-  if (dynamic_cast<Identifier*>(right.get())) {
-  } else if (dynamic_cast<NumericLiteral*>(right.get())) {
-  } else if (dynamic_cast<Index*>(right.get())) {
-  } else if (dynamic_cast<Slice*>(right.get())) {
+  if (dynamic_cast<Identifier *>(right.get())) {
+  } else if (dynamic_cast<NumericLiteral *>(right.get())) {
+  } else if (dynamic_cast<Index *>(right.get())) {
+  } else if (dynamic_cast<Slice *>(right.get())) {
   } else {
-      rstr = "(" + rstr + ")";
+    rstr = "(" + rstr + ")";
   }
   return lstr + ' ' + op_str + ' ' + rstr;
 }
@@ -242,12 +242,12 @@ std::string UnaryOp::toString() {
   }
   std::string operand_str = operand->toString();
   // TODO Precedence logic, for now we just insert parens if not symbol or num
-  if (dynamic_cast<Identifier*>(operand.get())) {
-  } else if (dynamic_cast<NumericLiteral*>(operand.get())) {
-  } else if (dynamic_cast<Index*>(operand.get())) {
-  } else if (dynamic_cast<Slice*>(operand.get())) {
+  if (dynamic_cast<Identifier *>(operand.get())) {
+  } else if (dynamic_cast<NumericLiteral *>(operand.get())) {
+  } else if (dynamic_cast<Index *>(operand.get())) {
+  } else if (dynamic_cast<Slice *>(operand.get())) {
   } else {
-      operand_str = "(" + operand_str + ")";
+    operand_str = "(" + operand_str + ")";
   }
   return op_str + ' ' + operand_str;
 }
@@ -381,7 +381,7 @@ std::string ModuleInstantiation::toString() {
   if (!connections.empty()) {
     std::vector<std::string> param_strs;
     for (auto &it : connections) {
-      param_strs.push_back("." + it.first + "(" + variant_to_string(it.second) +
+      param_strs.push_back("." + it.first + "(" + it.second->toString() +
                            ")");
     }
     module_inst_str += join(param_strs, ", ");
