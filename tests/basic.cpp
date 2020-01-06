@@ -402,6 +402,14 @@ TEST(BasicTests, Comment) {
                                             std::move(cont_assign));
   EXPECT_EQ(stmt_with_comment.toString(), "assign a = b;  // Test comment");
 }
+TEST(BasicTests, InlineVerilog) {
+  vAST::InlineVerilog inline_verilog(
+      "logic [1:0] x;\n"
+      "assign x = 2'b10;\n");
+  EXPECT_EQ(inline_verilog.toString(),
+            "logic [1:0] x;\n"
+            "assign x = 2'b10;\n");
+}
 
 }  // namespace
 
