@@ -108,8 +108,16 @@ std::string Index::toString() {
 }
 
 std::string Slice::toString() {
-  return id->toString() + '[' + high_index->toString() + ':' +
-         low_index->toString() + ']';
+  std::string expr_str = expr->toString();
+  if (dynamic_cast<Identifier *>(expr.get())) {
+  } else if (dynamic_cast<NumericLiteral *>(expr.get())) {
+  } else if (dynamic_cast<Index *>(expr.get())) {
+  } else if (dynamic_cast<Slice *>(expr.get())) {
+  } else {
+    expr_str = "(" + expr_str + ")";
+  }
+  return expr_str + '[' + high_index->toString() + ':' + low_index->toString() +
+         ']';
 }
 
 std::string Vector::toString() {
@@ -381,8 +389,7 @@ std::string ModuleInstantiation::toString() {
   if (!connections.empty()) {
     std::vector<std::string> param_strs;
     for (auto &it : connections) {
-      param_strs.push_back("." + it.first + "(" + it.second->toString() +
-                           ")");
+      param_strs.push_back("." + it.first + "(" + it.second->toString() + ")");
     }
     module_inst_str += join(param_strs, ", ");
   }

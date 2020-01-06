@@ -74,7 +74,7 @@ std::unique_ptr<Index> Transformer::visit(std::unique_ptr<Index> node) {
 }
 
 std::unique_ptr<Slice> Transformer::visit(std::unique_ptr<Slice> node) {
-  node->id = this->visit(std::move(node->id));
+  node->expr = this->visit(std::move(node->expr));
   node->high_index = this->visit(std::move(node->high_index));
   node->low_index = this->visit(std::move(node->low_index));
   return node;
