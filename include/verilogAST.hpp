@@ -128,22 +128,23 @@ class Index : public Expression {
 class Slice : public Expression {
  protected:
   virtual Slice* clone_impl() const override {
-    return new Slice(this->id->clone(), this->high_index->clone(),
+    return new Slice(this->expr->clone(), this->high_index->clone(),
                      this->low_index->clone());
   };
 
  public:
-  std::unique_ptr<Identifier> id;
+  std::unique_ptr<Expression> expr;
   std::unique_ptr<Expression> high_index;
   std::unique_ptr<Expression> low_index;
 
-  Slice(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> high_index,
+  Slice(std::unique_ptr<Expression> expr,
+        std::unique_ptr<Expression> high_index,
         std::unique_ptr<Expression> low_index)
-      : id(std::move(id)),
+      : expr(std::move(expr)),
         high_index(std::move(high_index)),
         low_index(std::move(low_index)){};
   Slice(const Slice& rhs)
-      : id(rhs.id->clone()),
+      : expr(rhs.expr->clone()),
         high_index(rhs.high_index->clone()),
         low_index(rhs.low_index->clone()){};
   std::string toString() override;

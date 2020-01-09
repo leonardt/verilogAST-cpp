@@ -492,7 +492,7 @@ TEST(BasicTests, TestSliceCopy) {
   std::unique_ptr<vAST::Slice> x1 = std::make_unique<vAST::Slice>(*x);
   EXPECT_EQ(x->toString(), "x[y:z]");
   EXPECT_EQ(x1->toString(), "x[y:z]");
-  x1->id = std::make_unique<vAST::Identifier>("a");
+  x1->expr = std::make_unique<vAST::Identifier>("a");
   x1->high_index = std::make_unique<vAST::Identifier>("b");
   x1->low_index = std::make_unique<vAST::Identifier>("c");
   EXPECT_EQ(x->toString(), "x[y:z]");
