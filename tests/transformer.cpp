@@ -178,6 +178,10 @@ TEST(TransformerTests, TestModule) {
   body.push_back(std::make_unique<vAST::SingleLineComment>("Test comment"));
   body.push_back(
       std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
+
+  body.push_back(
+      std::make_unique<vAST::InlineVerilog>("// Test inline verilog"));
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module0", std::move(ports), std::move(body), make_simple_params());
   std::string expected_str =
@@ -192,6 +196,7 @@ TEST(TransformerTests, TestModule) {
       "end\n\n"
       "// Test comment\n"
       "/*\nTest comment\non multiple lines\n*/\n"
+      "// Test inline verilog\n"
       "endmodule\n";
 
   ModuleTransformer transformer;
