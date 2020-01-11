@@ -179,6 +179,11 @@ std::unique_ptr<BlockComment> Transformer::visit(
   return node;
 }
 
+std::unique_ptr<InlineVerilog> Transformer::visit(
+    std::unique_ptr<InlineVerilog> node) {
+  return node;
+}
+
 std::unique_ptr<ModuleInstantiation> Transformer::visit(
     std::unique_ptr<ModuleInstantiation> node) {
   for (auto&& conn : node->connections) {
@@ -329,6 +334,10 @@ std::unique_ptr<StructuralStatement> Transformer::visit(
   if (auto ptr = dynamic_cast<BlockComment*>(node.get())) {
     node.release();
     return this->visit(std::unique_ptr<BlockComment>(ptr));
+  }
+  if (auto ptr = dynamic_cast<InlineVerilog*>(node.get())) {
+    node.release();
+    return this->visit(std::unique_ptr<InlineVerilog>(ptr));
   }
   throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
   return node;                              // LCOV_EXCL_LINE

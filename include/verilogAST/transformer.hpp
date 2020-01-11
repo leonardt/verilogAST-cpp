@@ -58,6 +58,9 @@ class Transformer {
   virtual std::unique_ptr<BlockComment> visit(
       std::unique_ptr<BlockComment> node);
 
+  virtual std::unique_ptr<InlineVerilog> visit(
+      std::unique_ptr<InlineVerilog> node);
+
   virtual std::unique_ptr<ModuleInstantiation> visit(
       std::unique_ptr<ModuleInstantiation> node);
 
