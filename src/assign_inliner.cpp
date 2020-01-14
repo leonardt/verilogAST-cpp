@@ -21,22 +21,24 @@ std::unique_ptr<ContinuousAssign> WireReadCounter::visit(
 }
 
 std::unique_ptr<Port> AssignMapBuilder::visit(std::unique_ptr<Port> node) {
+  std::string port_str = std::visit(
+      [](auto&& value) -> std::string {
+        if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
+          return ptr->toString();
+        } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
+          return ptr->id->toString();
+        }
+        throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
+        return "";                                // LCOV_EXCL_LINE
+      },
+      node->value);
   if (node->direction != Direction::INPUT) {
-    std::string port_str = std::visit(
-        [](auto&& value) -> std::string {
-          if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
-            return ptr->toString();
-          } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
-            return ptr->id->toString();
-          }
-          throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
-          return "";                                // LCOV_EXCL_LINE
-        },
-        node->value);
     this->non_input_ports.insert(port_str);
     if (node->direction == Direction::OUTPUT) {
       this->output_ports.insert(port_str);
     }
+  } else {
+    this->input_ports.insert(port_str);
   }
   return node;
 }
@@ -167,7 +169,8 @@ AssignInliner::do_inline(
 
 std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
   AssignMapBuilder builder(this->assign_count, this->assign_map,
-                           this->non_input_ports, this->output_ports);
+                           this->non_input_ports, this->output_ports,
+                           this->input_ports);
   node = builder.visit(std::move(node));
 
   WireReadCounter counter(this->read_count);
@@ -185,7 +188,8 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
     std::unique_ptr<Expression> value = this->assign_map[output]->clone();
     this->assign_map.erase(output);
     if (dynamic_cast<Identifier*>(value.get()) &&
-        this->assign_count[value->toString()] == 0) {
+        this->assign_count[value->toString()] == 0 &&
+        this->input_ports.count(value->toString()) == 0) {
       this->assign_map[value->toString()] = make_id(output);
       this->assign_count[value->toString()]++;
       this->inlined_outputs.insert(output);
