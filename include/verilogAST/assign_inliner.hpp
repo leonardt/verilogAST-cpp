@@ -12,17 +12,19 @@ class AssignMapBuilder : public Transformer {
   std::map<std::string, std::unique_ptr<Expression>> &assign_map;
   std::set<std::string> &non_input_ports;
   std::set<std::string> &output_ports;
+  std::set<std::string> &input_ports;
 
  public:
   AssignMapBuilder(
       std::map<std::string, int> &assign_count,
       std::map<std::string, std::unique_ptr<Expression>> &assign_map,
       std::set<std::string> &non_input_ports,
-      std::set<std::string> &output_ports)
+      std::set<std::string> &output_ports, std::set<std::string> &input_ports)
       : assign_count(assign_count),
         assign_map(assign_map),
         non_input_ports(non_input_ports),
-        output_ports(output_ports){};
+        output_ports(output_ports),
+        input_ports(input_ports){};
 
   using Transformer::visit;
   virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
@@ -55,6 +57,7 @@ class AssignInliner : public Transformer {
   std::map<std::string, std::unique_ptr<Expression>> assign_map;
   std::set<std::string> non_input_ports;
   std::set<std::string> output_ports;
+  std::set<std::string> input_ports;
   std::set<std::string> inlined_outputs;
 
   std::vector<std::variant<std::unique_ptr<StructuralStatement>,

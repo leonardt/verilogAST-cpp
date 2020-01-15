@@ -464,7 +464,11 @@ TEST(InlineAssignTests, TestInstConn) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"),
                                                vAST::INPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("a"),
+                                               vAST::INPUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"),
+                                               vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("b"),
                                                vAST::OUTPUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
@@ -481,8 +485,13 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("x"),
       std::make_unique<vAST::Identifier>("i")));
 
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("a")));
+
   vAST::Parameters parameters;
   std::map<std::string, std::unique_ptr<vAST::Expression>> connections;
+  connections["c"] = vAST::make_id("a");
   connections["i"] = vAST::make_id("x");
   connections["o"] = vAST::make_id("y");
 
@@ -499,19 +508,21 @@ TEST(InlineAssignTests, TestInstConn) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (input i, input a, output o, output b);\n"
       "wire x;\n"
       "wire y;\n"
       "assign x = i;\n"
-      "inner_module inner_module_inst(.i(x), .o(y));\n"
+      "assign b = a;\n"
+      "inner_module inner_module_inst(.c(a), .i(x), .o(y));\n"
       "assign o = y;\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o);\n"
-      "inner_module inner_module_inst(.i(i), .o(o));\n"
+      "module test_module (input i, input a, output o, output b);\n"
+      "assign b = a;\n"
+      "inner_module inner_module_inst(.c(a), .i(i), .o(o));\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
