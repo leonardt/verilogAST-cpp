@@ -58,8 +58,13 @@ TEST(ParameterizedModuleTests, TestEq) {
 
   cout << "//coreir_eq" << endl << coreir_eq->toString() << endl;
   std::string expected_str =
-      "module coreir_eq #(parameter width = 1) (input [width - 1:0] in0, input "
-      "[width - 1:0] in1, output out);\n"
+      "module coreir_eq #(\n"
+      "    parameter width = 1\n"
+      ") (\n"
+      "    input [width - 1:0] in0,\n"
+      "    input [width - 1:0] in1,\n"
+      "    output out\n"
+      ");\n"
       "assign out = in0 == in1;\n"
       "endmodule\n";
   EXPECT_EQ(coreir_eq->toString(), expected_str);
