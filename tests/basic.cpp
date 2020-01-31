@@ -429,6 +429,10 @@ TEST(BasicTests, Comment) {
   EXPECT_EQ(stmt_with_comment.toString(), "assign a = b;  // Test comment");
   vAST::ExprComment expr_comment(vAST::make_id("i"), "verilator_public");
   EXPECT_EQ(expr_comment.toString(), "i/*verilator_public*/");
+  vAST::PortComment port_comment(
+      std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT, vAST::WIRE),
+      "verilator_public");
+  EXPECT_EQ(port_comment.toString(), "input i/*verilator_public*/");
 }
 TEST(BasicTests, InlineVerilog) {
   vAST::InlineVerilog inline_verilog(

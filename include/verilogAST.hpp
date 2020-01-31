@@ -455,6 +455,17 @@ class ExprComment : public Expression {
   ~ExprComment(){};
 };
 
+class PortComment : public AbstractPort {
+ public:
+  std::unique_ptr<Port> port;
+  std::string value;
+
+  PortComment(std::unique_ptr<Port> port, std::string value)
+      : port(std::move(port)), value(value){};
+  std::string toString() override { return port->toString() + "/*" + value + "*/"; };
+  ~PortComment(){};
+};
+
 class InlineVerilog : public StructuralStatement {
   // Serializes into `value`, so allows the inclusion of arbitrary verilog
   // statement(s) in the body of a module definition.  The contents of
