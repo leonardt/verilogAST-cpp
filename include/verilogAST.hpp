@@ -460,7 +460,7 @@ class PortComment : public AbstractPort {
   std::unique_ptr<Port> port;
   std::string value;
 
-  PortComment(std::unique_ptr<Port> port, std::string value)
+  PortComment(std::unique_ptr<AbstractPort> port, std::string value)
       : port(std::move(port)), value(value){};
   std::string toString() override { return port->toString() + "/*" + value + "*/"; };
   ~PortComment(){};
