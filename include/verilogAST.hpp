@@ -457,7 +457,7 @@ class ExprComment : public Expression {
 
 class PortComment : public AbstractPort {
  public:
-  std::unique_ptr<Port> port;
+  std::unique_ptr<AbstractPort> port;
   std::string value;
 
   PortComment(std::unique_ptr<AbstractPort> port, std::string value)
