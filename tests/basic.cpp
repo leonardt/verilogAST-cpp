@@ -427,6 +427,8 @@ TEST(BasicTests, Comment) {
   vAST::SingleLineComment stmt_with_comment("Test comment",
                                             std::move(cont_assign));
   EXPECT_EQ(stmt_with_comment.toString(), "assign a = b;  // Test comment");
+  vAST::ExprComment expr_comment(vAST::make_id("i"), "verilator_public");
+  EXPECT_EQ(expr_comment.toString(), "i/*verilator_public*/");
 }
 TEST(BasicTests, InlineVerilog) {
   vAST::InlineVerilog inline_verilog(

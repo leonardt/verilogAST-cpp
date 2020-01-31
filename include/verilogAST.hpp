@@ -439,6 +439,22 @@ class BlockComment : public StructuralStatement, public BehavioralStatement {
   ~BlockComment(){};
 };
 
+class ExprComment : public Expression {
+ protected:
+  virtual ExprComment* clone_impl() const override {
+    return new ExprComment(this->expr->clone(), this->value);
+  };
+
+ public:
+  std::unique_ptr<Expression> expr;
+  std::string value;
+
+  ExprComment(std::unique_ptr<Expression> expr, std::string value)
+      : expr(std::move(expr)), value(value){};
+  std::string toString() override { return expr->toString() + "/*" + value + "*/"; };
+  ~ExprComment(){};
+};
+
 class InlineVerilog : public StructuralStatement {
   // Serializes into `value`, so allows the inclusion of arbitrary verilog
   // statement(s) in the body of a module definition.  The contents of
