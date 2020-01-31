@@ -439,22 +439,6 @@ class BlockComment : public StructuralStatement, public BehavioralStatement {
   ~BlockComment(){};
 };
 
-class ExprComment : public Expression {
- protected:
-  virtual ExprComment* clone_impl() const override {
-    return new ExprComment(this->expr->clone(), this->value);
-  };
-
- public:
-  std::unique_ptr<Expression> expr;
-  std::string value;
-
-  ExprComment(std::unique_ptr<Expression> expr, std::string value)
-      : expr(std::move(expr)), value(value){};
-  std::string toString() override { return expr->toString() + "/*" + value + "*/"; };
-  ~ExprComment(){};
-};
-
 class PortComment : public AbstractPort {
  public:
   std::unique_ptr<AbstractPort> port;

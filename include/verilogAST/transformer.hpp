@@ -50,6 +50,8 @@ class Transformer {
 
   virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
 
+  virtual std::unique_ptr<PortComment> visit(std::unique_ptr<PortComment> node);
+
   virtual std::unique_ptr<StringPort> visit(std::unique_ptr<StringPort> node);
 
   virtual std::unique_ptr<SingleLineComment> visit(
