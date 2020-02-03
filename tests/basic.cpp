@@ -65,6 +65,25 @@ TEST(BasicTests, TestSlice) {
   vAST::Slice slice(vAST::make_id("x"), vAST::make_num("31"),
                     vAST::make_num("0"));
   EXPECT_EQ(slice.toString(), "x[31:0]");
+
+  std::unique_ptr<vAST::Slice> x = std::make_unique<vAST::Slice>(
+      std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("31"),
+                                    vAST::make_num("0")),
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("c"));
+  EXPECT_EQ(x->toString(), "x[31:0][b:c]");
+  std::unique_ptr<vAST::Slice> x2 = std::make_unique<vAST::Slice>(
+
+      std::make_unique<vAST::Index>(vAST::make_id("x"), vAST::make_num("0")),
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("c"));
+  EXPECT_EQ(x2->toString(), "x[0][b:c]");
+  std::unique_ptr<vAST::Slice> x3 = std::make_unique<vAST::Slice>(
+
+      std::make_unique<vAST::BinaryOp>(vAST::make_id("x"), vAST::BinOp::ADD, vAST::make_id("y")),
+      std::make_unique<vAST::Identifier>("b"),
+      std::make_unique<vAST::Identifier>("c"));
+  EXPECT_EQ(x3->toString(), "(x + y)[b:c]");
 }
 
 TEST(BasicTests, TestVector) {
