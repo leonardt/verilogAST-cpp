@@ -80,7 +80,8 @@ TEST(BasicTests, TestSlice) {
   EXPECT_EQ(x2->toString(), "x[0][b:c]");
   std::unique_ptr<vAST::Slice> x3 = std::make_unique<vAST::Slice>(
 
-      std::make_unique<vAST::BinaryOp>(vAST::make_id("x"), vAST::BinOp::ADD, vAST::make_id("y")),
+      std::make_unique<vAST::BinaryOp>(vAST::make_id("x"), vAST::BinOp::ADD,
+                                       vAST::make_id("y")),
       std::make_unique<vAST::Identifier>("b"),
       std::make_unique<vAST::Identifier>("c"));
   EXPECT_EQ(x3->toString(), "(x + y)[b:c]");
@@ -446,10 +447,11 @@ TEST(BasicTests, Comment) {
   vAST::SingleLineComment stmt_with_comment("Test comment",
                                             std::move(cont_assign));
   EXPECT_EQ(stmt_with_comment.toString(), "assign a = b;  // Test comment");
-  vAST::PortComment port_comment(
-      std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT, vAST::WIRE),
-      "verilator_public");
-  EXPECT_EQ(port_comment.toString(), "input i/*verilator_public*/");
+  std::unique_ptr<vAST::WithComment<vAST::Port>> port_with_comment =
+      vAST::AddComment(std::make_unique<vAST::Port>(vAST::make_id("i"),
+                                                    vAST::INPUT, vAST::WIRE),
+                       "verilator_public");
+  EXPECT_EQ(port_with_comment->toString(), "input i/*verilator_public*/");
 }
 TEST(BasicTests, InlineVerilog) {
   vAST::InlineVerilog inline_verilog(

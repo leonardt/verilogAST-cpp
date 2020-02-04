@@ -164,11 +164,6 @@ std::unique_ptr<Port> Transformer::visit(std::unique_ptr<Port> node) {
   return node;
 }
 
-std::unique_ptr<PortComment> Transformer::visit(std::unique_ptr<PortComment> node) {
-  node->port = this->visit(std::move(node->port));
-  return node;
-}
-
 std::unique_ptr<StringPort> Transformer::visit(
     std::unique_ptr<StringPort> node) {
   return node;
@@ -309,10 +304,6 @@ std::unique_ptr<AbstractPort> Transformer::visit(
   if (auto ptr = dynamic_cast<Port*>(node.get())) {
     node.release();
     return this->visit(std::unique_ptr<Port>(ptr));
-  }
-  if (auto ptr = dynamic_cast<PortComment*>(node.get())) {
-    node.release();
-    return this->visit(std::unique_ptr<PortComment>(ptr));
   }
   if (auto ptr = dynamic_cast<StringPort*>(node.get())) {
     node.release();
