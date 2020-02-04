@@ -30,7 +30,7 @@ template <typename T>
 std::unique_ptr<WithComment<T>> AddComment(std::unique_ptr<T> node,
                                            std::string comment) {
   return std::make_unique<WithComment<T>>(std::move(node), comment);
-};
+}
 
 class Node {
  public:
