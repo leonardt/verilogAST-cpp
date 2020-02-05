@@ -12,6 +12,26 @@
 
 namespace verilogAST {
 
+template <typename T>
+class WithComment : public T {
+  std::string comment;
+
+ public:
+  WithComment(std::unique_ptr<T> node, std::string comment)
+      : T(std::move(node)), comment(comment){};
+
+  std::string toString() override {
+    return T::toString() + "/*" + this->comment + "*/";
+  };
+  ~WithComment(){};
+};
+
+template <typename T>
+std::unique_ptr<WithComment<T>> AddComment(std::unique_ptr<T> node,
+                                           std::string comment) {
+  return std::make_unique<WithComment<T>>(std::move(node), comment);
+}
+
 class Node {
  public:
   virtual std::string toString() = 0;
@@ -395,9 +415,11 @@ class Port : public AbstractPort {
 
   Port(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
        Direction direction, PortType data_type)
-      : value(std::move(value)),
-        direction(std::move(direction)),
-        data_type(std::move(data_type)){};
+      : value(std::move(value)), direction(direction), data_type(data_type){};
+  Port(std::unique_ptr<Port> port)
+      : value(std::move(port->value)),
+        direction(port->direction),
+        data_type(port->data_type){};
   std::string toString();
   ~Port(){};
 };
