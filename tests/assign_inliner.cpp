@@ -490,19 +490,19 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("a")));
 
   vAST::Parameters parameters;
-  std::map<std::string, std::unique_ptr<vAST::Expression>> connections;
-  connections["c"] = vAST::make_id("a");
-  connections["i"] = vAST::make_id("x");
-  connections["o"] = vAST::make_id("y");
+  std::vector<std::pair<std::string, std::unique_ptr<vAST::Expression>>>
+      connections;
+  connections.push_back(std::make_pair("c", vAST::make_id("a")));
+  connections.push_back(std::make_pair("i", vAST::make_id("x")));
+  connections.push_back(std::make_pair("o", vAST::make_id("y")));
 
   body.push_back(std::make_unique<vAST::ModuleInstantiation>(
-              "inner_module", std::move(parameters), "inner_module_inst",
-              std::move(connections)));
+      "inner_module", std::move(parameters), "inner_module_inst",
+      std::move(connections)));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("o"),
       std::make_unique<vAST::Identifier>("y")));
-
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
