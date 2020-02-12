@@ -494,6 +494,14 @@ class Connections {
     connections.push_back(std::make_pair(name, std::move(expr)));
   }
 
+  // Releases ownership of expression at @name if exists, othwerwise throws error.
+  std::unique_ptr<Expression> at(std::string name) {
+    auto is_name = [name](auto& element) { return element.first == name; };
+    auto it = std::find_if(connections.begin(), connections.end(), is_name);
+    if (it != connections.end()) return std::move(it->second);
+    throw std::runtime_error("Could not find '" + name + "'");
+  }
+
   ConnectionVector::iterator begin() { return connections.begin(); }
   ConnectionVector::iterator end() { return connections.end(); }
 
