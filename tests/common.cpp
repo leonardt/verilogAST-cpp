@@ -11,17 +11,15 @@ vAST::Parameters make_simple_params() {
   return parameters;
 }
 
-std::vector<std::pair<std::string, std::unique_ptr<vAST::Expression>>>
-make_simple_connections() {
-  std::vector<std::pair<std::string, std::unique_ptr<vAST::Expression>>>
-      connections;
-  connections.push_back(std::make_pair("a", vAST::make_id("a")));
-  connections.push_back(std::make_pair(
+std::unique_ptr<vAST::Connections> make_simple_connections() {
+  std::unique_ptr<vAST::Connections> connections = std::make_unique<vAST::Connections>();
+  connections->insert("a", vAST::make_id("a"));
+  connections->insert(
       "b",
-      std::make_unique<vAST::Index>(vAST::make_id("b"), vAST::make_num("0"))));
-  connections.push_back(std::make_pair(
+      std::make_unique<vAST::Index>(vAST::make_id("b"), vAST::make_num("0")));
+  connections->insert(
       "c", std::make_unique<vAST::Slice>(
-               vAST::make_id("c"), vAST::make_num("31"), vAST::make_num("0"))));
+               vAST::make_id("c"), vAST::make_num("31"), vAST::make_num("0")));
 
   return connections;
 }

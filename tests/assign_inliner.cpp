@@ -490,11 +490,10 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("a")));
 
   vAST::Parameters parameters;
-  std::vector<std::pair<std::string, std::unique_ptr<vAST::Expression>>>
-      connections;
-  connections.push_back(std::make_pair("c", vAST::make_id("a")));
-  connections.push_back(std::make_pair("i", vAST::make_id("x")));
-  connections.push_back(std::make_pair("o", vAST::make_id("y")));
+  std::unique_ptr<vAST::Connections> connections = std::make_unique<vAST::Connections>();
+  connections->insert("c", vAST::make_id("a"));
+  connections->insert("i", vAST::make_id("x"));
+  connections->insert("o", vAST::make_id("y"));
 
   body.push_back(std::make_unique<vAST::ModuleInstantiation>(
       "inner_module", std::move(parameters), "inner_module_inst",

@@ -478,6 +478,31 @@ typedef std::vector<
     std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
     Parameters;
 
+typedef std::vector<std::pair<std::string, std::unique_ptr<Expression>>>
+    ConnectionVector;
+
+class Connections {
+ public:
+  Connections() : connections() {}
+  ~Connections() = default;
+
+  // Non-copyable class
+  Connections(const Connections&) = delete;
+
+  // Takes ownership of @expr.
+  void insert(std::string name, std::unique_ptr<Expression> expr) {
+    connections.push_back(std::make_pair(name, std::move(expr)));
+  }
+
+  ConnectionVector::iterator begin() { return connections.begin(); }
+  ConnectionVector::iterator end() { return connections.end(); }
+
+  bool empty() { return connections.empty(); }
+
+ private:
+  ConnectionVector connections;
+};
+
 class ModuleInstantiation : public StructuralStatement {
  public:
   std::string module_name;
@@ -487,16 +512,13 @@ class ModuleInstantiation : public StructuralStatement {
 
   std::string instance_name;
 
-  // map from instance port names to connection expression
   // NOTE: anonymous style of module connections is not supported
-  std::vector<std::pair<std::string, std::unique_ptr<Expression>>> connections;
+  std::unique_ptr<Connections> connections;
 
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
-  ModuleInstantiation(
-      std::string module_name, Parameters parameters, std::string instance_name,
-      std::vector<std::pair<std::string, std::unique_ptr<Expression>>>
-          connections)
+  ModuleInstantiation(std::string module_name, Parameters parameters,
+                      std::string instance_name, std::unique_ptr<Connections> connections)
       : module_name(module_name),
         parameters(std::move(parameters)),
         instance_name(instance_name),
