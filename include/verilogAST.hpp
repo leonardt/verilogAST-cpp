@@ -505,7 +505,7 @@ class Connections {
   ConnectionVector::iterator begin() { return connections.begin(); }
   ConnectionVector::iterator end() { return connections.end(); }
 
-  bool empty() { return connections.empty(); }
+  bool empty() const { return connections.empty(); }
 
  private:
   ConnectionVector connections;
