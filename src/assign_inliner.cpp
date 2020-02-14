@@ -54,19 +54,26 @@ std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
   return node;
 }
 
+bool AssignInliner::can_inline(std::string key) {
+  if (this->wire_blacklist.count(key)) {
+      return false;
+  }
+  std::map<std::string, std::unique_ptr<Expression>>::iterator it =
+      assign_map.find(key);
+  return it != assign_map.end() && (this->assign_count[key] == 1) &&
+         (this->read_count[key] == 1 ||
+          dynamic_cast<Identifier*>(it->second.get()) ||
+          dynamic_cast<NumericLiteral*>(it->second.get()));
+}
+
 std::unique_ptr<Expression> AssignInliner::visit(
     std::unique_ptr<Expression> node) {
   if (auto ptr = dynamic_cast<Identifier*>(node.get())) {
     node.release();
     std::unique_ptr<Identifier> id(ptr);
     std::string key = id->toString();
-    std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-        assign_map.find(key);
-    if (it != assign_map.end() && (this->assign_count[key] == 1) &&
-        (this->read_count[id->toString()] == 1 ||
-         dynamic_cast<Identifier*>(it->second.get()) ||
-         dynamic_cast<NumericLiteral*>(it->second.get()))) {
-      return this->visit(it->second->clone());
+    if (this->can_inline(key)) {
+      return this->visit(assign_map[key]->clone());
     }
     return id;
   }
@@ -78,25 +85,9 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
   std::visit(
       [&](auto&& value) {
         if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
-          std::string key = ptr->toString();
-          std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-              this->assign_map.find(key);
-          if (it != assign_map.end() && (this->assign_count[key] == 1) &&
-              (this->read_count[key] == 1 ||
-               dynamic_cast<Identifier*>(it->second.get()) ||
-               dynamic_cast<NumericLiteral*>(it->second.get()))) {
-            remove = true;
-          };
+          remove = this->can_inline(ptr->toString());
         } else if (auto ptr = dynamic_cast<Vector*>(value.get())) {
-          std::string key = ptr->id->toString();
-          std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-              this->assign_map.find(key);
-          if (it != assign_map.end() && (this->assign_count[key] == 1) &&
-              (this->read_count[key] == 1 ||
-               dynamic_cast<Identifier*>(it->second.get()) ||
-               dynamic_cast<NumericLiteral*>(it->second.get()))) {
-            remove = true;
-          };
+          remove = this->can_inline(ptr->id->toString());
         }
       },
       node->value);
@@ -117,13 +108,7 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
   std::visit(
       [&](auto&& value) {
         if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
-          std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-              this->assign_map.find(ptr->toString());
-          if (it != assign_map.end() && (this->assign_count[key] == 1) &&
-              (this->read_count[ptr->toString()] == 1 ||
-               dynamic_cast<Identifier*>(it->second.get()) ||
-               dynamic_cast<NumericLiteral*>(it->second.get())) &&
-              this->non_input_ports.count(ptr->toString()) == 0) {
+          if (this->can_inline(key) && this->non_input_ports.count(key) == 0) {
             remove = true;
           } else if (this->inlined_outputs.count(ptr->toString())) {
             remove = true;
@@ -189,7 +174,8 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
     this->assign_map.erase(output);
     if (dynamic_cast<Identifier*>(value.get()) &&
         this->assign_count[value->toString()] == 0 &&
-        this->input_ports.count(value->toString()) == 0) {
+        this->input_ports.count(value->toString()) == 0 &&
+        this->wire_blacklist.count(value->toString()) == 0) {
       this->assign_map[value->toString()] = make_id(output);
       this->assign_count[value->toString()]++;
       this->inlined_outputs.insert(output);

@@ -59,6 +59,7 @@ class AssignInliner : public Transformer {
   std::set<std::string> output_ports;
   std::set<std::string> input_ports;
   std::set<std::string> inlined_outputs;
+  std::set<std::string> wire_blacklist;
 
   std::vector<std::variant<std::unique_ptr<StructuralStatement>,
                            std::unique_ptr<Declaration>>>
@@ -66,7 +67,12 @@ class AssignInliner : public Transformer {
                                      std::unique_ptr<Declaration>>>
                 body);
 
+  bool can_inline(std::string key);
+
  public:
+  AssignInliner() : wire_blacklist() {};
+  AssignInliner(std::set<std::string> wire_blacklist) :
+      wire_blacklist(wire_blacklist) {};
   using Transformer::visit;
   virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
   virtual std::unique_ptr<ContinuousAssign> visit(

@@ -66,7 +66,25 @@ TEST(InlineAssignTests, TestBasic) {
 
   EXPECT_EQ(module->toString(), raw_str);
 
+  std::set<std::string> blacklist = {"x", "x_vec"};
+  vAST::AssignInliner transformer_blacklist(blacklist);
+  module = transformer_blacklist.visit(std::move(module));
+  EXPECT_EQ(module->toString(), raw_str);
+
   std::string expected_str =
+      "module test_module (input i, output o, output [1:0] o_vec);\n"
+      "wire [1:0] x_vec;\n"
+      "assign o = i;\n"
+      "assign x_vec = {i,i};\n"
+      "assign o_vec = x_vec;\n"
+      "endmodule\n";
+
+  blacklist = {"x_vec"};
+  vAST::AssignInliner transformer_blacklist2(blacklist);
+  module = transformer_blacklist2.visit(std::move(module));
+  EXPECT_EQ(module->toString(), expected_str);
+
+  expected_str =
       "module test_module (input i, output o, output [1:0] o_vec);\n"
       "assign o = i;\n"
       "assign o_vec = {i,i};\n"
