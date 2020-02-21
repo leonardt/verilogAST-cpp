@@ -186,7 +186,7 @@ std::unique_ptr<InlineVerilog> Transformer::visit(
 
 std::unique_ptr<ModuleInstantiation> Transformer::visit(
     std::unique_ptr<ModuleInstantiation> node) {
-  for (auto&& conn : node->connections) {
+  for (auto&& conn : *node->connections) {
     conn.second = this->visit(std::move(conn.second));
   }
   for (auto&& param : node->parameters) {
