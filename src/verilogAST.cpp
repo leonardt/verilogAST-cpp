@@ -385,9 +385,9 @@ std::string ModuleInstantiation::toString() {
     module_inst_str += ")";
   }
   module_inst_str += " " + instance_name + "(";
-  if (!connections.empty()) {
+  if (!connections->empty()) {
     std::vector<std::string> param_strs;
-    for (auto &it : connections) {
+    for (auto &it : *connections) {
       param_strs.push_back("." + it.first + "(" + it.second->toString() + ")");
     }
     module_inst_str += join(param_strs, ", ");
