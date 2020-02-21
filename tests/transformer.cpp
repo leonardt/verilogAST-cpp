@@ -185,10 +185,25 @@ TEST(TransformerTests, TestModule) {
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module0", std::move(ports), std::move(body), make_simple_params());
   std::string expected_str =
-      "module test_module0 #(parameter y = 0, parameter param1 = "
-      "1) (input i, output [3:g] o, output reg [width-1:0] k);\nother_module "
-      "#(.y(0), .param1(1)) other_module_inst(.a(a), .b(b[0]), "
-      ".c(g[31:0]));\nassign g = b;\nwire g;\nreg g;\n"
+      "module test_module0 #(\n"
+      "    parameter y = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output [3:g] o,\n"
+      "    output reg [width-1:0] k\n"
+      ");\n"
+      "other_module #(\n"
+      "    .y(0),\n"
+      "    .param1(1)\n"
+      ") other_module_inst (\n"
+      "    .a(a),\n"
+      "    .b(b[0]),\n" 
+      "    .c(g[31:0])\n"
+      ");\n"
+      "assign g = b;\n"
+      "wire g;\n"
+      "reg g;\n"
       "always @(a) begin\n"
       "a = b;\n"
       "b <= g;\n"
@@ -214,20 +229,44 @@ TEST(TransformerTests, File) {
       name, make_simple_ports(), string_body, make_simple_params()));
 
   std::string module_str =
-      "module string_module #(parameter param0 = 0, parameter param1 = "
-      "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
-      "d;\nendmodule\n";
+      "module string_module #(\n"
+      "    parameter param0 = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "reg d;\n"
+      "assign d = a + b;\n"
+      "assign c = d;\n"
+      "endmodule\n";
   modules.push_back(std::make_unique<vAST::StringModule>(module_str));
 
   std::unique_ptr<vAST::File> file = std::make_unique<vAST::File>(modules);
 
   std::string expected_str =
-      "module test_module #(parameter y = 0, parameter param1 = "
-      "1) (input i, output d);\nreg d;\nassign d = a + b;\nassign c = "
-      "d;\nendmodule\n\n"
-      "module string_module #(parameter param0 = 0, parameter param1 = "
-      "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
-      "d;\nendmodule\n";
+      "module test_module #(\n"
+      "    parameter y = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output d\n"
+      ");\n"
+      "reg d;\n"
+      "assign d = a + b;\n"
+      "assign c = d;\n"
+      "endmodule\n\n"
+      "module string_module #(\n"
+      "    parameter param0 = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "reg d;\n"
+      "assign d = a + b;\n"
+      "assign c = d;\n"
+      "endmodule\n";
   FileTransformer transformer;
   EXPECT_EQ(transformer.visit(std::move(file))->toString(), expected_str);
 }

@@ -55,7 +55,11 @@ TEST(InlineAssignTests, TestBasic) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o, output [1:0] o_vec);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o,\n"
+      "    output [1:0] o_vec\n"
+      ");\n"
       "wire x;\n"
       "wire [1:0] x_vec;\n"
       "assign x = i;\n"
@@ -67,7 +71,11 @@ TEST(InlineAssignTests, TestBasic) {
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o, output [1:0] o_vec);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o,\n"
+      "    output [1:0] o_vec\n"
+      ");\n"
       "assign o = i;\n"
       "assign o_vec = {i,i};\n"
       "endmodule\n";
@@ -109,7 +117,10 @@ TEST(InlineAssignTests, TestBasicChain) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
       "wire x;\n"
       "wire y;\n"
       "assign x = i;\n"
@@ -120,7 +131,10 @@ TEST(InlineAssignTests, TestBasicChain) {
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
       "assign o = i;\n"
       "endmodule\n";
 
@@ -156,7 +170,10 @@ TEST(InlineAssignTests, TestBasicExpr) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
       "wire x;\n"
       "assign x = i ^ 1;\n"
       "assign o = x;\n"
@@ -165,7 +182,10 @@ TEST(InlineAssignTests, TestBasicExpr) {
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
       "assign o = i ^ 1;\n"
       "endmodule\n";
 
@@ -208,7 +228,10 @@ TEST(InlineAssignTests, TestExprChain) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
       "wire x;\n"
       "wire y;\n"
       "assign x = i ^ 1;\n"
@@ -219,7 +242,10 @@ TEST(InlineAssignTests, TestExprChain) {
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, output o);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
       "assign o = i ^ 1;\n"
       "endmodule\n";
 
@@ -328,7 +354,18 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output o2, output o3, output [1:0] o_vec0, output [1:0] o_vec1, output [1:0] o_vec2, output [1:0] o_vec3);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    input [1:0] i_vec,\n"
+      "    output o0,\n"
+      "    output o1,\n"
+      "    output o2,\n"
+      "    output o3,\n"
+      "    output [1:0] o_vec0,\n"
+      "    output [1:0] o_vec1,\n"
+      "    output [1:0] o_vec2,\n"
+      "    output [1:0] o_vec3\n"
+      ");\n"
       "wire x;\n"
       "wire y;\n"
       "wire [1:0] x_vec;\n"
@@ -350,7 +387,18 @@ TEST(InlineAssignTests, TestInlineFanOutIdOrNum) {
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, input [1:0] i_vec, output o0, output o1, output o2, output o3, output [1:0] o_vec0, output [1:0] o_vec1, output [1:0] o_vec2, output [1:0] o_vec3);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    input [1:0] i_vec,\n"
+      "    output o0,\n"
+      "    output o1,\n"
+      "    output o2,\n"
+      "    output o3,\n"
+      "    output [1:0] o_vec0,\n"
+      "    output [1:0] o_vec1,\n"
+      "    output [1:0] o_vec2,\n"
+      "    output [1:0] o_vec3\n"
+      ");\n"
       "assign o0 = i;\n"
       "assign o1 = i;\n"
       "assign o2 = 1;\n"
@@ -398,7 +446,11 @@ TEST(InlineAssignTests, TestNoInlineFanOutExpr) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, output o0, output o1);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o0,\n"
+      "    output o1\n"
+      ");\n"
       "wire x;\n"
       "assign x = i ^ 1;\n"
       "assign o0 = x;\n"
@@ -445,7 +497,11 @@ TEST(InlineAssignTests, TestMultipleAssign) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (inout io0, inout io1, inout io2);\n"
+      "module test_module (\n"
+      "    inout io0,\n"
+      "    inout io1,\n"
+      "    inout io2\n"
+      ");\n"
       "wire x;\n"
       "assign x = io0;\n"
       "assign x = io1;\n"
@@ -507,21 +563,39 @@ TEST(InlineAssignTests, TestInstConn) {
       "test_module", std::move(ports), std::move(body));
 
   std::string raw_str =
-      "module test_module (input i, input a, output o, output b);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    input a,\n"
+      "    output o,\n"
+      "    output b\n"
+      ");\n"
       "wire x;\n"
       "wire y;\n"
       "assign x = i;\n"
       "assign b = a;\n"
-      "inner_module inner_module_inst(.c(a), .i(x), .o(y));\n"
+      "inner_module inner_module_inst (\n"
+      "    .c(a),\n"
+      "    .i(x),\n"
+      "    .o(y)\n"
+      ");\n"
       "assign o = y;\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
 
   std::string expected_str =
-      "module test_module (input i, input a, output o, output b);\n"
+      "module test_module (\n"
+      "    input i,\n"
+      "    input a,\n"
+      "    output o,\n"
+      "    output b\n"
+      ");\n"
       "assign b = a;\n"
-      "inner_module inner_module_inst(.c(a), .i(i), .o(o));\n"
+      "inner_module inner_module_inst (\n"
+      "    .c(a),\n"
+      "    .i(i),\n"
+      "    .o(o)\n"
+      ");\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);

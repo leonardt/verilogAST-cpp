@@ -270,8 +270,14 @@ TEST(BasicTests, TestModuleInst) {
                                         make_simple_connections());
 
   EXPECT_EQ(module_inst.toString(),
-            "test_module #(.param0(0), .param1(1)) "
-            "test_module_inst(.a(a), .b(b[0]), .c(c[31:0]));");
+          "test_module #(\n"
+          "    .param0(0),\n"
+          "    .param1(1)\n"
+          ") test_module_inst (\n"
+          "    .a(a),\n"
+          "    .b(b[0]),\n"
+          "    .c(c[31:0])\n"
+          ");");
 }
 
 TEST(BasicTests, TestModule) {
@@ -282,9 +288,19 @@ TEST(BasicTests, TestModule) {
                       std::move(parameters));
 
   std::string expected_str =
-      "module test_module (input i, output o);\nother_module #(.param0(0), "
-      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
-      ".c(c[31:0]));\nendmodule\n";
+      "module test_module (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "other_module #(\n"
+      "    .param0(0),\n"
+      "    .param1(1)\n"
+      ") other_module_inst (\n"
+      "    .a(a),\n"
+      "    .b(b[0]),\n"
+      "    .c(c[31:0])\n"
+      ");\n"
+      "endmodule\n";
   EXPECT_EQ(module.toString(), expected_str);
 }
 
@@ -295,10 +311,22 @@ TEST(BasicTests, TestParamModule) {
                                   make_simple_params());
 
   std::string expected_str =
-      "module test_module #(parameter param0 = 0, parameter param1 = "
-      "1) (input i, output o);\nother_module #(.param0(0), "
-      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
-      ".c(c[31:0]));\nendmodule\n";
+      "module test_module #(\n"
+      "    parameter param0 = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "other_module #(\n"
+      "    .param0(0),\n"
+      "    .param1(1)\n"
+      ") other_module_inst (\n"
+      "    .a(a),\n"
+      "    .b(b[0]),\n"
+      "    .c(c[31:0])\n"
+      ");\n"
+      "endmodule\n";
   EXPECT_EQ(module_with_params.toString(), expected_str);
 }
 
@@ -311,9 +339,18 @@ TEST(BasicTests, TestStringBodyModule) {
   vAST::StringBodyModule string_body_module(name, make_simple_ports(),
                                             string_body, make_simple_params());
   std::string expected_str =
-      "module test_module #(parameter param0 = 0, parameter param1 = "
-      "1) (input i, output o);\nreg d;\nassign d = a + b;\nassign c = "
-      "d;\nendmodule\n";
+      "module test_module #(\n"
+      "    parameter param0 = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "reg d;\n"
+      "assign d = a + b;\n"
+      "assign c = "
+      "d;\n"
+      "endmodule\n";
   EXPECT_EQ(string_body_module.toString(), expected_str);
 
   vAST::StringModule string_module(expected_str);
@@ -425,13 +462,35 @@ TEST(BasicTests, File) {
   vAST::File file(modules);
 
   std::string expected_str =
-      "module test_module0 (input i, output o);\nother_module "
-      "#(.param0(0), .param1(1)) other_module_inst(.a(a), "
-      ".b(b[0]), .c(c[31:0]));\nendmodule\n\n"
-      "module test_module1 #(parameter param0 = 0, parameter param1 = "
-      "1) (input i, output o);\nother_module #(.param0(0), "
-      ".param1(1)) other_module_inst(.a(a), .b(b[0]), "
-      ".c(c[31:0]));\nendmodule\n";
+      "module test_module0 (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "other_module #(\n"
+      "    .param0(0),\n"
+      "    .param1(1)\n"
+      ") other_module_inst (\n"
+      "    .a(a),\n"
+      "    .b(b[0]),\n"
+      "    .c(c[31:0])\n"
+      ");\n"
+      "endmodule\n\n"
+      "module test_module1 #(\n"
+      "    parameter param0 = 0,\n"
+      "    parameter param1 = 1\n"
+      ") (\n"
+      "    input i,\n"
+      "    output o\n"
+      ");\n"
+      "other_module #(\n"
+      "    .param0(0),\n"
+      "    .param1(1)\n"
+      ") other_module_inst (\n"
+      "    .a(a),\n"
+      "    .b(b[0]),\n"
+      "    .c(c[31:0])\n"
+      ");\n"
+      "endmodule\n";
   EXPECT_EQ(file.toString(), expected_str);
 }
 TEST(BasicTests, Comment) {

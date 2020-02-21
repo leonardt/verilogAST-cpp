@@ -329,22 +329,22 @@ std::string Module::emitModuleHeader() {
 
   // emit parameter string
   if (!parameters.empty()) {
-    module_header_str += " #(";
+    module_header_str += " #(\n    ";
     std::vector<std::string> param_strs;
     for (auto &it : parameters) {
       param_strs.push_back("parameter " + it.first->toString() + " = " +
                            it.second->toString());
     }
-    module_header_str += join(param_strs, ", ");
-    module_header_str += ")";
+    module_header_str += join(param_strs, ",\n    ");
+    module_header_str += "\n)";
   }
 
   // emit port string
-  module_header_str += " (";
+  module_header_str += " (\n    ";
   std::vector<std::string> ports_strs;
   for (auto &it : ports) ports_strs.push_back(it->toString());
-  module_header_str += join(ports_strs, ", ");
-  module_header_str += ");\n";
+  module_header_str += join(ports_strs, ",\n    ");
+  module_header_str += "\n);\n";
   return module_header_str;
 }
 
@@ -375,24 +375,24 @@ std::string ModuleInstantiation::toString() {
   std::string module_inst_str = "";
   module_inst_str += module_name;
   if (!parameters.empty()) {
-    module_inst_str += " #(";
+    module_inst_str += " #(\n    ";
     std::vector<std::string> param_strs;
     for (auto &it : parameters) {
       param_strs.push_back("." + it.first->toString() + "(" +
                            it.second->toString() + ")");
     }
-    module_inst_str += join(param_strs, ", ");
-    module_inst_str += ")";
+    module_inst_str += join(param_strs, ",\n    ");
+    module_inst_str += "\n)";
   }
-  module_inst_str += " " + instance_name + "(";
+  module_inst_str += " " + instance_name + " (\n    ";
   if (!connections->empty()) {
     std::vector<std::string> param_strs;
     for (auto &it : *connections) {
       param_strs.push_back("." + it.first + "(" + it.second->toString() + ")");
     }
-    module_inst_str += join(param_strs, ", ");
+    module_inst_str += join(param_strs, ",\n    ");
   }
-  module_inst_str += ");";
+  module_inst_str += "\n);";
   return module_inst_str;
 }
 
