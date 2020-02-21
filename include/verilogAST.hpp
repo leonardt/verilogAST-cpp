@@ -478,6 +478,39 @@ typedef std::vector<
     std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
     Parameters;
 
+typedef std::vector<std::pair<std::string, std::unique_ptr<Expression>>>
+    ConnectionVector;
+
+class Connections {
+ public:
+  Connections() : connections() {}
+  ~Connections() = default;
+
+  // Non-copyable class
+  Connections(const Connections&) = delete;
+
+  // Takes ownership of @expr.
+  void insert(std::string name, std::unique_ptr<Expression> expr) {
+    connections.push_back(std::make_pair(name, std::move(expr)));
+  }
+
+  // Releases ownership of expression at @name if exists, othwerwise throws error.
+  std::unique_ptr<Expression> at(std::string name) {
+    auto is_name = [name](auto& element) { return element.first == name; };
+    auto it = std::find_if(connections.begin(), connections.end(), is_name);
+    if (it != connections.end()) return std::move(it->second);
+    throw std::runtime_error("Could not find '" + name + "'");
+  }
+
+  ConnectionVector::iterator begin() { return connections.begin(); }
+  ConnectionVector::iterator end() { return connections.end(); }
+
+  bool empty() const { return connections.empty(); }
+
+ private:
+  ConnectionVector connections;
+};
+
 class ModuleInstantiation : public StructuralStatement {
  public:
   std::string module_name;
@@ -487,15 +520,13 @@ class ModuleInstantiation : public StructuralStatement {
 
   std::string instance_name;
 
-  // map from instance port names to connection expression
   // NOTE: anonymous style of module connections is not supported
-  std::map<std::string, std::unique_ptr<Expression>> connections;
+  std::unique_ptr<Connections> connections;
 
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
-  ModuleInstantiation(
-      std::string module_name, Parameters parameters, std::string instance_name,
-      std::map<std::string, std::unique_ptr<Expression>> connections)
+  ModuleInstantiation(std::string module_name, Parameters parameters,
+                      std::string instance_name, std::unique_ptr<Connections> connections)
       : module_name(module_name),
         parameters(std::move(parameters)),
         instance_name(instance_name),
