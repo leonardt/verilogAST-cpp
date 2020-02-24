@@ -58,8 +58,7 @@ bool AssignInliner::can_inline(std::string key) {
   if (this->wire_blacklist.count(key)) {
       return false;
   }
-  std::map<std::string, std::unique_ptr<Expression>>::iterator it =
-      assign_map.find(key);
+  auto it = assign_map.find(key);
   return it != assign_map.end() && (this->assign_count[key] == 1) &&
          (this->read_count[key] == 1 ||
           dynamic_cast<Identifier*>(it->second.get()) ||
