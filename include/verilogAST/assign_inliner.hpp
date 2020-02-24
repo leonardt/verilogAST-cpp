@@ -71,7 +71,7 @@ class AssignInliner : public Transformer {
 
  public:
   AssignInliner() : wire_blacklist() {};
-  AssignInliner(std::set<std::string> wire_blacklist) :
+  explicit AssignInliner(std::set<std::string> wire_blacklist) :
       wire_blacklist(wire_blacklist) {};
   using Transformer::visit;
   virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
