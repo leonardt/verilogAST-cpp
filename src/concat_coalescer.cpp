@@ -18,7 +18,6 @@ std::unique_ptr<Expression> ConcatCoalescer::visit(
   if (not ptr) return node;
   const Index* first = nullptr;
   const Index* last = nullptr;
-  int first_index = 0;
   int last_index = 0;
   for (const auto& arg : ptr->args) {
     auto curr = dynamic_cast<const Index*>(arg.get());
@@ -28,7 +27,6 @@ std::unique_ptr<Expression> ConcatCoalescer::visit(
     if (not first) {
       first = curr;
       last = curr;
-      first_index = as_int.second;
       last_index = as_int.second;
       continue;
     }
