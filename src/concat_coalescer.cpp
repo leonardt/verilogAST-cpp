@@ -14,14 +14,14 @@ std::pair<bool, int> get_index_integer(const Expression* expr) {
 
 std::unique_ptr<Expression> ConcatCoalescer::visit(
     std::unique_ptr<Expression> node) {
-  auto ptr = dynamic_cast<Concat*>(node.get());
+  auto ptr = dynamic_cast<const Concat*>(node.get());
   if (not ptr) return node;
-  Index* first = nullptr;
-  Index* last = nullptr;
+  const Index* first = nullptr;
+  const Index* last = nullptr;
   int first_index = 0;
   int last_index = 0;
   for (const auto& arg : ptr->args) {
-    auto curr = dynamic_cast<Index*>(arg.get());
+    auto curr = dynamic_cast<const Index*>(arg.get());
     if (not curr) return node;
     const auto as_int = get_index_integer(curr->index.get());
     if (not as_int.first) return node;
