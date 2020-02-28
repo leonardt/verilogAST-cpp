@@ -1,3 +1,4 @@
+#include <cassert>
 #include "verilogAST/concat_coalescer.hpp"
 
 namespace verilogAST {
