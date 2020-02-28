@@ -106,6 +106,26 @@ TEST(ConcatCoalescerTests, TestNoRuns) {
   runTest({0, 2, 4, 6, 1, 3, 5, 7}, pre, post);
 }
 
+TEST(ConcatCoalescerTests, ReverseRun) {
+  auto pre =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[4],I[5],I[6],I[7],I[3],I[2],I[1],I[0]};\n"
+      "endmodule\n";
+  // ConcatCoalescer doesn't coalese reverse runs right now.
+  auto post =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[4],I[5],I[6],I[7],I[3:0]};\n"
+      "endmodule\n";
+  // Sequence has no contiguous runs.
+  runTest({0, 1, 2, 3, 7, 6, 5, 4}, pre, post);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
