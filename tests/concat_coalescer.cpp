@@ -9,74 +9,101 @@ namespace {
 using BodyElement = std::variant<std::unique_ptr<vAST::StructuralStatement>,
                                  std::unique_ptr<vAST::Declaration>>;
 
-
 auto makeVector(std::string name, int hi, int lo) {
   return std::make_unique<vAST::Vector>(vAST::make_id(name),
                                         vAST::make_num(std::to_string(hi)),
                                         vAST::make_num(std::to_string(lo)));
 }
 
-TEST(ConcatCoalescerTests, TestBasic) {
+void runTest(std::array<int, 8> indices, std::string pre, std::string post) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(makeVector("I", 7, 0),
                                                vAST::INPUT,
                                                vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(makeVector("O0", 3, 0),
-                                               vAST::OUTPUT,
-                                               vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(makeVector("O1", 3, 0),
+  ports.push_back(std::make_unique<vAST::Port>(makeVector("O", 7, 0),
                                                vAST::OUTPUT,
                                                vAST::WIRE));
   std::vector<BodyElement> body;
 
-  std::vector<std::unique_ptr<vAST::Expression>> args0 = {};
-  std::vector<std::unique_ptr<vAST::Expression>> args1 = {};
-  for (int i = 3; i >= 0; i--) {
-    args0.emplace_back(new vAST::Index(vAST::make_id("I"),
-                                       vAST::make_num(std::to_string(i))));
-    args1.emplace_back(new vAST::Index(vAST::make_id("I"),
-                                       vAST::make_num(std::to_string(i + 4))));
+  std::vector<std::unique_ptr<vAST::Expression>> args = {};
+  for (int i = 7; i >= 0; i--) {
+    args.emplace_back(
+        new vAST::Index(
+            vAST::make_id("I"),
+            vAST::make_num(std::to_string(indices[i]))));
   }
-  std::unique_ptr<vAST::Expression> rhs0(new vAST::Concat(std::move(args0)));
-  std::unique_ptr<vAST::Expression> rhs1(new vAST::Concat(std::move(args1)));
+  std::unique_ptr<vAST::Expression> rhs(new vAST::Concat(std::move(args)));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
-      std::make_unique<vAST::Identifier>("O0"), std::move(rhs0)));
-
-  body.push_back(std::make_unique<vAST::ContinuousAssign>(
-      std::make_unique<vAST::Identifier>("O1"), std::move(rhs1)));
+      std::make_unique<vAST::Identifier>("O"), std::move(rhs)));
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module",
       std::move(ports),
       std::move(body));
 
-  std::string expected;
-
-  expected =
-      "module test_module (\n"
-      "    input [7:0] I,\n"
-      "    output [3:0] O0,\n"
-      "    output [3:0] O1\n"
-      ");\n"
-      "assign O0 = {I[3],I[2],I[1],I[0]};\n"
-      "assign O1 = {I[7],I[6],I[5],I[4]};\n"
-      "endmodule\n";
-  EXPECT_EQ(module->toString(), expected);
+  EXPECT_EQ(module->toString(), pre);
 
   // Run ConcatCoalescer transformer.
   vAST::ConcatCoalescer transformer;
   module = transformer.visit(std::move(module));
-  expected =
+
+  EXPECT_EQ(module->toString(), post);
+}
+
+TEST(ConcatCoalescerTests, TestBasic) {
+  auto pre =
       "module test_module (\n"
       "    input [7:0] I,\n"
-      "    output [3:0] O0,\n"
-      "    output [3:0] O1\n"
+      "    output [7:0] O\n"
       ");\n"
-      "assign O0 = I[3:0];\n"
-      "assign O1 = I[7:4];\n"
+      "assign O = {I[7],I[6],I[5],I[4],I[3],I[2],I[1],I[0]};\n"
       "endmodule\n";
-  EXPECT_EQ(module->toString(), expected);
+  auto post =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = I[7:0];\n"
+      "endmodule\n";
+  runTest({0, 1, 2, 3, 4, 5, 6, 7}, pre, post);
+}
+
+TEST(ConcatCoalescerTests, TestMultipleRuns) {
+  auto pre =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[7],I[6],I[5],I[2],I[1],I[0],I[4],I[3]};\n"
+      "endmodule\n";
+  auto post =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[7:5],I[2:0],I[4:3]};\n"
+      "endmodule\n";
+  runTest({3, 4, 0, 1, 2, 5, 6, 7}, pre, post);
+}
+
+TEST(ConcatCoalescerTests, TestNoRuns) {
+  auto pre =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[7],I[5],I[3],I[1],I[6],I[4],I[2],I[0]};\n"
+      "endmodule\n";
+  auto post =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[7],I[5],I[3],I[1],I[6],I[4],I[2],I[0]};\n"
+      "endmodule\n";
+  // Sequence has no contiguous runs.
+  runTest({0, 2, 4, 6, 1, 3, 5, 7}, pre, post);
 }
 
 }  // namespace
