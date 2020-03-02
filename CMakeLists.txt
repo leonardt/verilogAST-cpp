@@ -21,7 +21,8 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include/
 ) 
 
-set(LIB_SOURCES src/verilogAST.cpp src/transformer.cpp src/assign_inliner.cpp)
+set(LIB_SOURCES src/verilogAST.cpp src/transformer.cpp src/assign_inliner.cpp
+    src/concat_coalescer.cpp)
 
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
@@ -65,6 +66,10 @@ if (VERILOGAST_BUILD_TESTS)
     add_executable(assign_inliner tests/assign_inliner.cpp)
     target_link_libraries(assign_inliner gtest_main ${LIBRARY_NAME})
     add_test(NAME assign_inliner_tests COMMAND assign_inliner)
+
+    add_executable(concat_coalescer tests/concat_coalescer.cpp)
+    target_link_libraries(concat_coalescer gtest_main ${LIBRARY_NAME})
+    add_test(NAME concat_coalescer_tests COMMAND concat_coalescer)
 endif()
 
 install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
