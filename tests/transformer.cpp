@@ -85,8 +85,9 @@ TEST(TransformerTests, TestXtoZ) {
   call_args.push_back(std::make_unique<vAST::TernaryOp>(
       std::make_unique<vAST::Concat>(std::move(concat_args)),
       vAST::make_binop(
-          std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("3"),
-                                        vAST::make_num("1")),
+          std::make_unique<vAST::Slice>(
+              std::make_unique<vAST::Attribute>(vAST::make_id("x"), "j"),
+              vAST::make_num("3"), vAST::make_num("1")),
           vAST::BinOp::ADD,
           std::make_unique<vAST::UnaryOp>(
               std::make_unique<vAST::Index>(vAST::make_id("y"),
@@ -99,7 +100,7 @@ TEST(TransformerTests, TestXtoZ) {
       std::make_unique<vAST::CallExpr>("my_func", std::move(call_args));
   XtoZ transformer;
   EXPECT_EQ(transformer.visit(std::move(expr))->toString(),
-            "my_func({z,b} ? z[3:1] + (~ y[1]) : {(2){z}}, z)");
+            "my_func({z,b} ? z.j[3:1] + (~ y[1]) : {(2){z}}, z)");
 }
 TEST(TransformerTests, TestReplaceNameWithExpr) {
   std::unique_ptr<vAST::Expression> expr = vAST::make_binop(
