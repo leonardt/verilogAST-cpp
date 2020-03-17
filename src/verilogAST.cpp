@@ -101,10 +101,21 @@ std::string Identifier::toString() {
     return value;
 }
 
+std::string Attribute::toString() {
+  return this->value->toString() + "." + this->attr;
+}
+
 std::string String::toString() { return "\"" + value + "\""; }
 
 std::string Index::toString() {
-  return id->toString() + '[' + index->toString() + ']';
+  std::string expr_str = value->toString();
+  if (dynamic_cast<Identifier *>(value.get())) {
+  } else if (dynamic_cast<Index *>(value.get())) {
+  } else if (dynamic_cast<Slice *>(value.get())) {
+  } else {
+    expr_str = "(" + expr_str + ")";
+  }
+  return expr_str + '[' + index->toString() + ']';
 }
 
 std::string Slice::toString() {

@@ -69,7 +69,9 @@ RunOrExpr makeRunOrExpr(const Expression* arg) {
   if (not index) return RunOrExpr(arg);
   auto as_int = expr_to_int(index->index.get());
   if (not as_int.first) return RunOrExpr(arg);
-  return RunOrExpr(index->id->value, as_int.second, as_int.second);
+  auto index_id = dynamic_cast<const Identifier*>(index->value.get());
+  if (not index_id) return RunOrExpr(arg);
+  return RunOrExpr(index_id->value, as_int.second, as_int.second);
 }
 
 }  // namespace

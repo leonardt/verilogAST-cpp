@@ -40,6 +40,14 @@ TEST(BasicTests, TestIdentifier) {
   EXPECT_EQ(id.toString(), "x");
 }
 
+TEST(BasicTests, TestAttribute) {
+  vAST::Attribute attr(vAST::make_id("x"), "y");
+  EXPECT_EQ(attr.toString(), "x.y");
+  vAST::Attribute attr2(
+      std::make_unique<vAST::Attribute>(vAST::make_id("a"), "b"), "c");
+  EXPECT_EQ(attr2.toString(), "a.b.c");
+}
+
 TEST(BasicTests, TestIdentifierEscaped) {
   vAST::Identifier id("instance[5]");
   EXPECT_EQ(id.toString(), "\\instance[5] ");
@@ -58,6 +66,11 @@ TEST(BasicTests, TestString) {
 TEST(BasicTests, TestIndex) {
   vAST::Index index(vAST::make_id("x"), vAST::make_num("0"));
   EXPECT_EQ(index.toString(), "x[0]");
+
+  std::unique_ptr<vAST::BinaryOp> binop = std::make_unique<vAST::BinaryOp>(
+      vAST::make_id("x"), vAST::BinOp::ADD, vAST::make_id("y"));
+  vAST::Index index_expr(std::move(binop), vAST::make_num("0"));
+  EXPECT_EQ(index_expr.toString(), "(x + y)[0]");
 }
 
 TEST(BasicTests, TestSlice) {
@@ -561,7 +574,7 @@ TEST(BasicTests, TestIndexCopy) {
   std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
   EXPECT_EQ(x->toString(), "x[y]");
   EXPECT_EQ(x1->toString(), "x[y]");
-  x1->id->value = "z";
+  x1->value = vAST::make_id("z");
   x1->index = std::make_unique<vAST::Identifier>("a");
   EXPECT_EQ(x->toString(), "x[y]");
   EXPECT_EQ(x1->toString(), "z[a]");

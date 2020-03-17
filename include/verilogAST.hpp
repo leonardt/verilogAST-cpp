@@ -110,6 +110,30 @@ class Identifier : public Expression {
   ~Identifier(){};
 };
 
+class Attribute : public Expression {
+ protected:
+  virtual Attribute* clone_impl() const override {
+    return new Attribute(*this);
+  };
+
+ public:
+  std::unique_ptr<Expression> value;
+  std::string attr;
+
+  Attribute(std::unique_ptr<Expression> value, std::string attr)
+      : value(std::move(value)), attr(attr){};
+  Attribute(const Attribute& rhs)
+      : value(rhs.value->clone()), attr(rhs.attr){};
+  auto clone() const { return std::unique_ptr<Attribute>(clone_impl()); }
+
+  bool operator==(const Attribute& rhs) {
+    return (this->value == rhs.value && this->attr == rhs.attr);
+  }
+
+  std::string toString() override;
+  ~Attribute(){};
+};
+
 class String : public Expression {
  protected:
   virtual String* clone_impl() const override { return new String(*this); };
@@ -128,17 +152,17 @@ class String : public Expression {
 class Index : public Expression {
  protected:
   virtual Index* clone_impl() const override {
-    return new Index(this->id->clone(), this->index->clone());
+    return new Index(this->value->clone(), this->index->clone());
   };
 
  public:
-  std::unique_ptr<Identifier> id;
+  std::unique_ptr<Expression> value;
   std::unique_ptr<Expression> index;
 
-  Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
-      : id(std::move(id)), index(std::move(index)){};
+  Index(std::unique_ptr<Expression> value, std::unique_ptr<Expression> index)
+      : value(std::move(value)), index(std::move(index)){};
 
-  Index(const Index& rhs) : id(rhs.id->clone()), index(rhs.index->clone()){};
+  Index(const Index& rhs) : value(rhs.value->clone()), index(rhs.index->clone()){};
 
   std::string toString() override;
   ~Index(){};
