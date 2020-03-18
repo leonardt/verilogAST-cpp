@@ -51,6 +51,23 @@ class WireReadCounter : public Transformer {
   virtual std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node);
 };
 
+class IndexBlacklister : public Transformer {
+  // Prevent inling wires into index nodes, e.g.
+  // wire x;
+  // assign x = y + z;
+  // assign w = x[0];
+  //
+  // Verilog does not support (y + z)[0]
+  std::set<std::string> &wire_blacklist;
+
+ public:
+  IndexBlacklister(std::set<std::string> &wire_blacklist)
+      : wire_blacklist(wire_blacklist){};
+
+  using Transformer::visit;
+  virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
+};
+
 class AssignInliner : public Transformer {
   std::map<std::string, int> read_count;
   std::map<std::string, int> assign_count;
