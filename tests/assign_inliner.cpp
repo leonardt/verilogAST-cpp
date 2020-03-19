@@ -623,6 +623,55 @@ TEST(InlineAssignTests, TestInstConn) {
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
 }
 
+TEST(InlineAssignTests, TestNoInlineIndex) {
+  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("i1"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::INPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("i2"),
+                                     vAST::make_num("1"), vAST::make_num("0")),
+      vAST::INPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"), vAST::OUTPUT,
+                                               vAST::WIRE));
+
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body;
+
+  body.push_back(
+      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("x")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("x"),
+      std::make_unique<vAST::BinaryOp>(vAST::make_id("i1"), vAST::BinOp::ADD,
+                                       vAST::make_id("i2"))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("o"),
+      std::make_unique<vAST::Index>(vAST::make_id("x"), vAST::make_num("0"))));
+
+  std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
+      "test_module", std::move(ports), std::move(body));
+
+  std::string raw_str =
+      "module test_module (\n"
+      "    input [1:0] i1,\n"
+      "    input [1:0] i2,\n"
+      "    output o\n"
+      ");\n"
+      "wire x;\n"
+      "assign x = i1 + i2;\n"
+      "assign o = x[0];\n"
+      "endmodule\n";
+
+  EXPECT_EQ(module->toString(), raw_str);
+
+  vAST::AssignInliner transformer;
+  EXPECT_EQ(transformer.visit(std::move(module))->toString(), raw_str);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

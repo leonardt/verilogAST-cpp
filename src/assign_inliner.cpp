@@ -3,6 +3,12 @@
 
 namespace verilogAST {
 
+std::unique_ptr<Index> IndexBlacklister::visit(
+    std::unique_ptr<Index> node) {
+  this->wire_blacklist.insert(node->id->value);
+  return node;
+}
+
 std::unique_ptr<Identifier> WireReadCounter::visit(
     std::unique_ptr<Identifier> node) {
   this->read_count[node->toString()]++;
@@ -159,6 +165,9 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
 
   WireReadCounter counter(this->read_count);
   node = counter.visit(std::move(node));
+
+  IndexBlacklister index_blacklist(this->wire_blacklist);
+  node = index_blacklist.visit(std::move(node));
 
   std::vector<std::unique_ptr<AbstractPort>> new_ports;
   for (auto&& item : node->ports) {
