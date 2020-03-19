@@ -159,7 +159,7 @@ class Index : public Expression {
   std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> index;
 
-  Index(std::unique_ptr<Expression> id, std::unique_ptr<Expression> index)
+  Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
       : id(std::move(id)), index(std::move(index)){};
 
   Index(const Index& rhs) : id(rhs.id->clone()), index(rhs.index->clone()){};
