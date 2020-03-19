@@ -574,7 +574,7 @@ TEST(BasicTests, TestIndexCopy) {
   std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
   EXPECT_EQ(x->toString(), "x[y]");
   EXPECT_EQ(x1->toString(), "x[y]");
-  x1->value = vAST::make_id("z");
+  x1->id->value = "z";
   x1->index = std::make_unique<vAST::Identifier>("a");
   EXPECT_EQ(x->toString(), "x[y]");
   EXPECT_EQ(x1->toString(), "z[a]");

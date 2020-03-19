@@ -152,17 +152,17 @@ class String : public Expression {
 class Index : public Expression {
  protected:
   virtual Index* clone_impl() const override {
-    return new Index(this->value->clone(), this->index->clone());
+    return new Index(this->id->clone(), this->index->clone());
   };
 
  public:
-  std::unique_ptr<Expression> value;
+  std::unique_ptr<Identifier> id;
   std::unique_ptr<Expression> index;
 
-  Index(std::unique_ptr<Expression> value, std::unique_ptr<Expression> index)
-      : value(std::move(value)), index(std::move(index)){};
+  Index(std::unique_ptr<Expression> id, std::unique_ptr<Expression> index)
+      : id(std::move(id)), index(std::move(index)){};
 
-  Index(const Index& rhs) : value(rhs.value->clone()), index(rhs.index->clone()){};
+  Index(const Index& rhs) : id(rhs.id->clone()), index(rhs.index->clone()){};
 
   std::string toString() override;
   ~Index(){};

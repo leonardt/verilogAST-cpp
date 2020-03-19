@@ -123,8 +123,7 @@ std::string Attribute::toString() {
 std::string String::toString() { return "\"" + value + "\""; }
 
 std::string Index::toString() {
-  std::string expr_str = expr_to_string_with_parens(value);
-  return expr_str + '[' + index->toString() + ']';
+  return return id->toString() + '[' + index->toString() + ']';
 }
 
 std::string Slice::toString() {
