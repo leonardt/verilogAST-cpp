@@ -66,11 +66,6 @@ TEST(BasicTests, TestString) {
 TEST(BasicTests, TestIndex) {
   vAST::Index index(vAST::make_id("x"), vAST::make_num("0"));
   EXPECT_EQ(index.toString(), "x[0]");
-
-  std::unique_ptr<vAST::BinaryOp> binop = std::make_unique<vAST::BinaryOp>(
-      vAST::make_id("x"), vAST::BinOp::ADD, vAST::make_id("y"));
-  vAST::Index index_expr(std::move(binop), vAST::make_num("0"));
-  EXPECT_EQ(index_expr.toString(), "(x + y)[0]");
 }
 
 TEST(BasicTests, TestSlice) {
