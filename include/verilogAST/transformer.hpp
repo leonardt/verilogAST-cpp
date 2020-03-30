@@ -20,6 +20,8 @@ class Transformer {
 
   virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node);
 
+  virtual std::unique_ptr<Attribute> visit(std::unique_ptr<Attribute> node);
+
   virtual std::unique_ptr<String> visit(std::unique_ptr<String> node);
 
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);

@@ -110,6 +110,43 @@ class Identifier : public Expression {
   ~Identifier(){};
 };
 
+class Attribute : public Expression {
+ protected:
+  virtual Attribute* clone_impl() const override {
+    return new Attribute(*this);
+  };
+
+ public:
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>> value;
+  std::string attr;
+
+  Attribute(
+      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>>
+          value,
+      std::string attr)
+      : value(std::move(value)), attr(attr){};
+
+  Attribute(const Attribute& rhs)
+      : value(std::visit(
+            [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
+                                             std::unique_ptr<Attribute>> {
+              return value->clone();
+            },
+            rhs.value)),
+        attr(rhs.attr){};
+
+  std::unique_ptr<Attribute> clone() const {
+    return std::unique_ptr<Attribute>(clone_impl());
+  }
+
+  bool operator==(const Attribute& rhs) {
+    return (this->value == rhs.value && this->attr == rhs.attr);
+  }
+
+  std::string toString() override;
+  ~Attribute(){};
+};
+
 class String : public Expression {
  protected:
   virtual String* clone_impl() const override { return new String(*this); };

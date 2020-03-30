@@ -3,6 +3,12 @@
 #include <regex>
 #include <unordered_set>
 
+template <typename... Ts>
+std::string variant_to_string(std::variant<Ts...> &value) {
+  return std::visit(
+      [](auto &&value) -> std::string { return value->toString(); }, value);
+}
+
 // Helper function to join a vector of strings with a specified separator ala
 // Python's ",".join(...)
 std::string join(std::vector<std::string> vec, std::string separator) {
@@ -15,6 +21,21 @@ std::string join(std::vector<std::string> vec, std::string separator) {
 }
 
 namespace verilogAST {
+
+std::string expr_to_string_with_parens(std::unique_ptr<Expression> &expr) {
+  // FIXME: For now we just do naive precedence logic
+  std::string expr_str = expr->toString();
+  if (dynamic_cast<Identifier *>(expr.get())) {
+  } else if (dynamic_cast<NumericLiteral *>(expr.get())) {
+  } else if (dynamic_cast<Index *>(expr.get())) {
+  } else if (dynamic_cast<Slice *>(expr.get())) {
+  } else if (dynamic_cast<Attribute *>(expr.get())) {
+  } else {
+    expr_str = "(" + expr_str + ")";
+  }
+  return expr_str;
+}
+
 std::string NumericLiteral::toString() {
   std::string signed_str = _signed ? "s" : "";
 
@@ -101,6 +122,10 @@ std::string Identifier::toString() {
     return value;
 }
 
+std::string Attribute::toString() {
+  return variant_to_string(this->value) + "." + this->attr;
+}
+
 std::string String::toString() { return "\"" + value + "\""; }
 
 std::string Index::toString() {
@@ -108,13 +133,7 @@ std::string Index::toString() {
 }
 
 std::string Slice::toString() {
-  std::string expr_str = expr->toString();
-  if (dynamic_cast<Identifier *>(expr.get())) {
-  } else if (dynamic_cast<Index *>(expr.get())) {
-  } else if (dynamic_cast<Slice *>(expr.get())) {
-  } else {
-    expr_str = "(" + expr_str + ")";
-  }
+  std::string expr_str = expr_to_string_with_parens(expr);
   return expr_str + '[' + high_index->toString() + ':' + low_index->toString() +
          ']';
 }
@@ -190,23 +209,8 @@ std::string BinaryOp::toString() {
       op_str = ">=";
       break;
   }
-  std::string lstr = left->toString();
-  std::string rstr = right->toString();
-  // TODO Precedence logic, for now we just insert parens if not symbol or num
-  if (dynamic_cast<Identifier *>(left.get())) {
-  } else if (dynamic_cast<NumericLiteral *>(left.get())) {
-  } else if (dynamic_cast<Index *>(left.get())) {
-  } else if (dynamic_cast<Slice *>(left.get())) {
-  } else {
-    lstr = "(" + lstr + ")";
-  }
-  if (dynamic_cast<Identifier *>(right.get())) {
-  } else if (dynamic_cast<NumericLiteral *>(right.get())) {
-  } else if (dynamic_cast<Index *>(right.get())) {
-  } else if (dynamic_cast<Slice *>(right.get())) {
-  } else {
-    rstr = "(" + rstr + ")";
-  }
+  std::string lstr = expr_to_string_with_parens(left);
+  std::string rstr = expr_to_string_with_parens(right);
   return lstr + ' ' + op_str + ' ' + rstr;
 }
 
@@ -247,15 +251,7 @@ std::string UnaryOp::toString() {
       op_str = "-";
       break;
   }
-  std::string operand_str = operand->toString();
-  // TODO Precedence logic, for now we just insert parens if not symbol or num
-  if (dynamic_cast<Identifier *>(operand.get())) {
-  } else if (dynamic_cast<NumericLiteral *>(operand.get())) {
-  } else if (dynamic_cast<Index *>(operand.get())) {
-  } else if (dynamic_cast<Slice *>(operand.get())) {
-  } else {
-    operand_str = "(" + operand_str + ")";
-  }
+  std::string operand_str = expr_to_string_with_parens(operand);
   return op_str + ' ' + operand_str;
 }
 
@@ -287,12 +283,6 @@ std::string Call::toString() {
     arg_strs.push_back(arg->toString());
   }
   return func + "(" + join(arg_strs, ", ") + ")";
-}
-
-template <typename... Ts>
-std::string variant_to_string(std::variant<Ts...> &value) {
-  return std::visit(
-      [](auto &&value) -> std::string { return value->toString(); }, value);
 }
 
 std::string Port::toString() {

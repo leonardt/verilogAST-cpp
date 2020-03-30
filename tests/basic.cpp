@@ -40,6 +40,14 @@ TEST(BasicTests, TestIdentifier) {
   EXPECT_EQ(id.toString(), "x");
 }
 
+TEST(BasicTests, TestAttribute) {
+  vAST::Attribute attr(vAST::make_id("x"), "y");
+  EXPECT_EQ(attr.toString(), "x.y");
+  vAST::Attribute attr2(
+      std::make_unique<vAST::Attribute>(vAST::make_id("a"), "b"), "c");
+  EXPECT_EQ(attr2.toString(), "a.b.c");
+}
+
 TEST(BasicTests, TestIdentifierEscaped) {
   vAST::Identifier id("instance[5]");
   EXPECT_EQ(id.toString(), "\\instance[5] ");
