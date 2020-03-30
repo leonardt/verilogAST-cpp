@@ -117,14 +117,25 @@ class Attribute : public Expression {
   };
 
  public:
-  std::unique_ptr<Expression> value;
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>> value;
   std::string attr;
 
-  Attribute(std::unique_ptr<Expression> value, std::string attr)
+  Attribute(
+      std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>>
+          value,
+      std::string attr)
       : value(std::move(value)), attr(attr){};
   Attribute(const Attribute& rhs)
-      : value(rhs.value->clone()), attr(rhs.attr){};
-  auto clone() const { return std::unique_ptr<Attribute>(clone_impl()); }
+      : value(std::visit(
+            [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
+                                             std::unique_ptr<Attribute>> {
+              return value->clone();
+            },
+            rhs.value)),
+        attr(rhs.attr){};
+  std::unique_ptr<Attribute> clone() const {
+    return std::unique_ptr<Attribute>(clone_impl());
+  }
 
   bool operator==(const Attribute& rhs) {
     return (this->value == rhs.value && this->attr == rhs.attr);

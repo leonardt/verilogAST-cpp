@@ -3,6 +3,12 @@
 #include <regex>
 #include <unordered_set>
 
+template <typename... Ts>
+std::string variant_to_string(std::variant<Ts...> &value) {
+  return std::visit(
+      [](auto &&value) -> std::string { return value->toString(); }, value);
+}
+
 // Helper function to join a vector of strings with a specified separator ala
 // Python's ",".join(...)
 std::string join(std::vector<std::string> vec, std::string separator) {
@@ -117,7 +123,7 @@ std::string Identifier::toString() {
 }
 
 std::string Attribute::toString() {
-  return this->value->toString() + "." + this->attr;
+  return variant_to_string(this->value) + "." + this->attr;
 }
 
 std::string String::toString() { return "\"" + value + "\""; }
@@ -277,12 +283,6 @@ std::string Call::toString() {
     arg_strs.push_back(arg->toString());
   }
   return func + "(" + join(arg_strs, ", ") + ")";
-}
-
-template <typename... Ts>
-std::string variant_to_string(std::variant<Ts...> &value) {
-  return std::visit(
-      [](auto &&value) -> std::string { return value->toString(); }, value);
 }
 
 std::string Port::toString() {
