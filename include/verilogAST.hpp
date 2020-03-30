@@ -125,6 +125,7 @@ class Attribute : public Expression {
           value,
       std::string attr)
       : value(std::move(value)), attr(attr){};
+
   Attribute(const Attribute& rhs)
       : value(std::visit(
             [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
@@ -133,6 +134,7 @@ class Attribute : public Expression {
             },
             rhs.value)),
         attr(rhs.attr){};
+
   std::unique_ptr<Attribute> clone() const {
     return std::unique_ptr<Attribute>(clone_impl());
   }
