@@ -464,4 +464,13 @@ std::string SingleLineComment::toString() {
   return result + "// " + value;
 }
 
+std::string InlineVerilog::toString() {
+    std::string result = value;
+    for (auto &&it : this->interpolated_symbols) {
+          result = std::regex_replace(
+              result, std::regex("\\{" + it.first + "\\}"), it.second->toString());
+    }
+    return result;
+}
+
 }  // namespace verilogAST

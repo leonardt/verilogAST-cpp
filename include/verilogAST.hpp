@@ -503,11 +503,22 @@ class InlineVerilog : public StructuralStatement {
   // statement(s) in the body of a module definition.  The contents of
   // `value` must be a valid verilog statement inside a module body.  The
   // contents are not validated.
+  //
+  // interpolated_symbols provides a mapping of the form "symbol": expression
+  // where instances of the pattern {symbol} will be replaced by
+  // expression->toString()  This can be used to inline symbols into the
+  // verilog that may be changed by a transformer, e.g. wire inlining
  public:
   std::string value;
+  std::vector<std::pair<std::string, std::unique_ptr<Expression>>>
+      interpolated_symbols;
 
+  InlineVerilog(std::string value,
+                std::vector<std::pair<std::string, std::unique_ptr<Expression>>>
+                    interpolated_symbols)
+      : value(value), interpolated_symbols(std::move(interpolated_symbols)){};
   InlineVerilog(std::string value) : value(value){};
-  std::string toString() { return value; };
+  std::string toString();
   ~InlineVerilog(){};
 };
 

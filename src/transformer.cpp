@@ -191,6 +191,9 @@ std::unique_ptr<BlockComment> Transformer::visit(
 
 std::unique_ptr<InlineVerilog> Transformer::visit(
     std::unique_ptr<InlineVerilog> node) {
+  for (auto&& symbol : node->interpolated_symbols) {
+    symbol.second = this->visit(std::move(symbol.second));
+  }
   return node;
 }
 

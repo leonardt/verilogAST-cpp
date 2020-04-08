@@ -180,8 +180,11 @@ TEST(TransformerTests, TestModule) {
   body.push_back(
       std::make_unique<vAST::BlockComment>("Test comment\non multiple lines"));
 
-  body.push_back(
-      std::make_unique<vAST::InlineVerilog>("// Test inline verilog"));
+  std::vector<std::pair<std::string, std::unique_ptr<vAST::Expression>>>
+      interpolated_symbols;
+  interpolated_symbols.push_back(std::make_pair("symbol", vAST::make_id("c")));
+  body.push_back(std::make_unique<vAST::InlineVerilog>(
+      "// Test inline verilog {symbol}", std::move(interpolated_symbols)));
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module0", std::move(ports), std::move(body), make_simple_params());
@@ -212,7 +215,7 @@ TEST(TransformerTests, TestModule) {
       "end\n\n"
       "// Test comment\n"
       "/*\nTest comment\non multiple lines\n*/\n"
-      "// Test inline verilog\n"
+      "// Test inline verilog g\n"
       "endmodule\n";
 
   ModuleTransformer transformer;

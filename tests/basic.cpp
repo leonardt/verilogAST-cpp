@@ -520,10 +520,17 @@ TEST(BasicTests, Comment) {
                        "verilator_public");
   EXPECT_EQ(port_with_comment->toString(), "input i/*verilator_public*/");
 }
+
 TEST(BasicTests, InlineVerilog) {
+  std::vector<std::pair<std::string, std::unique_ptr<vAST::Expression>>>
+      interpolated_symbols;
+  interpolated_symbols.push_back(
+      std::make_pair("y", std::make_unique<vAST::NumericLiteral>(
+                              "10", 2, false, vAST::Radix::BINARY)));
   vAST::InlineVerilog inline_verilog(
       "logic [1:0] x;\n"
-      "assign x = 2'b10;\n");
+      "assign x = {y};\n",
+      std::move(interpolated_symbols));
   EXPECT_EQ(inline_verilog.toString(),
             "logic [1:0] x;\n"
             "assign x = 2'b10;\n");
