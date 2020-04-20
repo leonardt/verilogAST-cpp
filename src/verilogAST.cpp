@@ -55,6 +55,9 @@ std::string NumericLiteral::toString() {
       break;
   }
   std::string size_str = std::to_string(size);
+  if (size_str == "32" && !always_codegen_size) {
+    size_str = "";
+  }
 
   std::string separator = "";
   if (size_str + signed_str + radix_str != "") {

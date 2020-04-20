@@ -33,6 +33,10 @@ TEST(BasicTests, TestNumericLiteral) {
 
   vAST::NumericLiteral n8("z", vAST::Radix::HEX);
   EXPECT_EQ(n8.toString(), "'hz");
+
+  // Test always codegen prefix
+  vAST::NumericLiteral n9("DEADBEEF", 32, false, vAST::HEX, true);
+  EXPECT_EQ(n9.toString(), "32'hDEADBEEF");
 }
 
 TEST(BasicTests, TestIdentifier) {
