@@ -120,6 +120,26 @@ class NumericLiteral : public Expression {
   auto clone() const { return std::unique_ptr<NumericLiteral>(clone_impl()); }
 };
 
+class Cast : public Expression {
+ protected:
+  virtual Cast* clone_impl() const override {
+    return new Cast(this->width, this->expr->clone());
+  };
+
+ public:
+  // integer width because we want to avoid numeric literals with ' like 2'b01
+  unsigned int width;
+  std::unique_ptr<Expression> expr;
+
+  Cast(unsigned int width, std::unique_ptr<Expression> expr)
+      : width(width), expr(std::move(expr)){};
+  Cast(const Cast& rhs) : width(rhs.width), expr(expr->clone()){};
+  auto clone() const { return std::unique_ptr<Cast>(clone_impl()); }
+
+  std::string toString() override;
+  ~Cast(){};
+};
+
 // TODO also need a string literal, as strings can be used as parameter values
 
 class Identifier : public Expression {

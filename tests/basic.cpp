@@ -44,6 +44,13 @@ TEST(BasicTests, TestIdentifier) {
   EXPECT_EQ(id.toString(), "x");
 }
 
+TEST(BasicTests, TestCast) {
+  vAST::NumericLiteral n8("z", vAST::Radix::HEX);
+  vAST::Cast cast(5, vAST::make_id("x"));
+
+  EXPECT_EQ(cast.toString(), "5'(x)");
+}
+
 TEST(BasicTests, TestAttribute) {
   vAST::Attribute attr(vAST::make_id("x"), "y");
   EXPECT_EQ(attr.toString(), "x.y");

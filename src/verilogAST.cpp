@@ -122,6 +122,10 @@ std::string Identifier::toString() {
     return value;
 }
 
+std::string Cast::toString() {
+    return std::to_string(this->width) + "'(" + this->expr->toString() + ")";
+}
+
 std::string Attribute::toString() {
   return variant_to_string(this->value) + "." + this->attr;
 }
