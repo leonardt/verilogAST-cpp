@@ -71,7 +71,7 @@ class NumericLiteral : public Expression {
   Radix radix;        // default decimal
   // always generate size prefix (default false will not codegen size for 32
   // bit literals)
-  bool always_codegen_size;
+  bool always_codegen_size = false;
 
   NumericLiteral(std::string value, unsigned int size, bool _signed,
                  Radix radix, bool always_codegen_size)
@@ -86,36 +86,32 @@ class NumericLiteral : public Expression {
       : value(value),
         size(size),
         _signed(_signed),
-        radix(radix),
-        always_codegen_size(false){};
+        radix(radix){};
 
   NumericLiteral(std::string value, unsigned int size, bool _signed)
       : value(value),
         size(size),
         _signed(_signed),
-        radix(Radix::DECIMAL),
-        always_codegen_size(false){};
+        radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value, unsigned int size)
       : value(value),
         size(size),
         _signed(false),
-        radix(Radix::DECIMAL),
-        always_codegen_size(false){};
+        radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value)
       : value(value),
         size(32),
         _signed(false),
-        radix(Radix::DECIMAL),
-        always_codegen_size(false){};
+        radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value, Radix radix)
       : value(value),
         size(32),
         _signed(false),
-        radix(radix),
-        always_codegen_size(false){};
+        radix(radix){};
+
   std::string toString() override;
   auto clone() const { return std::unique_ptr<NumericLiteral>(clone_impl()); }
 };
