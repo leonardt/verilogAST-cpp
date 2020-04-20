@@ -54,7 +54,7 @@ class NumericLiteral : public Expression {
  protected:
   virtual NumericLiteral* clone_impl() const override {
     return new NumericLiteral(this->value, this->size, this->_signed,
-                              this->radix);
+                              this->radix, this->always_codegen_size);
   };
 
  public:
