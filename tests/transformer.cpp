@@ -95,12 +95,13 @@ TEST(TransformerTests, TestXtoZ) {
               vAST::UnOp::INVERT)),
       std::make_unique<vAST::Replicate>(vAST::make_num("2"),
                                         vAST::make_id("x"))));
-  call_args.push_back(vAST::make_id("x"));
+  call_args.push_back(
+      std::make_unique<vAST::Cast>(5, vAST::make_id("x")));
   std::unique_ptr<vAST::Expression> expr =
       std::make_unique<vAST::CallExpr>("my_func", std::move(call_args));
   XtoZ transformer;
   EXPECT_EQ(transformer.visit(std::move(expr))->toString(),
-            "my_func({z,b} ? z.j[3:1] + (~ y[1]) : {(2){z}}, z)");
+            "my_func({z,b} ? z.j[3:1] + (~ y[1]) : {(2){z}}, 5'(z))");
 }
 TEST(TransformerTests, TestReplaceNameWithExpr) {
   std::unique_ptr<vAST::Expression> expr = vAST::make_binop(

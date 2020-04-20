@@ -13,6 +13,10 @@ std::unique_ptr<Expression> Transformer::visit(
     node.release();
     return this->visit(std::unique_ptr<Identifier>(ptr));
   }
+  if (auto ptr = dynamic_cast<Cast*>(node.get())) {
+    node.release();
+    return this->visit(std::unique_ptr<Cast>(ptr));
+  }
   if (auto ptr = dynamic_cast<Attribute*>(node.get())) {
     node.release();
     return this->visit(std::unique_ptr<Attribute>(ptr));
@@ -64,6 +68,12 @@ std::unique_ptr<NumericLiteral> Transformer::visit(
 
 std::unique_ptr<Identifier> Transformer::visit(
     std::unique_ptr<Identifier> node) {
+  return node;
+}
+
+std::unique_ptr<Cast> Transformer::visit(
+    std::unique_ptr<Cast> node) {
+  node->expr = this->visit(std::move(node->expr));
   return node;
 }
 
