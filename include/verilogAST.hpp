@@ -91,7 +91,9 @@ class NumericLiteral : public Expression {
 
 class Cast : public Expression {
  protected:
-  virtual Cast* clone_impl() const override { return new Cast(*this); };
+  virtual Cast* clone_impl() const override {
+    return new Cast(this->width, this->expr->clone());
+  };
 
  public:
   // integer width because we want to avoid numeric literals with ' like 2'b01
