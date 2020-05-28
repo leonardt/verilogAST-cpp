@@ -77,6 +77,11 @@ TEST(BasicTests, TestString) {
 TEST(BasicTests, TestIndex) {
   vAST::Index index(vAST::make_id("x"), vAST::make_num("0"));
   EXPECT_EQ(index.toString(), "x[0]");
+  vAST::Index index2(
+      std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("3"),
+                                    vAST::make_num("0")),
+      vAST::make_num("0"));
+  EXPECT_EQ(index2.toString(), "x[3:0][0]");
 }
 
 TEST(BasicTests, TestSlice) {
@@ -289,14 +294,14 @@ TEST(BasicTests, TestModuleInst) {
                                         make_simple_connections());
 
   EXPECT_EQ(module_inst.toString(),
-          "test_module #(\n"
-          "    .param0(0),\n"
-          "    .param1(1)\n"
-          ") test_module_inst (\n"
-          "    .a(a),\n"
-          "    .b(b[0]),\n"
-          "    .c(c[31:0])\n"
-          ");");
+            "test_module #(\n"
+            "    .param0(0),\n"
+            "    .param1(1)\n"
+            ") test_module_inst (\n"
+            "    .a(a),\n"
+            "    .b(b[0]),\n"
+            "    .c(c[31:0])\n"
+            ");");
 }
 
 TEST(BasicTests, TestModule) {
@@ -580,7 +585,7 @@ TEST(BasicTests, TestIndexCopy) {
   std::unique_ptr<vAST::Index> x1 = std::make_unique<vAST::Index>(*x);
   EXPECT_EQ(x->toString(), "x[y]");
   EXPECT_EQ(x1->toString(), "x[y]");
-  x1->id->value = "z";
+  x1->value = vAST::make_id("z");
   x1->index = std::make_unique<vAST::Identifier>("a");
   EXPECT_EQ(x->toString(), "x[y]");
   EXPECT_EQ(x1->toString(), "z[a]");

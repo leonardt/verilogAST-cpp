@@ -88,7 +88,7 @@ std::unique_ptr<String> Transformer::visit(std::unique_ptr<String> node) {
 }
 
 std::unique_ptr<Index> Transformer::visit(std::unique_ptr<Index> node) {
-  node->id = this->visit(std::move(node->id));
+  node->value = this->visit(std::move(node->value));
   node->index = this->visit(std::move(node->index));
   return node;
 }

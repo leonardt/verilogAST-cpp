@@ -59,6 +59,7 @@ class IndexBlacklister : public Transformer {
   //
   // Verilog does not support (y + z)[0]
   std::set<std::string> &wire_blacklist;
+  bool inside_index = false;
 
  public:
   IndexBlacklister(std::set<std::string> &wire_blacklist)
@@ -66,6 +67,7 @@ class IndexBlacklister : public Transformer {
 
   using Transformer::visit;
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
+  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node);
 };
 
 class AssignInliner : public Transformer {
@@ -87,9 +89,9 @@ class AssignInliner : public Transformer {
   bool can_inline(std::string key);
 
  public:
-  AssignInliner() : wire_blacklist() {};
-  explicit AssignInliner(std::set<std::string> wire_blacklist) :
-      wire_blacklist(wire_blacklist) {};
+  AssignInliner() : wire_blacklist(){};
+  explicit AssignInliner(std::set<std::string> wire_blacklist)
+      : wire_blacklist(wire_blacklist){};
   using Transformer::visit;
   virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
   virtual std::unique_ptr<ContinuousAssign> visit(

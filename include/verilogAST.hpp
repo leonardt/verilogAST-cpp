@@ -209,26 +209,6 @@ class String : public Expression {
   auto clone() const { return std::unique_ptr<String>(clone_impl()); }
 };
 
-class Index : public Expression {
- protected:
-  virtual Index* clone_impl() const override {
-    return new Index(this->id->clone(), this->index->clone());
-  };
-
- public:
-  std::unique_ptr<Identifier> id;
-  std::unique_ptr<Expression> index;
-
-  Index(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> index)
-      : id(std::move(id)), index(std::move(index)){};
-
-  Index(const Index& rhs) : id(rhs.id->clone()), index(rhs.index->clone()){};
-
-  std::string toString() override;
-  ~Index(){};
-  auto clone() const { return std::unique_ptr<Index>(clone_impl()); }
-};
-
 class Slice : public Expression {
  protected:
   virtual Slice* clone_impl() const override {
@@ -254,6 +234,38 @@ class Slice : public Expression {
   std::string toString() override;
   ~Slice(){};
   auto clone() const { return std::unique_ptr<Slice>(clone_impl()); }
+};
+
+class Index : public Expression {
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Slice>>
+  clone_index_value() const {
+    return std::visit(
+        [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
+                                         std::unique_ptr<Slice>> {
+          return value->clone();
+        },
+        this->value);
+  }
+
+ protected:
+  virtual Index* clone_impl() const override {
+    return new Index(this->clone_index_value(), this->index->clone());
+  };
+
+ public:
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Slice>> value;
+  std::unique_ptr<Expression> index;
+
+  Index(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Slice>> value,
+        std::unique_ptr<Expression> index)
+      : value(std::move(value)), index(std::move(index)){};
+
+  Index(const Index& rhs)
+      : value(rhs.clone_index_value()), index(rhs.index->clone()){};
+
+  std::string toString() override;
+  ~Index(){};
+  auto clone() const { return std::unique_ptr<Index>(clone_impl()); }
 };
 
 namespace BinOp {
@@ -578,7 +590,8 @@ class Connections {
     connections.push_back(std::make_pair(name, std::move(expr)));
   }
 
-  // Releases ownership of expression at @name if exists, othwerwise throws error.
+  // Releases ownership of expression at @name if exists, othwerwise throws
+  // error.
   std::unique_ptr<Expression> at(std::string name) {
     auto is_name = [name](auto& element) { return element.first == name; };
     auto it = std::find_if(connections.begin(), connections.end(), is_name);
@@ -610,7 +623,8 @@ class ModuleInstantiation : public StructuralStatement {
   // TODO Need to make sure that the instance parameters are a subset of the
   // module parameters
   ModuleInstantiation(std::string module_name, Parameters parameters,
-                      std::string instance_name, std::unique_ptr<Connections> connections)
+                      std::string instance_name,
+                      std::unique_ptr<Connections> connections)
       : module_name(module_name),
         parameters(std::move(parameters)),
         instance_name(instance_name),
