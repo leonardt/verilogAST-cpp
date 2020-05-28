@@ -77,11 +77,16 @@ TEST(BasicTests, TestString) {
 TEST(BasicTests, TestIndex) {
   vAST::Index index(vAST::make_id("x"), vAST::make_num("0"));
   EXPECT_EQ(index.toString(), "x[0]");
+
   vAST::Index index2(
       std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("3"),
                                     vAST::make_num("0")),
       vAST::make_num("0"));
   EXPECT_EQ(index2.toString(), "x[3:0][0]");
+
+  vAST::Index index3(std::make_unique<vAST::Attribute>(vAST::make_id("x"), "y"),
+                     vAST::make_num("0"));
+  EXPECT_EQ(index3.toString(), "x.y[0]");
 }
 
 TEST(BasicTests, TestSlice) {

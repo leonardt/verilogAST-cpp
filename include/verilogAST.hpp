@@ -83,34 +83,19 @@ class NumericLiteral : public Expression {
 
   NumericLiteral(std::string value, unsigned int size, bool _signed,
                  Radix radix)
-      : value(value),
-        size(size),
-        _signed(_signed),
-        radix(radix){};
+      : value(value), size(size), _signed(_signed), radix(radix){};
 
   NumericLiteral(std::string value, unsigned int size, bool _signed)
-      : value(value),
-        size(size),
-        _signed(_signed),
-        radix(Radix::DECIMAL){};
+      : value(value), size(size), _signed(_signed), radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value, unsigned int size)
-      : value(value),
-        size(size),
-        _signed(false),
-        radix(Radix::DECIMAL){};
+      : value(value), size(size), _signed(false), radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value)
-      : value(value),
-        size(32),
-        _signed(false),
-        radix(Radix::DECIMAL){};
+      : value(value), size(32), _signed(false), radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value, Radix radix)
-      : value(value),
-        size(32),
-        _signed(false),
-        radix(radix){};
+      : value(value), size(32), _signed(false), radix(radix){};
 
   std::string toString() override;
   auto clone() const { return std::unique_ptr<NumericLiteral>(clone_impl()); }
@@ -237,10 +222,12 @@ class Slice : public Expression {
 };
 
 class Index : public Expression {
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Slice>>
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
+               std::unique_ptr<Slice>>
   clone_index_value() const {
     return std::visit(
         [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
+                                         std::unique_ptr<Attribute>,
                                          std::unique_ptr<Slice>> {
           return value->clone();
         },
@@ -253,10 +240,14 @@ class Index : public Expression {
   };
 
  public:
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Slice>> value;
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
+               std::unique_ptr<Slice>>
+      value;
   std::unique_ptr<Expression> index;
 
-  Index(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Slice>> value,
+  Index(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
+                     std::unique_ptr<Slice>>
+            value,
         std::unique_ptr<Expression> index)
       : value(std::move(value)), index(std::move(index)){};
 
