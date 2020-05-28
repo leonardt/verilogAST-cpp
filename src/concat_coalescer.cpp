@@ -1,5 +1,5 @@
-#include <cassert>
 #include "verilogAST/concat_coalescer.hpp"
+#include <cassert>
 
 namespace verilogAST {
 
@@ -8,7 +8,7 @@ namespace {
 struct Run {
   std::string name;
   int first;  // inclusive
-  int last;  // inclusive
+  int last;   // inclusive
 };
 
 class RunOrExpr {
@@ -69,7 +69,11 @@ RunOrExpr makeRunOrExpr(const Expression* arg) {
   if (not index) return RunOrExpr(arg);
   auto as_int = expr_to_int(index->index.get());
   if (not as_int.first) return RunOrExpr(arg);
-  return RunOrExpr(index->id->value, as_int.second, as_int.second);
+  if (not std::holds_alternative<std::unique_ptr<Identifier>>(index->value)) {
+    return RunOrExpr(arg);
+  }
+  auto& id = std::get<std::unique_ptr<Identifier>>(index->value);
+  return RunOrExpr(id->value, as_int.second, as_int.second);
 }
 
 }  // namespace

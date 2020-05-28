@@ -133,7 +133,7 @@ std::string Attribute::toString() {
 std::string String::toString() { return "\"" + value + "\""; }
 
 std::string Index::toString() {
-  return id->toString() + '[' + index->toString() + ']';
+  return variant_to_string(value) + '[' + index->toString() + ']';
 }
 
 std::string Slice::toString() {

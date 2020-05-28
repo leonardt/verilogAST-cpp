@@ -3,9 +3,18 @@
 
 namespace verilogAST {
 
-std::unique_ptr<Index> IndexBlacklister::visit(
-    std::unique_ptr<Index> node) {
-  this->wire_blacklist.insert(node->id->value);
+std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
+  bool prev = this->inside_index;
+  this->inside_index = true;
+  node = Transformer::visit(std::move(node));
+  // Restore prev value, since we could be nested inside an index
+  this->inside_index = prev;
+  return node;
+}
+
+std::unique_ptr<Identifier> IndexBlacklister::visit(
+    std::unique_ptr<Identifier> node) {
+  if (this->inside_index) this->wire_blacklist.insert(node->value);
   return node;
 }
 
@@ -62,7 +71,7 @@ std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
 
 bool AssignInliner::can_inline(std::string key) {
   if (this->wire_blacklist.count(key)) {
-      return false;
+    return false;
   }
   auto it = assign_map.find(key);
   return it != assign_map.end() && (this->assign_count[key] == 1) &&
