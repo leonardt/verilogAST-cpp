@@ -74,3 +74,4 @@ endif()
 
 install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
 install(FILES include/verilogAST.hpp DESTINATION include)
+install(DIRECTORY include/verilogAST DESTINATION include)
