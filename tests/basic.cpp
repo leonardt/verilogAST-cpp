@@ -442,6 +442,11 @@ TEST(BasicTests, TestAlways) {
       "a = b;\n"
       "b <= c;\n"
       "$display(\"b=%d, c=%d\", b, c);\n"
+      "if (b) begin\n"
+      "    e = f;\n"
+      "end else begin\n"
+      "    e = g;\n"
+      "end\n"
       "end\n";
   EXPECT_EQ(always.toString(), expected_str);
 }
@@ -452,6 +457,7 @@ TEST(BasicTests, TestAlwaysStar) {
       std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
       sensitivity_list;
   sensitivity_list.push_back(std::make_unique<vAST::Star>());
+
   vAST::Always always_star(std::move(sensitivity_list),
                            make_simple_always_body());
   std::string expected_str =
@@ -459,6 +465,11 @@ TEST(BasicTests, TestAlwaysStar) {
       "a = b;\n"
       "b <= c;\n"
       "$display(\"b=%d, c=%d\", b, c);\n"
+      "if (b) begin\n"
+      "    e = f;\n"
+      "end else begin\n"
+      "    e = g;\n"
+      "end\n"
       "end\n";
   EXPECT_EQ(always_star.toString(), expected_str);
 }

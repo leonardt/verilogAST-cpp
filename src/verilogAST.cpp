@@ -123,7 +123,7 @@ std::string Identifier::toString() {
 }
 
 std::string Cast::toString() {
-    return std::to_string(this->width) + "'(" + this->expr->toString() + ")";
+  return std::to_string(this->width) + "'(" + this->expr->toString() + ")";
 }
 
 std::string Attribute::toString() {
@@ -420,6 +420,27 @@ std::string Always::toString() {
 
   always_str += "end\n";
   return always_str;
+}
+
+std::string If::toString() {
+  std::string if_str = "";
+  if_str += "if (";
+  if_str += this->cond->toString();
+  if_str += ") begin\n";
+
+  for (auto &statement : this->true_body) {
+    if_str += "    " + statement->toString() + "\n";
+  }
+
+  if_str += "end";
+  if (this->false_body.size()) {
+    if_str += " else begin\n";
+    for (auto &statement : false_body) {
+      if_str += "    " + statement->toString() + "\n";
+    }
+    if_str += "end";
+  }
+  return if_str;
 }
 
 std::string File::toString() {

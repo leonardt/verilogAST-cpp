@@ -71,14 +71,12 @@ std::unique_ptr<Identifier> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<Cast> Transformer::visit(
-    std::unique_ptr<Cast> node) {
+std::unique_ptr<Cast> Transformer::visit(std::unique_ptr<Cast> node) {
   node->expr = this->visit(std::move(node->expr));
   return node;
 }
 
-std::unique_ptr<Attribute> Transformer::visit(
-    std::unique_ptr<Attribute> node) {
+std::unique_ptr<Attribute> Transformer::visit(std::unique_ptr<Attribute> node) {
   node->value = this->visit(std::move(node->value));
   return node;
 }
@@ -199,6 +197,22 @@ std::unique_ptr<BlockComment> Transformer::visit(
   return node;
 }
 
+std::unique_ptr<If> Transformer::visit(std::unique_ptr<If> node) {
+  std::vector<std::unique_ptr<BehavioralStatement>> new_true_body;
+  for (auto&& item : node->true_body) {
+    new_true_body.push_back(this->visit(std::move(item)));
+  }
+  node->true_body = std::move(new_true_body);
+
+  std::vector<std::unique_ptr<BehavioralStatement>> new_false_body;
+  for (auto&& item : node->false_body) {
+    new_false_body.push_back(this->visit(std::move(item)));
+  }
+  node->false_body = std::move(new_false_body);
+
+  return node;
+}
+
 std::unique_ptr<InlineVerilog> Transformer::visit(
     std::unique_ptr<InlineVerilog> node) {
   return node;
@@ -268,6 +282,10 @@ std::unique_ptr<BehavioralStatement> Transformer::visit(
   if (auto ptr = dynamic_cast<BlockComment*>(node.get())) {
     node.release();
     return this->visit(std::unique_ptr<BlockComment>(ptr));
+  }
+  if (auto ptr = dynamic_cast<If*>(node.get())) {
+    node.release();
+    return this->visit(std::unique_ptr<If>(ptr));
   }
   throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
   return node;                              // LCOV_EXCL_LINE

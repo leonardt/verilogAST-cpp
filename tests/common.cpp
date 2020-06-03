@@ -12,11 +12,11 @@ vAST::Parameters make_simple_params() {
 }
 
 std::unique_ptr<vAST::Connections> make_simple_connections() {
-  std::unique_ptr<vAST::Connections> connections = std::make_unique<vAST::Connections>();
+  std::unique_ptr<vAST::Connections> connections =
+      std::make_unique<vAST::Connections>();
   connections->insert("a", vAST::make_id("a"));
-  connections->insert(
-      "b",
-      std::make_unique<vAST::Index>(vAST::make_id("b"), vAST::make_num("0")));
+  connections->insert("b", std::make_unique<vAST::Index>(vAST::make_id("b"),
+                                                         vAST::make_num("0")));
   connections->insert(
       "c", std::make_unique<vAST::Slice>(
                vAST::make_id("c"), vAST::make_num("31"), vAST::make_num("0")));
@@ -66,6 +66,19 @@ make_simple_always_body() {
   args.push_back(std::make_unique<vAST::Identifier>("b"));
   args.push_back(std::make_unique<vAST::Identifier>("c"));
   body.push_back(std::make_unique<vAST::CallStmt>("$display", std::move(args)));
+
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> true_body;
+  true_body.push_back(std::make_unique<vAST::BlockingAssign>(
+      std::make_unique<vAST::Identifier>("e"),
+      std::make_unique<vAST::Identifier>("f")));
+
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> false_body;
+  false_body.push_back(std::make_unique<vAST::BlockingAssign>(
+      std::make_unique<vAST::Identifier>("e"),
+      std::make_unique<vAST::Identifier>("g")));
+
+  body.push_back(std::make_unique<vAST::If>(
+      vAST::make_id("b"), std::move(true_body), std::move(false_body)));
 
   return body;
 }

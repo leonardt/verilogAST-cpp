@@ -770,6 +770,23 @@ class Always : public StructuralStatement {
   ~Always(){};
 };
 
+class If : public BehavioralStatement {
+ public:
+  std::unique_ptr<Expression> cond;
+  std::vector<std::unique_ptr<BehavioralStatement>> true_body;
+  std::vector<std::unique_ptr<BehavioralStatement>> false_body;
+
+  If(std::unique_ptr<Expression> cond,
+     std::vector<std::unique_ptr<BehavioralStatement>> true_body,
+     std::vector<std::unique_ptr<BehavioralStatement>> false_body)
+      : cond(std::move(cond)),
+        true_body(std::move(true_body)),
+        false_body(std::move(false_body)){};
+
+  std::string toString();
+  ~If(){};
+};
+
 class AbstractModule : public Node {};
 
 class Module : public AbstractModule {

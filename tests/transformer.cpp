@@ -43,6 +43,8 @@ class AlwaysTransformer : public vAST::Transformer {
       return vAST::make_id("z");
     } else if (node->value == "b") {
       return vAST::make_id("y");
+    } else if (node->value == "e") {
+      return vAST::make_id("w");
     }
     return node;
   };
@@ -95,8 +97,7 @@ TEST(TransformerTests, TestXtoZ) {
               vAST::UnOp::INVERT)),
       std::make_unique<vAST::Replicate>(vAST::make_num("2"),
                                         vAST::make_id("x"))));
-  call_args.push_back(
-      std::make_unique<vAST::Cast>(5, vAST::make_id("x")));
+  call_args.push_back(std::make_unique<vAST::Cast>(5, vAST::make_id("x")));
   std::unique_ptr<vAST::Expression> expr =
       std::make_unique<vAST::CallExpr>("my_func", std::move(call_args));
   XtoZ transformer;
@@ -136,6 +137,11 @@ TEST(TransformerTests, TestAlways) {
       "z = y;\n"
       "y <= c;\n"
       "$display(\"b=%d, c=%d\", y, c);\n"
+      "if (b) begin\n"
+      "    w = f;\n"
+      "end else begin\n"
+      "    w = g;\n"
+      "end\n"
       "// Test comment\n"
       "/*\nTest comment\non multiple lines\n*/\n"
       "end\n";
@@ -200,7 +206,7 @@ TEST(TransformerTests, TestModule) {
       "    .param1(1)\n"
       ") other_module_inst (\n"
       "    .a(a),\n"
-      "    .b(b[0]),\n" 
+      "    .b(b[0]),\n"
       "    .c(g[31:0])\n"
       ");\n"
       "assign g = b;\n"
@@ -210,6 +216,11 @@ TEST(TransformerTests, TestModule) {
       "a = b;\n"
       "b <= g;\n"
       "$display(\"b=%d, c=%d\", b, g);\n"
+      "if (b) begin\n"
+      "    e = f;\n"
+      "end else begin\n"
+      "    e = g;\n"
+      "end\n"
       "end\n\n"
       "// Test comment\n"
       "/*\nTest comment\non multiple lines\n*/\n"
