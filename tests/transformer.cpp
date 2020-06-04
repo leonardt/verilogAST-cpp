@@ -137,7 +137,7 @@ TEST(TransformerTests, TestAlways) {
       "z = y;\n"
       "y <= c;\n"
       "$display(\"b=%d, c=%d\", y, c);\n"
-      "if (b) begin\n"
+      "if (y) begin\n"
       "    w = f;\n"
       "end else begin\n"
       "    w = g;\n"

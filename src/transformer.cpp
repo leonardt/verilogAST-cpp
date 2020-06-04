@@ -198,6 +198,8 @@ std::unique_ptr<BlockComment> Transformer::visit(
 }
 
 std::unique_ptr<If> Transformer::visit(std::unique_ptr<If> node) {
+  node->cond = this->visit(std::move(node->cond));
+
   std::vector<std::unique_ptr<BehavioralStatement>> new_true_body;
   for (auto&& item : node->true_body) {
     new_true_body.push_back(this->visit(std::move(item)));
