@@ -1,6 +1,7 @@
 #include "verilogAST.hpp"
 
 #include <regex>
+#include <sstream>
 #include <unordered_set>
 
 template <typename... Ts>
@@ -422,6 +423,18 @@ std::string Always::toString() {
   return always_str;
 }
 
+std::string add_tab(std::string block) {
+  // Indents each line by four spaces, adds an extra newline at the end
+  std::istringstream block_stream(block);
+  std::string new_block;
+  while (!block_stream.eof()) {
+    std::string line;
+    std::getline(block_stream, line);
+    new_block += "    " + line + "\n";
+  }
+  return new_block;
+}
+
 std::string If::toString() {
   std::string if_str = "";
   if_str += "if (";
@@ -429,14 +442,14 @@ std::string If::toString() {
   if_str += ") begin\n";
 
   for (auto &statement : this->true_body) {
-    if_str += "    " + statement->toString() + "\n";
+    if_str += add_tab(statement->toString());
   }
 
   if_str += "end";
   if (this->false_body.size()) {
     if_str += " else begin\n";
     for (auto &statement : false_body) {
-      if_str += "    " + statement->toString() + "\n";
+      if_str += add_tab(statement->toString());
     }
     if_str += "end";
   }
