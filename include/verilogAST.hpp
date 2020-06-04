@@ -774,14 +774,22 @@ class If : public BehavioralStatement {
  public:
   std::unique_ptr<Expression> cond;
   std::vector<std::unique_ptr<BehavioralStatement>> true_body;
-  std::vector<std::unique_ptr<BehavioralStatement>> false_body;
+  // pair of cond + body for else if cases
+  std::vector<std::pair<std::unique_ptr<Expression>,
+                        std::vector<std::unique_ptr<BehavioralStatement>>>>
+      else_ifs;
+  std::vector<std::unique_ptr<BehavioralStatement>> else_body;
 
   If(std::unique_ptr<Expression> cond,
      std::vector<std::unique_ptr<BehavioralStatement>> true_body,
-     std::vector<std::unique_ptr<BehavioralStatement>> false_body)
+     std::vector<std::pair<std::unique_ptr<Expression>,
+                           std::vector<std::unique_ptr<BehavioralStatement>>>>
+         else_ifs,
+     std::vector<std::unique_ptr<BehavioralStatement>> else_body)
       : cond(std::move(cond)),
         true_body(std::move(true_body)),
-        false_body(std::move(false_body)){};
+        else_ifs(std::move(else_ifs)),
+        else_body(std::move(else_body)){};
 
   std::string toString();
   ~If(){};

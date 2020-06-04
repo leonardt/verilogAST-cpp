@@ -206,11 +206,24 @@ std::unique_ptr<If> Transformer::visit(std::unique_ptr<If> node) {
   }
   node->true_body = std::move(new_true_body);
 
-  std::vector<std::unique_ptr<BehavioralStatement>> new_false_body;
-  for (auto&& item : node->false_body) {
-    new_false_body.push_back(this->visit(std::move(item)));
+  std::vector<std::pair<std::unique_ptr<Expression>,
+                        std::vector<std::unique_ptr<BehavioralStatement>>>>
+      new_else_ifs;
+  for (auto&& item : node->else_ifs) {
+    std::vector<std::unique_ptr<BehavioralStatement>> new_body;
+    for (auto&& inner_statement : item.second) {
+      new_body.push_back(this->visit(std::move(inner_statement)));
+    }
+    new_else_ifs.push_back(
+        {this->visit(std::move(item.first)), std::move(new_body)});
   }
-  node->false_body = std::move(new_false_body);
+  node->else_ifs = std::move(new_else_ifs);
+
+  std::vector<std::unique_ptr<BehavioralStatement>> new_else_body;
+  for (auto&& item : node->else_body) {
+    new_else_body.push_back(this->visit(std::move(item)));
+  }
+  node->else_body = std::move(new_else_body);
 
   return node;
 }

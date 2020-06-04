@@ -72,13 +72,28 @@ make_simple_always_body() {
       std::make_unique<vAST::Identifier>("e"),
       std::make_unique<vAST::Identifier>("f")));
 
-  std::vector<std::unique_ptr<vAST::BehavioralStatement>> false_body;
-  false_body.push_back(std::make_unique<vAST::BlockingAssign>(
+  std::vector<
+      std::pair<std::unique_ptr<vAST::Expression>,
+                std::vector<std::unique_ptr<vAST::BehavioralStatement>>>>
+      else_ifs;
+  for (int i = 0; i < 2; i++) {
+    std::unique_ptr<vAST::Expression> cond =
+        vAST::make_id("x" + std::to_string(i));
+    std::vector<std::unique_ptr<vAST::BehavioralStatement>> body;
+    body.push_back(std::make_unique<vAST::BlockingAssign>(
+        std::make_unique<vAST::Identifier>("e"),
+        std::make_unique<vAST::Identifier>("g" + std::to_string(i))));
+    else_ifs.push_back({std::move(cond), std::move(body)});
+  }
+
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> else_body;
+  else_body.push_back(std::make_unique<vAST::BlockingAssign>(
       std::make_unique<vAST::Identifier>("e"),
       std::make_unique<vAST::Identifier>("g")));
 
-  body.push_back(std::make_unique<vAST::If>(
-      vAST::make_id("b"), std::move(true_body), std::move(false_body)));
+  body.push_back(
+      std::make_unique<vAST::If>(vAST::make_id("b"), std::move(true_body),
+                                 std::move(else_ifs), std::move(else_body)));
 
   return body;
 }

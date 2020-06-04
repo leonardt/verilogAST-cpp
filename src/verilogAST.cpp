@@ -446,9 +446,18 @@ std::string If::toString() {
   }
 
   if_str += "end";
-  if (this->false_body.size()) {
+
+  for (auto &entry : this->else_ifs) {
+    if_str += " else if (" + entry.first->toString() + ") begin\n";
+    for (auto &statement : entry.second) {
+      if_str += add_tab(statement->toString());
+    }
+    if_str += "end";
+  }
+
+  if (this->else_body.size()) {
     if_str += " else begin\n";
-    for (auto &statement : false_body) {
+    for (auto &statement : else_body) {
       if_str += add_tab(statement->toString());
     }
     if_str += "end";
