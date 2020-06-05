@@ -14,6 +14,9 @@ class AssignMapBuilder : public Transformer {
   std::set<std::string> &output_ports;
   std::set<std::string> &input_ports;
 
+  template <typename T>
+  std::unique_ptr<T> process_assign(std::unique_ptr<T> node);
+
  public:
   AssignMapBuilder(
       std::map<std::string, int> &assign_count,
@@ -38,6 +41,9 @@ class WireReadCounter : public Transformer {
   // Counts number of times a wire is read
   //
   std::map<std::string, int> &read_count;
+
+  template <typename T>
+  std::unique_ptr<T> process_assign(std::unique_ptr<T> node);
 
  public:
   WireReadCounter(std::map<std::string, int> &read_count)
@@ -91,6 +97,9 @@ class AssignInliner : public Transformer {
                 body);
 
   bool can_inline(std::string key);
+
+  template <typename T>
+  std::unique_ptr<T> process_assign(std::unique_ptr<T> node);
 
  public:
   AssignInliner() : wire_blacklist(){};
