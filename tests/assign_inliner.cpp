@@ -16,6 +16,8 @@ TEST(InlineAssignTests, TestBasic) {
                                                vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"), vAST::OUTPUT,
                                                vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o1"),
+                                               vAST::OUTPUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(
       std::make_unique<vAST::Vector>(vAST::make_id("o_vec"),
                                      vAST::make_num("1"), vAST::make_num("0")),
@@ -51,9 +53,49 @@ TEST(InlineAssignTests, TestBasic) {
       std::make_unique<vAST::Identifier>("o_vec"),
       std::make_unique<vAST::Identifier>("x_vec")));
 
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      always_body;
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> always_body;
+
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> true_body;
+  true_body.push_back(std::make_unique<vAST::BlockingAssign>(
+      std::make_unique<vAST::Identifier>("o1"),
+      std::make_unique<vAST::Identifier>("x")));
+
+  std::vector<
+      std::pair<std::unique_ptr<vAST::Expression>,
+                std::vector<std::unique_ptr<vAST::BehavioralStatement>>>>
+      else_ifs;
+  for (int i = 1; i < 3; i++) {
+    std::unique_ptr<vAST::Expression> cond = std::make_unique<vAST::BinaryOp>(
+        std::make_unique<vAST::Identifier>("x"), vAST::BinOp::EQ,
+        vAST::make_num(std::to_string(i)));
+    std::vector<std::unique_ptr<vAST::BehavioralStatement>> body;
+    body.push_back(std::make_unique<vAST::BlockingAssign>(
+        std::make_unique<vAST::Identifier>("o1"),
+        std::make_unique<vAST::BinaryOp>(
+            std::make_unique<vAST::Identifier>("x"), vAST::BinOp::ADD,
+            vAST::make_num(std::to_string(i)))));
+    else_ifs.push_back({std::move(cond), std::move(body)});
+  }
+
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> else_body;
+  else_body.push_back(std::make_unique<vAST::BlockingAssign>(
+      std::make_unique<vAST::Identifier>("o1"),
+      std::make_unique<vAST::BinaryOp>(std::make_unique<vAST::Identifier>("x"),
+                                       vAST::BinOp::ADD, vAST::make_num("3"))));
+
+  always_body.push_back(std::make_unique<vAST::If>(
+      std::make_unique<vAST::BinaryOp>(std::make_unique<vAST::Identifier>("x"),
+                                       vAST::BinOp::EQ, vAST::make_num("0")),
+      std::move(true_body), std::move(else_ifs), std::move(else_body)));
+
+  std::vector<std::variant<
+      std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
+      std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
+      sensitivity_list;
+  sensitivity_list.push_back(std::make_unique<vAST::Star>());
+
+  body.push_back(std::make_unique<vAST::Always>(std::move(sensitivity_list),
+                                                std::move(always_body)));
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
@@ -62,6 +104,7 @@ TEST(InlineAssignTests, TestBasic) {
       "module test_module (\n"
       "    input i,\n"
       "    output o,\n"
+      "    output o1,\n"
       "    output [1:0] o_vec\n"
       ");\n"
       "wire x;\n"
@@ -70,6 +113,17 @@ TEST(InlineAssignTests, TestBasic) {
       "assign o = x;\n"
       "assign x_vec = {i,i};\n"
       "assign o_vec = x_vec;\n"
+      "always @(*) begin\n"
+      "if (x == 0) begin\n"
+      "    o1 = x;\n"
+      "end else if (x == 1) begin\n"
+      "    o1 = x + 1;\n"
+      "end else if (x == 2) begin\n"
+      "    o1 = x + 2;\n"
+      "end else begin\n"
+      "    o1 = x + 3;\n"
+      "end\n"
+      "end\n\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
@@ -83,12 +137,24 @@ TEST(InlineAssignTests, TestBasic) {
       "module test_module (\n"
       "    input i,\n"
       "    output o,\n"
+      "    output o1,\n"
       "    output [1:0] o_vec\n"
       ");\n"
       "wire [1:0] x_vec;\n"
       "assign o = i;\n"
       "assign x_vec = {i,i};\n"
       "assign o_vec = x_vec;\n"
+      "always @(*) begin\n"
+      "if (i == 0) begin\n"
+      "    o1 = i;\n"
+      "end else if (i == 1) begin\n"
+      "    o1 = i + 1;\n"
+      "end else if (i == 2) begin\n"
+      "    o1 = i + 2;\n"
+      "end else begin\n"
+      "    o1 = i + 3;\n"
+      "end\n"
+      "end\n\n"
       "endmodule\n";
 
   blacklist = {"x_vec"};
@@ -100,10 +166,22 @@ TEST(InlineAssignTests, TestBasic) {
       "module test_module (\n"
       "    input i,\n"
       "    output o,\n"
+      "    output o1,\n"
       "    output [1:0] o_vec\n"
       ");\n"
       "assign o = i;\n"
       "assign o_vec = {i,i};\n"
+      "always @(*) begin\n"
+      "if (i == 0) begin\n"
+      "    o1 = i;\n"
+      "end else if (i == 1) begin\n"
+      "    o1 = i + 1;\n"
+      "end else if (i == 2) begin\n"
+      "    o1 = i + 2;\n"
+      "end else begin\n"
+      "    o1 = i + 3;\n"
+      "end\n"
+      "end\n\n"
       "endmodule\n";
 
   vAST::AssignInliner transformer;
