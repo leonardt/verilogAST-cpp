@@ -748,17 +748,13 @@ class Always : public StructuralStatement {
       std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                    std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
       sensitivity_list;
-  std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
-                           std::unique_ptr<Declaration>>>
-      body;
+  std::vector<std::unique_ptr<BehavioralStatement>> body;
 
   Always(std::vector<
              std::variant<std::unique_ptr<Identifier>, std::unique_ptr<PosEdge>,
                           std::unique_ptr<NegEdge>, std::unique_ptr<Star>>>
              sensitivity_list,
-         std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
-                                  std::unique_ptr<Declaration>>>
-             body)
+         std::vector<std::unique_ptr<BehavioralStatement>> body)
       : body(std::move(body)) {
     if (sensitivity_list.empty()) {
       throw std::runtime_error(

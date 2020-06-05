@@ -49,12 +49,9 @@ make_simple_body() {
   return body;
 }
 
-std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                         std::unique_ptr<vAST::Declaration>>>
+std::vector<std::unique_ptr<vAST::BehavioralStatement>>
 make_simple_always_body() {
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> body;
   body.push_back(std::make_unique<vAST::BlockingAssign>(
       std::make_unique<vAST::Identifier>("a"),
       std::make_unique<vAST::Identifier>("b")));

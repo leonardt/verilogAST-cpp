@@ -342,9 +342,7 @@ std::unique_ptr<Always> Transformer::visit(std::unique_ptr<Always> node) {
     new_sensitivity_list.push_back(this->visit(std::move(item)));
   }
   node->sensitivity_list = std::move(new_sensitivity_list);
-  std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
-                           std::unique_ptr<Declaration>>>
-      new_body;
+  std::vector<std::unique_ptr<BehavioralStatement>> new_body;
   for (auto&& item : node->body) {
     new_body.push_back(this->visit(std::move(item)));
   }

@@ -122,9 +122,8 @@ TEST(TransformerTests, TestAlways) {
       std::make_unique<vAST::NegEdge>(std::make_unique<vAST::Identifier>("c")));
   sensitivity_list.push_back(std::make_unique<vAST::Star>());
 
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      always_body = make_simple_always_body();
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> always_body =
+      make_simple_always_body();
   always_body.push_back(
       std::make_unique<vAST::SingleLineComment>("Test comment"));
   always_body.push_back(

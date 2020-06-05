@@ -51,6 +51,10 @@ TEST(InlineAssignTests, TestBasic) {
       std::make_unique<vAST::Identifier>("o_vec"),
       std::make_unique<vAST::Identifier>("x_vec")));
 
+  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      always_body;
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
 
@@ -540,14 +544,14 @@ TEST(InlineAssignTests, TestMultipleAssign) {
 TEST(InlineAssignTests, TestInstConn) {
   // Should not inline a wire that is assigned multiple times
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
-  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"),
-                                               vAST::INPUT, vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("a"),
-                                               vAST::INPUT, vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"),
-                                               vAST::OUTPUT, vAST::WIRE));
-  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("b"),
-                                               vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT,
+                                               vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("a"), vAST::INPUT,
+                                               vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"), vAST::OUTPUT,
+                                               vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("b"), vAST::OUTPUT,
+                                               vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
@@ -568,7 +572,8 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("a")));
 
   vAST::Parameters parameters;
-  std::unique_ptr<vAST::Connections> connections = std::make_unique<vAST::Connections>();
+  std::unique_ptr<vAST::Connections> connections =
+      std::make_unique<vAST::Connections>();
   connections->insert("c", vAST::make_id("a"));
   connections->insert("i", vAST::make_id("x"));
   connections->insert("o", vAST::make_id("y"));
@@ -626,12 +631,12 @@ TEST(InlineAssignTests, TestInstConn) {
 TEST(InlineAssignTests, TestNoInlineIndex) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Vector>(vAST::make_id("i1"),
-                                     vAST::make_num("1"), vAST::make_num("0")),
+      std::make_unique<vAST::Vector>(vAST::make_id("i1"), vAST::make_num("1"),
+                                     vAST::make_num("0")),
       vAST::INPUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Vector>(vAST::make_id("i2"),
-                                     vAST::make_num("1"), vAST::make_num("0")),
+      std::make_unique<vAST::Vector>(vAST::make_id("i2"), vAST::make_num("1"),
+                                     vAST::make_num("0")),
       vAST::INPUT, vAST::WIRE));
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o"), vAST::OUTPUT,
                                                vAST::WIRE));

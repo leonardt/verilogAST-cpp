@@ -414,9 +414,7 @@ std::string Always::toString() {
 
   // emit body
   for (auto &statement : body) {
-    always_str += variant_to_string<std::unique_ptr<BehavioralStatement>,
-                                    std::unique_ptr<Declaration>>(statement) +
-                  "\n";
+    always_str += statement->toString() + "\n";
   }
 
   always_str += "end\n";

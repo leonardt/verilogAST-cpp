@@ -30,6 +30,8 @@ class AssignMapBuilder : public Transformer {
   virtual std::unique_ptr<Port> visit(std::unique_ptr<Port> node);
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
+  virtual std::unique_ptr<BlockingAssign> visit(
+      std::unique_ptr<BlockingAssign> node);
 };
 
 class WireReadCounter : public Transformer {
@@ -47,6 +49,8 @@ class WireReadCounter : public Transformer {
   // Skip target of assign (not read)
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
+  virtual std::unique_ptr<BlockingAssign> visit(
+      std::unique_ptr<BlockingAssign> node);
   // Skip declarations (not read)
   virtual std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node);
 };
@@ -96,6 +100,8 @@ class AssignInliner : public Transformer {
   virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
+  virtual std::unique_ptr<BlockingAssign> visit(
+      std::unique_ptr<BlockingAssign> node);
   virtual std::unique_ptr<Wire> visit(std::unique_ptr<Wire> node);
   virtual std::unique_ptr<Module> visit(std::unique_ptr<Module> node);
 };

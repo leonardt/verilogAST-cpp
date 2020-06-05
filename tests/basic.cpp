@@ -487,9 +487,7 @@ TEST(BasicTests, TestAlwaysEmpty) {
       std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
       std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
       sensitivity_list;
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> body;
 
   ASSERT_THROW(
       vAST::Always always_empty(std::move(sensitivity_list), std::move(body)),
