@@ -8,7 +8,7 @@ namespace {
 
 TEST(BasicTests, TestNumericLiteral) {
   vAST::NumericLiteral n0("23", 16, false, vAST::DECIMAL);
-  EXPECT_EQ(n0.toString(), "16'23");
+  EXPECT_EQ(n0.toString(), "16'd23");
 
   vAST::NumericLiteral n1("DEADBEEF", 32, false, vAST::HEX);
   EXPECT_EQ(n1.toString(), "'hDEADBEEF");
@@ -20,16 +20,16 @@ TEST(BasicTests, TestNumericLiteral) {
   EXPECT_EQ(n3.toString(), "24'o764");
 
   vAST::NumericLiteral n4("764", 8, false);
-  EXPECT_EQ(n4.toString(), "8'764");
+  EXPECT_EQ(n4.toString(), "8'd764");
 
   vAST::NumericLiteral n5("764", 8);
-  EXPECT_EQ(n5.toString(), "8'764");
+  EXPECT_EQ(n5.toString(), "8'd764");
 
   vAST::NumericLiteral n6("764");
   EXPECT_EQ(n6.toString(), "764");
 
   vAST::NumericLiteral n7("764", 8, true);
-  EXPECT_EQ(n7.toString(), "8's764");
+  EXPECT_EQ(n7.toString(), "8'sd764");
 
   vAST::NumericLiteral n8("z", vAST::Radix::HEX);
   EXPECT_EQ(n8.toString(), "'hz");
