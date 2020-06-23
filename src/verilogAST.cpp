@@ -58,6 +58,10 @@ std::string NumericLiteral::toString() {
   if (size_str == "32" && !always_codegen_size) {
     size_str = "";
   }
+  if (size_str != "" && radix_str == "") {
+    // verilator needs decimal explicitly
+    radix_str = "d";
+  }
 
   std::string separator = "";
   if (size_str + signed_str + radix_str != "") {
