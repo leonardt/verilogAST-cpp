@@ -29,10 +29,20 @@ std::unique_ptr<Declaration> WireReadCounter::visit(
   return node;
 }
 
-std::unique_ptr<ContinuousAssign> WireReadCounter::visit(
-    std::unique_ptr<ContinuousAssign> node) {
+template <typename T>
+std::unique_ptr<T> WireReadCounter::process_assign(std::unique_ptr<T> node) {
   node->value = this->visit(std::move(node->value));
   return node;
+}
+
+std::unique_ptr<ContinuousAssign> WireReadCounter::visit(
+    std::unique_ptr<ContinuousAssign> node) {
+  return this->process_assign(std::move(node));
+}
+
+std::unique_ptr<BlockingAssign> WireReadCounter::visit(
+    std::unique_ptr<BlockingAssign> node) {
+  return this->process_assign(std::move(node));
 }
 
 std::unique_ptr<Port> AssignMapBuilder::visit(std::unique_ptr<Port> node) {
@@ -57,9 +67,8 @@ std::unique_ptr<Port> AssignMapBuilder::visit(std::unique_ptr<Port> node) {
   }
   return node;
 }
-
-std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
-    std::unique_ptr<ContinuousAssign> node) {
+template <typename T>
+std::unique_ptr<T> AssignMapBuilder::process_assign(std::unique_ptr<T> node) {
   node = Transformer::visit(std::move(node));
   std::string key =
       std::visit([](auto&& value) -> std::string { return value->toString(); },
@@ -67,6 +76,16 @@ std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
   this->assign_map[key] = node->value->clone();
   this->assign_count[key]++;
   return node;
+}
+
+std::unique_ptr<BlockingAssign> AssignMapBuilder::visit(
+    std::unique_ptr<BlockingAssign> node) {
+  return this->process_assign(std::move(node));
+}
+
+std::unique_ptr<ContinuousAssign> AssignMapBuilder::visit(
+    std::unique_ptr<ContinuousAssign> node) {
+  return this->process_assign(std::move(node));
 }
 
 bool AssignInliner::can_inline(std::string key) {
@@ -112,8 +131,8 @@ std::unique_ptr<Wire> AssignInliner::visit(std::unique_ptr<Wire> node) {
   return node;
 }
 
-std::unique_ptr<ContinuousAssign> AssignInliner::visit(
-    std::unique_ptr<ContinuousAssign> node) {
+template <typename T>
+std::unique_ptr<T> AssignInliner::process_assign(std::unique_ptr<T> node) {
   node->value = this->visit(std::move(node->value));
   std::string key =
       std::visit([](auto&& value) -> std::string { return value->toString(); },
@@ -131,9 +150,19 @@ std::unique_ptr<ContinuousAssign> AssignInliner::visit(
       },
       node->target);
   if (remove) {
-    return std::unique_ptr<ContinuousAssign>{};
+    return std::unique_ptr<T>{};
   }
   return node;
+}
+
+std::unique_ptr<ContinuousAssign> AssignInliner::visit(
+    std::unique_ptr<ContinuousAssign> node) {
+  return this->process_assign(std::move(node));
+}
+
+std::unique_ptr<BlockingAssign> AssignInliner::visit(
+    std::unique_ptr<BlockingAssign> node) {
+  return this->process_assign(std::move(node));
 }
 
 std::vector<std::variant<std::unique_ptr<StructuralStatement>,

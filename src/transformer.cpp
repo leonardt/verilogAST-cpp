@@ -71,14 +71,12 @@ std::unique_ptr<Identifier> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<Cast> Transformer::visit(
-    std::unique_ptr<Cast> node) {
+std::unique_ptr<Cast> Transformer::visit(std::unique_ptr<Cast> node) {
   node->expr = this->visit(std::move(node->expr));
   return node;
 }
 
-std::unique_ptr<Attribute> Transformer::visit(
-    std::unique_ptr<Attribute> node) {
+std::unique_ptr<Attribute> Transformer::visit(std::unique_ptr<Attribute> node) {
   node->value = this->visit(std::move(node->value));
   return node;
 }
@@ -199,6 +197,37 @@ std::unique_ptr<BlockComment> Transformer::visit(
   return node;
 }
 
+std::unique_ptr<If> Transformer::visit(std::unique_ptr<If> node) {
+  node->cond = this->visit(std::move(node->cond));
+
+  std::vector<std::unique_ptr<BehavioralStatement>> new_true_body;
+  for (auto&& item : node->true_body) {
+    new_true_body.push_back(this->visit(std::move(item)));
+  }
+  node->true_body = std::move(new_true_body);
+
+  std::vector<std::pair<std::unique_ptr<Expression>,
+                        std::vector<std::unique_ptr<BehavioralStatement>>>>
+      new_else_ifs;
+  for (auto&& item : node->else_ifs) {
+    std::vector<std::unique_ptr<BehavioralStatement>> new_body;
+    for (auto&& inner_statement : item.second) {
+      new_body.push_back(this->visit(std::move(inner_statement)));
+    }
+    new_else_ifs.push_back(
+        {this->visit(std::move(item.first)), std::move(new_body)});
+  }
+  node->else_ifs = std::move(new_else_ifs);
+
+  std::vector<std::unique_ptr<BehavioralStatement>> new_else_body;
+  for (auto&& item : node->else_body) {
+    new_else_body.push_back(this->visit(std::move(item)));
+  }
+  node->else_body = std::move(new_else_body);
+
+  return node;
+}
+
 std::unique_ptr<InlineVerilog> Transformer::visit(
     std::unique_ptr<InlineVerilog> node) {
   return node;
@@ -269,6 +298,10 @@ std::unique_ptr<BehavioralStatement> Transformer::visit(
     node.release();
     return this->visit(std::unique_ptr<BlockComment>(ptr));
   }
+  if (auto ptr = dynamic_cast<If*>(node.get())) {
+    node.release();
+    return this->visit(std::unique_ptr<If>(ptr));
+  }
   throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
   return node;                              // LCOV_EXCL_LINE
 }
@@ -309,9 +342,7 @@ std::unique_ptr<Always> Transformer::visit(std::unique_ptr<Always> node) {
     new_sensitivity_list.push_back(this->visit(std::move(item)));
   }
   node->sensitivity_list = std::move(new_sensitivity_list);
-  std::vector<std::variant<std::unique_ptr<BehavioralStatement>,
-                           std::unique_ptr<Declaration>>>
-      new_body;
+  std::vector<std::unique_ptr<BehavioralStatement>> new_body;
   for (auto&& item : node->body) {
     new_body.push_back(this->visit(std::move(item)));
   }

@@ -442,6 +442,15 @@ TEST(BasicTests, TestAlways) {
       "a = b;\n"
       "b <= c;\n"
       "$display(\"b=%d, c=%d\", b, c);\n"
+      "if (b) begin\n"
+      "    e = f;\n"
+      "end else if (x0) begin\n"
+      "    e = g0;\n"
+      "end else if (x1) begin\n"
+      "    e = g1;\n"
+      "end else begin\n"
+      "    e = g;\n"
+      "end\n"
       "end\n";
   EXPECT_EQ(always.toString(), expected_str);
 }
@@ -452,6 +461,7 @@ TEST(BasicTests, TestAlwaysStar) {
       std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
       sensitivity_list;
   sensitivity_list.push_back(std::make_unique<vAST::Star>());
+
   vAST::Always always_star(std::move(sensitivity_list),
                            make_simple_always_body());
   std::string expected_str =
@@ -459,6 +469,15 @@ TEST(BasicTests, TestAlwaysStar) {
       "a = b;\n"
       "b <= c;\n"
       "$display(\"b=%d, c=%d\", b, c);\n"
+      "if (b) begin\n"
+      "    e = f;\n"
+      "end else if (x0) begin\n"
+      "    e = g0;\n"
+      "end else if (x1) begin\n"
+      "    e = g1;\n"
+      "end else begin\n"
+      "    e = g;\n"
+      "end\n"
       "end\n";
   EXPECT_EQ(always_star.toString(), expected_str);
 }
@@ -468,9 +487,7 @@ TEST(BasicTests, TestAlwaysEmpty) {
       std::unique_ptr<vAST::Identifier>, std::unique_ptr<vAST::PosEdge>,
       std::unique_ptr<vAST::NegEdge>, std::unique_ptr<vAST::Star>>>
       sensitivity_list;
-  std::vector<std::variant<std::unique_ptr<vAST::BehavioralStatement>,
-                           std::unique_ptr<vAST::Declaration>>>
-      body;
+  std::vector<std::unique_ptr<vAST::BehavioralStatement>> body;
 
   ASSERT_THROW(
       vAST::Always always_empty(std::move(sensitivity_list), std::move(body)),

@@ -1,6 +1,7 @@
 #include "verilogAST.hpp"
 
 #include <regex>
+#include <sstream>
 #include <unordered_set>
 
 template <typename... Ts>
@@ -127,7 +128,7 @@ std::string Identifier::toString() {
 }
 
 std::string Cast::toString() {
-    return std::to_string(this->width) + "'(" + this->expr->toString() + ")";
+  return std::to_string(this->width) + "'(" + this->expr->toString() + ")";
 }
 
 std::string Attribute::toString() {
@@ -417,13 +418,53 @@ std::string Always::toString() {
 
   // emit body
   for (auto &statement : body) {
-    always_str += variant_to_string<std::unique_ptr<BehavioralStatement>,
-                                    std::unique_ptr<Declaration>>(statement) +
-                  "\n";
+    always_str += statement->toString() + "\n";
   }
 
   always_str += "end\n";
   return always_str;
+}
+
+std::string add_tab(std::string block) {
+  // Indents each line by four spaces, adds an extra newline at the end
+  std::istringstream block_stream(block);
+  std::string new_block;
+  while (!block_stream.eof()) {
+    std::string line;
+    std::getline(block_stream, line);
+    new_block += "    " + line + "\n";
+  }
+  return new_block;
+}
+
+std::string If::toString() {
+  std::string if_str = "";
+  if_str += "if (";
+  if_str += this->cond->toString();
+  if_str += ") begin\n";
+
+  for (auto &statement : this->true_body) {
+    if_str += add_tab(statement->toString());
+  }
+
+  if_str += "end";
+
+  for (auto &entry : this->else_ifs) {
+    if_str += " else if (" + entry.first->toString() + ") begin\n";
+    for (auto &statement : entry.second) {
+      if_str += add_tab(statement->toString());
+    }
+    if_str += "end";
+  }
+
+  if (this->else_body.size()) {
+    if_str += " else begin\n";
+    for (auto &statement : else_body) {
+      if_str += add_tab(statement->toString());
+    }
+    if_str += "end";
+  }
+  return if_str;
 }
 
 std::string File::toString() {
