@@ -3,6 +3,21 @@
 
 namespace verilogAST {
 
+std::unique_ptr<Slice> SliceBlacklister::visit(std::unique_ptr<Slice> node) {
+  bool prev = this->inside_slice;
+  this->inside_slice = true;
+  node = Transformer::visit(std::move(node));
+  // Restore prev value, since we could be nested inside an slice
+  this->inside_slice = prev;
+  return node;
+}
+
+std::unique_ptr<Identifier> SliceBlacklister::visit(
+    std::unique_ptr<Identifier> node) {
+  if (this->inside_slice) this->wire_blacklist.insert(node->value);
+  return node;
+}
+
 std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
   bool prev = this->inside_index;
   this->inside_index = true;
@@ -206,6 +221,9 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
 
   IndexBlacklister index_blacklist(this->wire_blacklist);
   node = index_blacklist.visit(std::move(node));
+
+  SliceBlacklister slice_blacklist(this->wire_blacklist);
+  node = slice_blacklist.visit(std::move(node));
 
   std::vector<std::unique_ptr<AbstractPort>> new_ports;
   for (auto&& item : node->ports) {
