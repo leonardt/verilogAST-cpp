@@ -1,12 +1,12 @@
-#ifndef VERILOGAST_CONCAT_COALESCER_H
-#define VERILOGAST_CONCAT_COALESCER_H
+#ifndef VERILOGAST_ZEXT_COALESCER_H
+#define VERILOGAST_ZEXT_COALESCER_H
 
 #include "verilogAST.hpp"
 #include "verilogAST/transformer.hpp"
 
 namespace verilogAST {
 
-class ConcatCoalescer : public Transformer {
+class ZextCoalescer : public Transformer {
  public:
   using Transformer::visit;
 
@@ -15,4 +15,4 @@ class ConcatCoalescer : public Transformer {
 
 }  // namespace verilogAST
 
-#endif  // VERILOGAST_CONCAT_COALESCER_H
+#endif  // VERILOGAST_ZEXT_COALESCER_H
