@@ -37,7 +37,7 @@ std::pair<int, ConcatArgs::const_iterator> processArguments(
     zeros += res.second;
   }
   return {zeros, it};
-};
+}
 
 }  // namespace
 
