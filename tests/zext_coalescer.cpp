@@ -15,7 +15,10 @@ auto makeVector(std::string name, int hi, int lo) {
                                         vAST::make_num(std::to_string(lo)));
 }
 
-void runTest(std::vector<int> prefix, std::string pre, std::string post) {
+void runTest(std::vector<int> prefix,
+             std::string pre,
+             std::string post,
+             bool elide = false) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(makeVector("I", 7, 0),
                                                vAST::INPUT,
@@ -49,7 +52,7 @@ void runTest(std::vector<int> prefix, std::string pre, std::string post) {
   EXPECT_EQ(module->toString(), pre);
 
   // Run ZextCoalescer transformer.
-  vAST::ZextCoalescer transformer;
+  vAST::ZextCoalescer transformer(elide);
   module = transformer.visit(std::move(module));
 
   EXPECT_EQ(module->toString(), post);
@@ -71,6 +74,24 @@ TEST(ZextCoalescerTests, TestBasic) {
       "assign O = {3'd0,I[4:0]};\n"
       "endmodule\n";
   runTest({1, 2}, pre, post);
+}
+
+TEST(ZextCoalescerTests, TestElide) {
+  auto pre =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {1'd0,2'd0,I[4:0]};\n"
+      "endmodule\n";
+  auto post =
+      "module test_module (\n"
+      "    input [7:0] I,\n"
+      "    output [7:0] O\n"
+      ");\n"
+      "assign O = {I[4:0]};\n"
+      "endmodule\n";
+  runTest({1, 2}, pre, post, true /* elide */);
 }
 
 // TEST(ZextCoalescerTests, TestMultipleRuns) {

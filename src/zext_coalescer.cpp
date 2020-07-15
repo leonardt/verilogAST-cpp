@@ -52,7 +52,9 @@ std::unique_ptr<Expression> ZextCoalescer::visit(
     return node;
   }
   ConcatArgs args;
-  args.emplace_back(new NumericLiteral("0", res.first));
+  if (not elide_) {
+    args.emplace_back(new NumericLiteral("0", res.first));
+  }
   for (auto it = res.second; it != ptr->args.end(); it++) {
     args.push_back((*it)->clone());
   }
