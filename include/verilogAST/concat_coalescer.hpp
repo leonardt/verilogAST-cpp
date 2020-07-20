@@ -1,5 +1,5 @@
-#ifndef VERILOGAST_ASSIGN_INLINER_H
-#define VERILOGAST_ASSIGN_INLINER_H
+#ifndef VERILOGAST_CONCAT_COALESCER_H
+#define VERILOGAST_CONCAT_COALESCER_H
 
 #include "verilogAST.hpp"
 #include "verilogAST/transformer.hpp"
@@ -15,4 +15,4 @@ class ConcatCoalescer : public Transformer {
 
 }  // namespace verilogAST
 
-#endif  // VERILOGAST_ASSIGN_INLINER_H
+#endif  // VERILOGAST_CONCAT_COALESCER_H
