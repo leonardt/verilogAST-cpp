@@ -14,7 +14,14 @@ std::unique_ptr<Slice> SliceBlacklister::visit(std::unique_ptr<Slice> node) {
 
 std::unique_ptr<Identifier> SliceBlacklister::visit(
     std::unique_ptr<Identifier> node) {
-  if (this->inside_slice) this->wire_blacklist.insert(node->value);
+  if (this->inside_slice) {
+    auto it = assign_map.find(node->toString());
+    bool assigned_to_id =
+        it != assign_map.end() && dynamic_cast<Identifier*>(it->second.get());
+    if (!assigned_to_id) {
+      this->wire_blacklist.insert(node->value);
+    }
+  }
   return node;
 }
 
@@ -29,7 +36,14 @@ std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
 
 std::unique_ptr<Identifier> IndexBlacklister::visit(
     std::unique_ptr<Identifier> node) {
-  if (this->inside_index) this->wire_blacklist.insert(node->value);
+  if (this->inside_index) {
+    auto it = assign_map.find(node->toString());
+    bool assigned_to_id =
+        it != assign_map.end() && dynamic_cast<Identifier*>(it->second.get());
+    if (!assigned_to_id) {
+      this->wire_blacklist.insert(node->value);
+    }
+  };
   return node;
 }
 
@@ -112,6 +126,22 @@ bool AssignInliner::can_inline(std::string key) {
          (this->read_count[key] == 1 ||
           dynamic_cast<Identifier*>(it->second.get()) ||
           dynamic_cast<NumericLiteral*>(it->second.get()));
+}
+
+std::unique_ptr<Index> AssignInliner::visit(std::unique_ptr<Index> node) {
+  if (std::holds_alternative<std::unique_ptr<Identifier>>(node->value)) {
+    std::string key =
+        std::get<std::unique_ptr<Identifier>>(node->value)->toString();
+    if (this->can_inline(key)) {
+      std::unique_ptr<Expression> value = this->visit(assign_map[key]->clone());
+      if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
+        value.release();
+        node->value = std::unique_ptr<Identifier>(ptr);
+      }
+    }
+    return node;
+  }
+  return Transformer::visit(std::move(node));
 }
 
 std::unique_ptr<Expression> AssignInliner::visit(
@@ -219,10 +249,10 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
   WireReadCounter counter(this->read_count);
   node = counter.visit(std::move(node));
 
-  IndexBlacklister index_blacklist(this->wire_blacklist);
+  IndexBlacklister index_blacklist(this->wire_blacklist, this->assign_map);
   node = index_blacklist.visit(std::move(node));
 
-  SliceBlacklister slice_blacklist(this->wire_blacklist);
+  SliceBlacklister slice_blacklist(this->wire_blacklist, this->assign_map);
   node = slice_blacklist.visit(std::move(node));
 
   std::vector<std::unique_ptr<AbstractPort>> new_ports;

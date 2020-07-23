@@ -69,11 +69,14 @@ class SliceBlacklister : public Transformer {
   //
   // Verilog does not support (y + z)[4:0]
   std::set<std::string> &wire_blacklist;
+  std::map<std::string, std::unique_ptr<Expression>> &assign_map;
   bool inside_slice = false;
 
  public:
-  SliceBlacklister(std::set<std::string> &wire_blacklist)
-      : wire_blacklist(wire_blacklist){};
+  SliceBlacklister(
+      std::set<std::string> &wire_blacklist,
+      std::map<std::string, std::unique_ptr<Expression>> &assign_map)
+      : wire_blacklist(wire_blacklist), assign_map(assign_map){};
 
   using Transformer::visit;
   virtual std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node);
@@ -88,11 +91,14 @@ class IndexBlacklister : public Transformer {
   //
   // Verilog does not support (y + z)[0]
   std::set<std::string> &wire_blacklist;
+  std::map<std::string, std::unique_ptr<Expression>> &assign_map;
   bool inside_index = false;
 
  public:
-  IndexBlacklister(std::set<std::string> &wire_blacklist)
-      : wire_blacklist(wire_blacklist){};
+  IndexBlacklister(
+      std::set<std::string> &wire_blacklist,
+      std::map<std::string, std::unique_ptr<Expression>> &assign_map)
+      : wire_blacklist(wire_blacklist), assign_map(assign_map){};
 
   using Transformer::visit;
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
@@ -126,6 +132,7 @@ class AssignInliner : public Transformer {
       : wire_blacklist(wire_blacklist){};
   using Transformer::visit;
   virtual std::unique_ptr<Expression> visit(std::unique_ptr<Expression> node);
+  virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
   virtual std::unique_ptr<ContinuousAssign> visit(
       std::unique_ptr<ContinuousAssign> node);
   virtual std::unique_ptr<BlockingAssign> visit(
