@@ -61,48 +61,51 @@ class WireReadCounter : public Transformer {
   virtual std::unique_ptr<Declaration> visit(std::unique_ptr<Declaration> node);
 };
 
-class SliceBlacklister : public Transformer {
+class Blacklister : public Transformer {
+  std::set<std::string> &wire_blacklist;
+  std::map<std::string, std::unique_ptr<Expression>> &assign_map;
+
+ protected:
+  bool blacklist = false;
+
+ public:
+  Blacklister(std::set<std::string> &wire_blacklist,
+              std::map<std::string, std::unique_ptr<Expression>> &assign_map)
+      : wire_blacklist(wire_blacklist), assign_map(assign_map){};
+  using Transformer::visit;
+  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node);
+};
+
+class SliceBlacklister : public Blacklister {
   // Prevent inling wires into slice nodes, e.g.
   // wire [7:0] x;
   // assign x = y + z;
   // assign w = x[4:0];
   //
   // Verilog does not support (y + z)[4:0]
-  std::set<std::string> &wire_blacklist;
-  std::map<std::string, std::unique_ptr<Expression>> &assign_map;
-  bool inside_slice = false;
-
  public:
   SliceBlacklister(
       std::set<std::string> &wire_blacklist,
       std::map<std::string, std::unique_ptr<Expression>> &assign_map)
-      : wire_blacklist(wire_blacklist), assign_map(assign_map){};
-
-  using Transformer::visit;
+      : Blacklister(wire_blacklist, assign_map){};
+  using Blacklister::visit;
   virtual std::unique_ptr<Slice> visit(std::unique_ptr<Slice> node);
-  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node);
 };
 
-class IndexBlacklister : public Transformer {
+class IndexBlacklister : public Blacklister {
   // Prevent inling wires into index nodes, e.g.
   // wire x;
   // assign x = y + z;
   // assign w = x[0];
   //
   // Verilog does not support (y + z)[0]
-  std::set<std::string> &wire_blacklist;
-  std::map<std::string, std::unique_ptr<Expression>> &assign_map;
-  bool inside_index = false;
-
  public:
   IndexBlacklister(
       std::set<std::string> &wire_blacklist,
       std::map<std::string, std::unique_ptr<Expression>> &assign_map)
-      : wire_blacklist(wire_blacklist), assign_map(assign_map){};
-
-  using Transformer::visit;
+      : Blacklister(wire_blacklist, assign_map){};
+  using Blacklister::visit;
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
-  virtual std::unique_ptr<Identifier> visit(std::unique_ptr<Identifier> node);
 };
 
 class AssignInliner : public Transformer {

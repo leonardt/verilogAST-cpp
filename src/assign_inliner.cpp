@@ -3,18 +3,9 @@
 
 namespace verilogAST {
 
-std::unique_ptr<Slice> SliceBlacklister::visit(std::unique_ptr<Slice> node) {
-  bool prev = this->inside_slice;
-  this->inside_slice = true;
-  node = Transformer::visit(std::move(node));
-  // Restore prev value, since we could be nested inside an slice
-  this->inside_slice = prev;
-  return node;
-}
-
-std::unique_ptr<Identifier> SliceBlacklister::visit(
+std::unique_ptr<Identifier> Blacklister::visit(
     std::unique_ptr<Identifier> node) {
-  if (this->inside_slice) {
+  if (this->blacklist) {
     auto it = assign_map.find(node->toString());
     bool assigned_to_id =
         it != assign_map.end() && dynamic_cast<Identifier*>(it->second.get());
@@ -25,25 +16,21 @@ std::unique_ptr<Identifier> SliceBlacklister::visit(
   return node;
 }
 
-std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
-  bool prev = this->inside_index;
-  this->inside_index = true;
+std::unique_ptr<Slice> SliceBlacklister::visit(std::unique_ptr<Slice> node) {
+  bool prev = this->blacklist;
+  this->blacklist = true;
   node = Transformer::visit(std::move(node));
-  // Restore prev value, since we could be nested inside an index
-  this->inside_index = prev;
+  // Restore prev value, since we could be nested inside an slice
+  this->blacklist = prev;
   return node;
 }
 
-std::unique_ptr<Identifier> IndexBlacklister::visit(
-    std::unique_ptr<Identifier> node) {
-  if (this->inside_index) {
-    auto it = assign_map.find(node->toString());
-    bool assigned_to_id =
-        it != assign_map.end() && dynamic_cast<Identifier*>(it->second.get());
-    if (!assigned_to_id) {
-      this->wire_blacklist.insert(node->value);
-    }
-  };
+std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
+  bool prev = this->blacklist;
+  this->blacklist = true;
+  node = Transformer::visit(std::move(node));
+  // Restore prev value, since we could be nested inside an index
+  this->blacklist = prev;
   return node;
 }
 
