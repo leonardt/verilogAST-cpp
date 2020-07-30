@@ -222,18 +222,6 @@ class Slice : public Expression {
 };
 
 class Index : public Expression {
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
-               std::unique_ptr<Slice>>
-  clone_index_value() const {
-    return std::visit(
-        [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
-                                         std::unique_ptr<Attribute>,
-                                         std::unique_ptr<Slice>> {
-          return value->clone();
-        },
-        this->value);
-  }
-
  protected:
   virtual Index* clone_impl() const override {
     return new Index(this->clone_index_value(), this->index->clone());
@@ -241,12 +229,12 @@ class Index : public Expression {
 
  public:
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
-               std::unique_ptr<Slice>>
+               std::unique_ptr<Slice>, std::unique_ptr<Index>>
       value;
   std::unique_ptr<Expression> index;
 
   Index(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
-                     std::unique_ptr<Slice>>
+                     std::unique_ptr<Slice>, std::unique_ptr<Index>>
             value,
         std::unique_ptr<Expression> index)
       : value(std::move(value)), index(std::move(index)){};
@@ -257,6 +245,18 @@ class Index : public Expression {
   std::string toString() override;
   ~Index(){};
   auto clone() const { return std::unique_ptr<Index>(clone_impl()); }
+
+ private:
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
+               std::unique_ptr<Slice>, std::unique_ptr<Index>>
+  clone_index_value() const {
+    return std::visit(
+        [](auto&& value)
+            -> std::variant<std::unique_ptr<Identifier>,
+                            std::unique_ptr<Attribute>, std::unique_ptr<Slice>,
+                            std::unique_ptr<Index>> { return value->clone(); },
+        this->value);
+  }
 };
 
 namespace BinOp {
