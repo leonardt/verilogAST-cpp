@@ -122,6 +122,15 @@ TEST(BasicTests, TestVector) {
   EXPECT_EQ(slice.toString(), "[31:0] x");
 }
 
+TEST(BasicTests, TestNDVector) {
+  std::vector<std::unique_ptr<vAST::Expression>> dims;
+  dims.push_back(vAST::make_num("8"));
+  dims.push_back(vAST::make_num("32"));
+  vAST::NDVector slice(vAST::make_id("x"), vAST::make_num("31"),
+                       vAST::make_num("0"), std::move(dims));
+  EXPECT_EQ(slice.toString(), "[31:0] x [8][32]");
+}
+
 TEST(BasicTests, TestBinaryOp) {
   std::vector<std::pair<vAST::BinOp::BinOp, std::string>> ops;
   ops.push_back(std::make_pair(vAST::BinOp::LSHIFT, "<<"));

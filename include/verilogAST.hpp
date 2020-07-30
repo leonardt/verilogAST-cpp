@@ -487,6 +487,22 @@ class Vector : public Node {
   ~Vector(){};
 };
 
+class NDVector : public Vector {
+ public:
+  std::unique_ptr<Identifier> id;
+  std::unique_ptr<Expression> msb;
+  std::unique_ptr<Expression> lsb;
+  std::vector<std::unique_ptr<Expression>> dims;
+
+  NDVector(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
+           std::unique_ptr<Expression> lsb,
+           std::vector<std::unique_ptr<Expression>> dims)
+      : Vector(std::move(id), std::move(msb), std::move(lsb)),
+        dims(std::move(dims)){};
+  std::string toString() override;
+  ~NDVector(){};
+};
+
 class Port : public AbstractPort {
  public:
   // Required

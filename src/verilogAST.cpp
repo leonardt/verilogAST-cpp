@@ -151,6 +151,15 @@ std::string Vector::toString() {
   return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
 }
 
+std::string NDVector::toString() {
+  std::string base_str = Vector::toString();
+  base_str += " ";
+  for (auto &dim : dims) {
+    base_str += "[" + dim->toString() + "]";
+  }
+  return base_str;
+}
+
 std::string BinaryOp::toString() {
   std::string op_str;
   switch (op) {
