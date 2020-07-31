@@ -152,12 +152,12 @@ std::string Vector::toString() {
 }
 
 std::string NDVector::toString() {
-  std::string base_str = Vector::toString();
-  base_str += " ";
-  for (auto &dim : dims) {
-    base_str += "[" + dim->toString() + "]";
+  std::string s =
+      "[" + this->msb->toString() + ":" + this->lsb->toString() + "]";
+  for (auto &dim : inner_dims) {
+    s += "[" + dim.first->toString() + ":" + dim.second->toString() + "]";
   }
-  return base_str;
+  return s + " " + this->id->toString();
 }
 
 std::string BinaryOp::toString() {
