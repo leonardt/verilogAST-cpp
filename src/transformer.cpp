@@ -174,6 +174,16 @@ std::unique_ptr<Vector> Transformer::visit(std::unique_ptr<Vector> node) {
   node->id = this->visit(std::move(node->id));
   node->msb = this->visit(std::move(node->msb));
   node->lsb = this->visit(std::move(node->lsb));
+  if (auto ptr = dynamic_cast<NDVector*>(node.get())) {
+    std::vector<
+        std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>>
+        new_outer_dims;
+    for (auto& dim : ptr->outer_dims) {
+      new_outer_dims.push_back({this->visit(std::move(dim.first)),
+                                this->visit(std::move(dim.second))});
+    }
+    ptr->outer_dims = std::move(new_outer_dims);
+  }
   return node;
 }
 

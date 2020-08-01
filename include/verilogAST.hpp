@@ -488,20 +488,18 @@ class Vector : public Node {
 };
 
 class NDVector : public Vector {
-  // we separate outer dim from inner dims to be consistent with vector
-  // interface
+ public:
   std::vector<
       std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>>
-      inner_dims;
+      outer_dims;
 
- public:
   NDVector(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
            std::unique_ptr<Expression> lsb,
            std::vector<std::pair<std::unique_ptr<Expression>,
                                  std::unique_ptr<Expression>>>
-               inner_dims)
+               outer_dims)
       : Vector(std::move(id), std::move(msb), std::move(lsb)),
-        inner_dims(std::move(inner_dims)){};
+        outer_dims(std::move(outer_dims)){};
   std::string toString() override;
   ~NDVector(){};
 };

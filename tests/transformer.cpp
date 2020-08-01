@@ -155,9 +155,15 @@ TEST(TransformerTests, TestModule) {
   std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
   ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("i"), vAST::INPUT,
                                                vAST::WIRE));
+  std::vector<std::pair<std::unique_ptr<vAST::Expression>,
+                        std::unique_ptr<vAST::Expression>>>
+      outer_dims;
+  outer_dims.push_back({vAST::make_num("7"), vAST::make_num("0")});
+  outer_dims.push_back({vAST::make_id("c"), vAST::make_num("0")});
   ports.push_back(std::make_unique<vAST::Port>(
-      std::make_unique<vAST::Vector>(vAST::make_id("o"), vAST::make_num("3"),
-                                     vAST::make_id("c")),
+      std::make_unique<vAST::NDVector>(vAST::make_id("o"), vAST::make_num("3"),
+                                       vAST::make_id("c"),
+                                       std::move(outer_dims)),
       vAST::OUTPUT, vAST::WIRE));
 
   ports.push_back(
@@ -201,7 +207,7 @@ TEST(TransformerTests, TestModule) {
       "    parameter param1 = 1\n"
       ") (\n"
       "    input i,\n"
-      "    output [3:g] o,\n"
+      "    output [3:g] o [7:0][g:0],\n"
       "    output reg [width-1:0] k\n"
       ");\n"
       "other_module #(\n"

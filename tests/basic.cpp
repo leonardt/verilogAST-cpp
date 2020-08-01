@@ -125,12 +125,12 @@ TEST(BasicTests, TestVector) {
 TEST(BasicTests, TestNDVector) {
   std::vector<std::pair<std::unique_ptr<vAST::Expression>,
                         std::unique_ptr<vAST::Expression>>>
-      inner_dims;
-  inner_dims.push_back({vAST::make_num("7"), vAST::make_num("0")});
-  inner_dims.push_back({vAST::make_num("15"), vAST::make_num("0")});
+      outer_dims;
+  outer_dims.push_back({vAST::make_num("7"), vAST::make_num("0")});
+  outer_dims.push_back({vAST::make_num("15"), vAST::make_num("0")});
   vAST::NDVector slice(vAST::make_id("x"), vAST::make_num("31"),
-                       vAST::make_num("0"), std::move(inner_dims));
-  EXPECT_EQ(slice.toString(), "[31:0][7:0][15:0] x");
+                       vAST::make_num("0"), std::move(outer_dims));
+  EXPECT_EQ(slice.toString(), "[31:0] x [7:0][15:0]");
 }
 
 TEST(BasicTests, TestBinaryOp) {
