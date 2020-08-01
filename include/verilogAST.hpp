@@ -383,11 +383,13 @@ class Concat : public Expression {
 
  public:
   std::vector<std::unique_ptr<Expression>> args;
+  bool unpacked;
 
-  Concat(std::vector<std::unique_ptr<Expression>> args)
-      : args(std::move(args)){};
+  Concat(std::vector<std::unique_ptr<Expression>> args, bool unpacked = false)
+      : args(std::move(args)), unpacked(unpacked){};
   Concat(const Concat& rhs) {
     for (const auto& arg : rhs.args) args.push_back(arg->clone());
+    this->unpacked = rhs.unpacked;
   };
 
   std::string toString() override;

@@ -282,7 +282,11 @@ std::string Concat::toString() {
   for (auto &arg : args) {
     arg_strs.push_back(arg->toString());
   }
-  return "{" + join(arg_strs, ",") + "}";
+  std::string prefix = "";
+  if (this->unpacked) {
+    prefix = "'";
+  }
+  return prefix + "{" + join(arg_strs, ",") + "}";
 }
 
 std::string Replicate::toString() {

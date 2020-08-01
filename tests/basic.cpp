@@ -207,6 +207,12 @@ TEST(BasicTests, TestConcat) {
   args.push_back(vAST::make_id("y"));
   vAST::Concat concat(std::move(args));
   EXPECT_EQ(concat.toString(), "{x,y}");
+
+  std::vector<std::unique_ptr<vAST::Expression>> args2;
+  args2.push_back(vAST::make_id("x"));
+  args2.push_back(vAST::make_id("y"));
+  vAST::Concat concat2(std::move(args2), true);
+  EXPECT_EQ(concat2.toString(), "'{x,y}");
 }
 
 TEST(BasicTests, TestReplicate) {
