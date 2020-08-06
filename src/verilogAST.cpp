@@ -151,6 +151,14 @@ std::string Vector::toString() {
   return "[" + msb->toString() + ':' + lsb->toString() + "] " + id->toString();
 }
 
+std::string NDVector::toString() {
+  std::string s = Vector::toString() + " ";
+  for (auto &dim : outer_dims) {
+    s += "[" + dim.first->toString() + ":" + dim.second->toString() + "]";
+  }
+  return s;
+}
+
 std::string BinaryOp::toString() {
   std::string op_str;
   switch (op) {
@@ -274,7 +282,11 @@ std::string Concat::toString() {
   for (auto &arg : args) {
     arg_strs.push_back(arg->toString());
   }
-  return "{" + join(arg_strs, ",") + "}";
+  std::string prefix = "";
+  if (this->unpacked) {
+    prefix = "'";
+  }
+  return prefix + "{" + join(arg_strs, ",") + "}";
 }
 
 std::string Replicate::toString() {

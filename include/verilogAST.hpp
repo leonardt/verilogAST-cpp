@@ -222,18 +222,6 @@ class Slice : public Expression {
 };
 
 class Index : public Expression {
-  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
-               std::unique_ptr<Slice>>
-  clone_index_value() const {
-    return std::visit(
-        [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
-                                         std::unique_ptr<Attribute>,
-                                         std::unique_ptr<Slice>> {
-          return value->clone();
-        },
-        this->value);
-  }
-
  protected:
   virtual Index* clone_impl() const override {
     return new Index(this->clone_index_value(), this->index->clone());
@@ -241,12 +229,12 @@ class Index : public Expression {
 
  public:
   std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
-               std::unique_ptr<Slice>>
+               std::unique_ptr<Slice>, std::unique_ptr<Index>>
       value;
   std::unique_ptr<Expression> index;
 
   Index(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
-                     std::unique_ptr<Slice>>
+                     std::unique_ptr<Slice>, std::unique_ptr<Index>>
             value,
         std::unique_ptr<Expression> index)
       : value(std::move(value)), index(std::move(index)){};
@@ -257,6 +245,18 @@ class Index : public Expression {
   std::string toString() override;
   ~Index(){};
   auto clone() const { return std::unique_ptr<Index>(clone_impl()); }
+
+ private:
+  std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Attribute>,
+               std::unique_ptr<Slice>, std::unique_ptr<Index>>
+  clone_index_value() const {
+    return std::visit(
+        [](auto&& value)
+            -> std::variant<std::unique_ptr<Identifier>,
+                            std::unique_ptr<Attribute>, std::unique_ptr<Slice>,
+                            std::unique_ptr<Index>> { return value->clone(); },
+        this->value);
+  }
 };
 
 namespace BinOp {
@@ -383,11 +383,13 @@ class Concat : public Expression {
 
  public:
   std::vector<std::unique_ptr<Expression>> args;
+  bool unpacked;
 
-  Concat(std::vector<std::unique_ptr<Expression>> args)
-      : args(std::move(args)){};
+  Concat(std::vector<std::unique_ptr<Expression>> args, bool unpacked = false)
+      : args(std::move(args)), unpacked(unpacked){};
   Concat(const Concat& rhs) {
     for (const auto& arg : rhs.args) args.push_back(arg->clone());
+    this->unpacked = rhs.unpacked;
   };
 
   std::string toString() override;
@@ -485,6 +487,23 @@ class Vector : public Node {
       : id(std::move(id)), msb(std::move(msb)), lsb(std::move(lsb)){};
   std::string toString() override;
   ~Vector(){};
+};
+
+class NDVector : public Vector {
+ public:
+  std::vector<
+      std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>>
+      outer_dims;
+
+  NDVector(std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
+           std::unique_ptr<Expression> lsb,
+           std::vector<std::pair<std::unique_ptr<Expression>,
+                                 std::unique_ptr<Expression>>>
+               outer_dims)
+      : Vector(std::move(id), std::move(msb), std::move(lsb)),
+        outer_dims(std::move(outer_dims)){};
+  std::string toString() override;
+  ~NDVector(){};
 };
 
 class Port : public AbstractPort {
