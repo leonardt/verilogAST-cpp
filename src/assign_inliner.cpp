@@ -251,6 +251,9 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
   node->body = this->do_inline(std::move(node->body));
   // Now "reverse inline" output wires
   for (auto output : this->output_ports) {
+    if (!this->assign_map.count(output)) {
+      continue;
+    }
     std::unique_ptr<Expression> value = this->assign_map[output]->clone();
     this->assign_map.erase(output);
     if (dynamic_cast<Identifier*>(value.get()) &&
