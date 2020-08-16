@@ -580,8 +580,9 @@ class InlineVerilog : public StructuralStatement {
   ~InlineVerilog(){};
 };
 
-typedef std::vector<
-    std::pair<std::unique_ptr<Identifier>, std::unique_ptr<Expression>>>
+typedef std::vector<std::pair<
+    std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>>,
+    std::unique_ptr<Expression>>>
     Parameters;
 
 typedef std::vector<std::pair<std::string, std::unique_ptr<Expression>>>
