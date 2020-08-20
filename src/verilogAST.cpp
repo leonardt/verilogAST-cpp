@@ -343,7 +343,7 @@ std::string Module::emitModuleHeader() {
     module_header_str += " #(\n    ";
     std::vector<std::string> param_strs;
     for (auto &it : parameters) {
-      param_strs.push_back("parameter " + it.first->toString() + " = " +
+      param_strs.push_back("parameter " + variant_to_string(it.first) + " = " +
                            it.second->toString());
     }
     module_header_str += join(param_strs, ",\n    ");
@@ -389,7 +389,7 @@ std::string ModuleInstantiation::toString() {
     module_inst_str += " #(\n    ";
     std::vector<std::string> param_strs;
     for (auto &it : parameters) {
-      param_strs.push_back("." + it.first->toString() + "(" +
+      param_strs.push_back("." + variant_to_string(it.first) + "(" +
                            it.second->toString() + ")");
     }
     module_inst_str += join(param_strs, ",\n    ");

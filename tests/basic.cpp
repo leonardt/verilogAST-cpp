@@ -330,11 +330,17 @@ TEST(BasicTests, TestModule) {
   std::string name = "test_module";
 
   vAST::Parameters parameters;
+  parameters.push_back(std::make_pair(
+      std::make_unique<vAST::Vector>(vAST::make_id("param1"),
+                                     vAST::make_num("3"), vAST::make_num("0")),
+      vAST::make_num("1")));
   vAST::Module module(name, make_simple_ports(), make_simple_body(),
                       std::move(parameters));
 
   std::string expected_str =
-      "module test_module (\n"
+      "module test_module #(\n"
+      "    parameter [3:0] param1 = 1\n"
+      ") (\n"
       "    input i,\n"
       "    output o\n"
       ");\n"
