@@ -7,9 +7,12 @@ std::unique_ptr<Identifier> Blacklister::visit(
     std::unique_ptr<Identifier> node) {
   if (this->blacklist) {
     auto it = assign_map.find(node->toString());
-    bool assigned_to_id =
-        it != assign_map.end() && dynamic_cast<Identifier*>(it->second.get());
-    if (!assigned_to_id) {
+    // Can only inline if driven by identifier, index, or slice
+    bool valid_driver = it != assign_map.end() &&
+                        (dynamic_cast<Identifier*>(it->second.get()) ||
+                         dynamic_cast<Index*>(it->second.get()) ||
+                         dynamic_cast<Slice*>(it->second.get()));
+    if (!valid_driver) {
       this->wire_blacklist.insert(node->value);
     }
   }
