@@ -641,6 +641,9 @@ TEST(InlineAssignTests, TestInstConn) {
   body.push_back(
       std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("y")));
 
+  body.push_back(
+      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("z")));
+
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("x"),
       std::make_unique<vAST::Identifier>("i")));
@@ -649,11 +652,16 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("b"),
       std::make_unique<vAST::Identifier>("a")));
 
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("z"), vAST::make_binop(vAST::make_id("i"), vAST::BinOp::ADD,
+                                           vAST::make_id("a"))));
+
   vAST::Parameters parameters;
   std::unique_ptr<vAST::Connections> connections =
       std::make_unique<vAST::Connections>();
   connections->insert("c", vAST::make_id("a"));
   connections->insert("i", vAST::make_id("x"));
+  connections->insert("w", vAST::make_id("z"));
   connections->insert("o", vAST::make_id("y"));
 
   body.push_back(std::make_unique<vAST::ModuleInstantiation>(
@@ -676,11 +684,14 @@ TEST(InlineAssignTests, TestInstConn) {
       ");\n"
       "wire x;\n"
       "wire y;\n"
+      "wire z;\n"
       "assign x = i;\n"
       "assign b = a;\n"
+      "assign z = i + a;\n"
       "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(x),\n"
+      "    .w(z),\n"
       "    .o(y)\n"
       ");\n"
       "assign o = y;\n"
@@ -695,10 +706,13 @@ TEST(InlineAssignTests, TestInstConn) {
       "    output o,\n"
       "    output b\n"
       ");\n"
+      "wire z;\n"
       "assign b = a;\n"
+      "assign z = i + a;\n"
       "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(i),\n"
+      "    .w(z),\n"
       "    .o(o)\n"
       ");\n"
       "endmodule\n";
