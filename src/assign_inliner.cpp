@@ -127,6 +127,12 @@ std::unique_ptr<Index> AssignInliner::visit(std::unique_ptr<Index> node) {
       if (auto ptr = dynamic_cast<Identifier*>(value.get())) {
         value.release();
         node->value = std::unique_ptr<Identifier>(ptr);
+      } else if (auto ptr = dynamic_cast<Index*>(value.get())) {
+        value.release();
+        node->value = std::unique_ptr<Index>(ptr);
+      } else if (auto ptr = dynamic_cast<Slice*>(value.get())) {
+        value.release();
+        node->value = std::unique_ptr<Slice>(ptr);
       }
     }
     return node;
