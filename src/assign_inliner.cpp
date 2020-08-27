@@ -50,6 +50,16 @@ std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
   return node;
 }
 
+std::unique_ptr<ModuleInstantiation> ModuleInstanceBlacklister::visit(
+    std::unique_ptr<ModuleInstantiation> node) {
+  this->blacklist = true;
+  for (auto&& conn : *node->connections) {
+    conn.second = this->visit(std::move(conn.second));
+  }
+  this->blacklist = false;
+  return node;
+}
+
 std::unique_ptr<Identifier> WireReadCounter::visit(
     std::unique_ptr<Identifier> node) {
   this->read_count[node->toString()]++;
@@ -263,6 +273,10 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
 
   SliceBlacklister slice_blacklist(this->wire_blacklist, this->assign_map);
   node = slice_blacklist.visit(std::move(node));
+
+  ModuleInstanceBlacklister module_instance_blacklister(this->wire_blacklist,
+                                                        this->assign_map);
+  node = module_instance_blacklister.visit(std::move(node));
 
   std::vector<std::unique_ptr<AbstractPort>> new_ports;
   for (auto&& item : node->ports) {
