@@ -4,6 +4,10 @@
 namespace verilogAST {
 
 void Blacklister::blacklist_invalid_driver(std::unique_ptr<Identifier> node) {
+  if (this->wire_blacklist.count(node->value)) {
+    // Already blacklisted
+    return;
+  }
   if (!assign_map.count(node->toString())) {
     // Not in assign map, means it's a module input, don't need to do anything
     // because it won't be inlined
@@ -136,7 +140,7 @@ bool AssignInliner::can_inline(std::string key) {
     return false;
   }
   auto it = assign_map.find(key);
-  return it != assign_map.end() && (this->assign_count[key] == 1) &&
+  return it != assign_map.end() &&
          (this->read_count[key] == 1 ||
           dynamic_cast<Identifier*>(it->second.get()) ||
           dynamic_cast<NumericLiteral*>(it->second.get()));
@@ -259,6 +263,13 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
                            this->non_input_ports, this->output_ports,
                            this->input_ports);
   node = builder.visit(std::move(node));
+  for (auto entry : assign_count) {
+    if (entry.second > 1) {
+      // Do not inline things assigned more than once, e.g. a reg inside
+      // if/else statements
+      this->wire_blacklist.insert(entry.first);
+    }
+  }
 
   WireReadCounter counter(this->read_count);
   node = counter.visit(std::move(node));
