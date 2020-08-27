@@ -13,7 +13,8 @@ void Blacklister::blacklist_invalid_driver(std::unique_ptr<Identifier> node) {
   // Can only inline if driven by identifier, index, or slice
   bool valid_driver = dynamic_cast<Identifier*>(driver.get()) ||
                       dynamic_cast<Index*>(driver.get()) ||
-                      dynamic_cast<Slice*>(driver.get());
+                      dynamic_cast<Slice*>(driver.get()) ||
+                      dynamic_cast<NumericLiteral*>(driver.get());
   if (!valid_driver) {
     this->wire_blacklist.insert(node->value);
   } else if (auto ptr = dynamic_cast<Identifier*>(driver.get())) {
