@@ -3,18 +3,31 @@
 
 namespace verilogAST {
 
+void Blacklister::blacklist_invalid_driver(std::unique_ptr<Identifier> node) {
+  if (!assign_map.count(node->toString())) {
+    // Not in assign map, means it's a module input, don't need to do anything
+    // because it won't be inlined
+    return;
+  }
+  auto driver = assign_map[node->toString()]->clone();
+  // Can only inline if driven by identifier, index, or slice
+  bool valid_driver = dynamic_cast<Identifier*>(driver.get()) ||
+                      dynamic_cast<Index*>(driver.get()) ||
+                      dynamic_cast<Slice*>(driver.get());
+  if (!valid_driver) {
+    this->wire_blacklist.insert(node->value);
+  } else if (auto ptr = dynamic_cast<Identifier*>(driver.get())) {
+    // if driven by an id, we need to recursively blacklist any invalid
+    // drivers, else they'll eventually get inlined into here
+    driver.release();
+    blacklist_invalid_driver(std::unique_ptr<Identifier>(ptr));
+  }
+}
+
 std::unique_ptr<Identifier> Blacklister::visit(
     std::unique_ptr<Identifier> node) {
   if (this->blacklist) {
-    auto it = assign_map.find(node->toString());
-    // Can only inline if driven by identifier, index, or slice
-    bool valid_driver = it != assign_map.end() &&
-                        (dynamic_cast<Identifier*>(it->second.get()) ||
-                         dynamic_cast<Index*>(it->second.get()) ||
-                         dynamic_cast<Slice*>(it->second.get()));
-    if (!valid_driver) {
-      this->wire_blacklist.insert(node->value);
-    }
+    blacklist_invalid_driver(node->clone());
   }
   return node;
 }

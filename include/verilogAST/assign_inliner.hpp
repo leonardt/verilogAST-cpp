@@ -67,6 +67,7 @@ class Blacklister : public Transformer {
 
  protected:
   bool blacklist = false;
+  void blacklist_invalid_driver(std::unique_ptr<Identifier> node);
 
  public:
   Blacklister(std::set<std::string> &wire_blacklist,

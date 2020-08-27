@@ -802,21 +802,39 @@ TEST(InlineAssignTests, TestNoInlineSliceUnlessID) {
       std::make_unique<vAST::Vector>(vAST::make_id("o1"), vAST::make_num("3"),
                                      vAST::make_num("0")),
       vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o2"), vAST::make_num("3"),
+                                     vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
 
   std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
                            std::unique_ptr<vAST::Declaration>>>
       body;
 
-  body.push_back(
-      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("x")));
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("x"), vAST::make_num("4"), vAST::make_num("0"))));
 
-  body.push_back(
-      std::make_unique<vAST::Wire>(std::make_unique<vAST::Identifier>("y")));
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("y"), vAST::make_num("4"), vAST::make_num("0"))));
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("h"), vAST::make_num("4"), vAST::make_num("0"))));
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("g"), vAST::make_num("4"), vAST::make_num("0"))));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       vAST::make_id("x"),
       std::make_unique<vAST::BinaryOp>(vAST::make_id("i1"), vAST::BinOp::ADD,
                                        vAST::make_id("i2"))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("h"),
+      std::make_unique<vAST::BinaryOp>(vAST::make_id("i1"), vAST::BinOp::SUB,
+                                       vAST::make_id("i2"))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(vAST::make_id("g"),
+                                                          vAST::make_id("h")));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       vAST::make_id("o0"),
@@ -831,6 +849,11 @@ TEST(InlineAssignTests, TestNoInlineSliceUnlessID) {
       std::make_unique<vAST::Slice>(vAST::make_id("y"), vAST::make_num("3"),
                                     vAST::make_num("0"))));
 
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("o2"),
+      std::make_unique<vAST::Slice>(vAST::make_id("g"), vAST::make_num("3"),
+                                    vAST::make_num("0"))));
+
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
 
@@ -839,14 +862,20 @@ TEST(InlineAssignTests, TestNoInlineSliceUnlessID) {
       "    input [4:0] i1,\n"
       "    input [4:0] i2,\n"
       "    output [3:0] o0,\n"
-      "    output [3:0] o1\n"
+      "    output [3:0] o1,\n"
+      "    output [3:0] o2\n"
       ");\n"
-      "wire x;\n"
-      "wire y;\n"
+      "wire [4:0] x;\n"
+      "wire [4:0] y;\n"
+      "wire [4:0] h;\n"
+      "wire [4:0] g;\n"
       "assign x = i1 + i2;\n"
+      "assign h = i1 - i2;\n"
+      "assign g = h;\n"
       "assign o0 = x[3:0];\n"
       "assign y = i1;\n"
       "assign o1 = y[3:0];\n"
+      "assign o2 = g[3:0];\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
@@ -856,12 +885,16 @@ TEST(InlineAssignTests, TestNoInlineSliceUnlessID) {
       "    input [4:0] i1,\n"
       "    input [4:0] i2,\n"
       "    output [3:0] o0,\n"
-      "    output [3:0] o1\n"
+      "    output [3:0] o1,\n"
+      "    output [3:0] o2\n"
       ");\n"
-      "wire x;\n"
+      "wire [4:0] x;\n"
+      "wire [4:0] h;\n"
       "assign x = i1 + i2;\n"
+      "assign h = i1 - i2;\n"
       "assign o0 = x[3:0];\n"
       "assign o1 = i1[3:0];\n"
+      "assign o2 = h[3:0];\n"
       "endmodule\n";
 
   vAST::AssignInliner transformer;
