@@ -109,6 +109,31 @@ class IndexBlacklister : public Blacklister {
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
 };
 
+class ModuleInstanceBlacklister : public Blacklister {
+  // Prevent inling wires into module instance nodes, e.g.
+  // wire z;
+  // assign b = a;
+  // assign z = i + a;  // <--- not inlined into .w below
+  // inner_module inner_module_inst (
+  //     .c(a),
+  //     .i(i),
+  //     .w(z),
+  //     .o(o)
+  // );
+  //
+  // We can make this configurable, but for now we keep it as the default since
+  // some tools do not support general expressions inside module instance
+  // statements
+ public:
+  ModuleInstanceBlacklister(
+      std::set<std::string> &wire_blacklist,
+      std::map<std::string, std::unique_ptr<Expression>> &assign_map)
+      : Blacklister(wire_blacklist, assign_map){};
+  using Blacklister::visit;
+  virtual std::unique_ptr<ModuleInstantiation> visit(
+      std::unique_ptr<ModuleInstantiation> node);
+};
+
 class AssignInliner : public Transformer {
   std::map<std::string, int> read_count;
   std::map<std::string, int> assign_count;
