@@ -71,7 +71,7 @@ std::string NumericLiteral::toString() {
   return size_str + separator + signed_str + radix_str + value;
 }
 
-std::string Identifier::toString() {
+Identifier::Identifier(std::string value) {
   static std::unordered_set<std::string> sKeywords{
       // clang-format off
       "accept_on",     "dist",          "local",                "randomize",       "task",
@@ -121,11 +121,13 @@ std::string Identifier::toString() {
       // clang-format on
   };
   static std::regex sSimpleIdentifierRE{"^[a-zA-Z$_][a-zA-Z$_0-9]*$"};
-  if (sKeywords.count(value) || !std::regex_match(value, sSimpleIdentifierRE))
-    return "\\" + value + " ";
-  else
-    return value;
+  if (sKeywords.count(value) || !std::regex_match(value, sSimpleIdentifierRE)) {
+    value = "\\" + value + " ";
+  }
+  this->value = value;
 }
+
+std::string Identifier::toString() { return this->value; }
 
 std::string Cast::toString() {
   return std::to_string(this->width) + "'(" + this->expr->toString() + ")";
