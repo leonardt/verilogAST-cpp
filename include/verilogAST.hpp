@@ -132,7 +132,7 @@ class Identifier : public Expression {
  public:
   std::string value;
 
-  Identifier(std::string value) : value(value){};
+  Identifier(std::string value);
   Identifier(const Identifier& rhs) : value(rhs.value){};
   auto clone() const { return std::unique_ptr<Identifier>(clone_impl()); }
 
