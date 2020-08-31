@@ -1077,6 +1077,56 @@ TEST(InlineAssignTests, TestInlineMultipleAssign) {
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
 }
 
+TEST(InlineAssignTests, TestNoInlineNumToIndexSlice) {
+  std::vector<std::unique_ptr<vAST::AbstractPort>> ports;
+  ports.push_back(std::make_unique<vAST::Port>(vAST::make_id("o0"),
+                                               vAST::OUTPUT, vAST::WIRE));
+  ports.push_back(std::make_unique<vAST::Port>(
+      std::make_unique<vAST::Vector>(vAST::make_id("o1"), vAST::make_num("1"),
+                                     vAST::make_num("0")),
+      vAST::OUTPUT, vAST::WIRE));
+
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      body;
+
+  body.push_back(std::make_unique<vAST::Wire>(std::make_unique<vAST::Vector>(
+      vAST::make_id("x"), vAST::make_num("2"), vAST::make_num("0"))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(vAST::make_id("x"),
+                                                          vAST::make_num("7")));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("o0"),
+      std::make_unique<vAST::Index>(vAST::make_id("x"), vAST::make_num("0"))));
+
+  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("o1"),
+      std::make_unique<vAST::Slice>(vAST::make_id("x"), vAST::make_num("1"),
+                                    vAST::make_num("0"))));
+
+  std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
+      "test_module", std::move(ports), std::move(body));
+
+  std::string raw_str =
+      "module test_module (\n"
+      "    output o0,\n"
+      "    output [1:0] o1\n"
+      ");\n"
+      "wire [2:0] x;\n"
+      "assign x = 7;\n"
+      "assign o0 = x[0];\n"
+      "assign o1 = x[1:0];\n"
+      "endmodule\n";
+
+  EXPECT_EQ(module->toString(), raw_str);
+
+  std::string expected_str = raw_str;
+
+  vAST::AssignInliner transformer;
+  EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
