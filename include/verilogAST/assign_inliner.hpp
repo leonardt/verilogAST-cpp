@@ -67,6 +67,9 @@ class Blacklister : public Transformer {
 
  protected:
   bool blacklist = false;
+  // Allow numeric literals as valid drivers (okay for module instances, not
+  // okay for slice/index)
+  virtual bool allowNumDriver() { return false; };
   void blacklist_invalid_driver(std::unique_ptr<Identifier> node);
 
  public:
@@ -107,6 +110,34 @@ class IndexBlacklister : public Blacklister {
       : Blacklister(wire_blacklist, assign_map){};
   using Blacklister::visit;
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
+};
+
+class ModuleInstanceBlacklister : public Blacklister {
+  // Prevent inling wires into module instance nodes, e.g.
+  // wire z;
+  // assign b = a;
+  // assign z = i + a;  // <--- not inlined into .w below
+  // inner_module inner_module_inst (
+  //     .c(a),
+  //     .i(i),
+  //     .w(z),
+  //     .o(o)
+  // );
+  //
+  // We can make this configurable, but for now we keep it as the default since
+  // some tools do not support general expressions inside module instance
+  // statements
+ protected:
+  bool allowNumDriver() override { return true; };
+
+ public:
+  ModuleInstanceBlacklister(
+      std::set<std::string> &wire_blacklist,
+      std::map<std::string, std::unique_ptr<Expression>> &assign_map)
+      : Blacklister(wire_blacklist, assign_map){};
+  using Blacklister::visit;
+  virtual std::unique_ptr<ModuleInstantiation> visit(
+      std::unique_ptr<ModuleInstantiation> node) override;
 };
 
 class AssignInliner : public Transformer {
