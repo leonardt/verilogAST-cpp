@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>  // std::pair
 #include <variant>
