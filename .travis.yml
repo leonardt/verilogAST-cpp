@@ -17,7 +17,6 @@ matrix:
       env:
         - MATRIX_EVAL="GCOV=gcov"
 
-
 before_install:
   - eval "${MATRIX_EVAL}"
 
