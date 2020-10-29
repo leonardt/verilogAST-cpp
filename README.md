@@ -1,6 +1,5 @@
 # verilogAST-cpp
 [![Build Status](https://travis-ci.com/leonardt/verilogAST-cpp.svg?branch=master)](https://travis-ci.com/leonardt/verilogAST-cpp)
-[![Coverage Status](https://coveralls.io/repos/github/leonardt/verilogAST-cpp/badge.svg)](https://coveralls.io/github/leonardt/verilogAST-cpp)
 [![codecov](https://codecov.io/gh/leonardt/verilogAST-cpp/branch/master/graph/badge.svg?token=P7tdc1K0CH)](https://codecov.io/gh/leonardt/verilogAST-cpp/)
 
 C++17 Implementation of an AST for Verilog code generation
