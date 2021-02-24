@@ -656,9 +656,16 @@ TEST(InlineAssignTests, TestInstConn) {
   connections->insert("i", vAST::make_id("x"));
   connections->insert("o", vAST::make_id("y"));
 
-  body.push_back(std::make_unique<vAST::ModuleInstantiation>(
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst = std::make_unique<vAST::ModuleInstantiation>(
       "inner_module", std::move(parameters), "inner_module_inst",
-      std::move(connections)));
+      std::move(connections));
+
+  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+      if_def_body;
+  if_def_body.push_back(std::move(module_inst));
+  std::unique_ptr<vAST::IfDef> if_def = std::make_unique<vAST::IfDef>("ASSERT_ON", std::move(if_def_body));
+
+  body.push_back(std::move(if_def));
 
   body.push_back(std::make_unique<vAST::ContinuousAssign>(
       std::make_unique<vAST::Identifier>("o"),
@@ -678,11 +685,13 @@ TEST(InlineAssignTests, TestInstConn) {
       "wire y;\n"
       "assign x = i;\n"
       "assign b = a;\n"
+      "`ifdef ASSERT_ON\n"
       "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(x),\n"
       "    .o(y)\n"
       ");\n"
+      "`endif\n"
       "assign o = y;\n"
       "endmodule\n";
 
@@ -696,11 +705,13 @@ TEST(InlineAssignTests, TestInstConn) {
       "    output b\n"
       ");\n"
       "assign b = a;\n"
+      "`ifdef ASSERT_ON\n"
       "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(i),\n"
       "    .o(o)\n"
       ");\n"
+      "`endif\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
