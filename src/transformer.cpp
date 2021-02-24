@@ -243,8 +243,7 @@ std::unique_ptr<InlineVerilog> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<IfDef> Transformer::visit(
-    std::unique_ptr<IfDef> node) {
+std::unique_ptr<IfDef> Transformer::visit(std::unique_ptr<IfDef> node) {
   std::vector<std::unique_ptr<StructuralStatement>> new_body;
   for (auto&& item : node->body) {
     new_body.push_back(this->visit(std::move(item)));

@@ -656,14 +656,15 @@ TEST(InlineAssignTests, TestInstConn) {
   connections->insert("i", vAST::make_id("x"));
   connections->insert("o", vAST::make_id("y"));
 
-  std::unique_ptr<vAST::ModuleInstantiation> module_inst = std::make_unique<vAST::ModuleInstantiation>(
-      "inner_module", std::move(parameters), "inner_module_inst",
-      std::move(connections));
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst =
+      std::make_unique<vAST::ModuleInstantiation>(
+          "inner_module", std::move(parameters), "inner_module_inst",
+          std::move(connections));
 
-  std::vector<std::unique_ptr<vAST::StructuralStatement>>
-      if_def_body;
+  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_body;
   if_def_body.push_back(std::move(module_inst));
-  std::unique_ptr<vAST::IfDef> if_def = std::make_unique<vAST::IfDef>("ASSERT_ON", std::move(if_def_body));
+  std::unique_ptr<vAST::IfDef> if_def =
+      std::make_unique<vAST::IfDef>("ASSERT_ON", std::move(if_def_body));
 
   body.push_back(std::move(if_def));
 
