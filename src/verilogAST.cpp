@@ -409,6 +409,14 @@ std::string ModuleInstantiation::toString() {
   return module_inst_str;
 }
 
+std::string IfDef::toString() {
+   std::string s = "`ifdef " + this->var + "\n";
+   for (auto &statement : this->body) {
+     s += statement->toString() + "\n";
+   }
+   return s + "`endif";
+}
+
 std::string Declaration::toString() {
   return decl + " " + variant_to_string(value) + ";";
 }
