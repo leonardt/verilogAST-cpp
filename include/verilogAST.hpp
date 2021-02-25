@@ -645,6 +645,18 @@ class ModuleInstantiation : public StructuralStatement {
   ~ModuleInstantiation(){};
 };
 
+class IfDef : public StructuralStatement {
+  public:
+   std::string condition_str;
+   std::vector<std::unique_ptr<StructuralStatement>> body;
+
+   IfDef(std::string condition_str,
+         std::vector<std::unique_ptr<StructuralStatement>> body)
+       : condition_str(condition_str), body(std::move(body)){};
+   std::string toString();
+   ~IfDef(){};
+};
+
 class Declaration : public Node {
  public:
   std::string decl;
