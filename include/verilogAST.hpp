@@ -648,11 +648,16 @@ class ModuleInstantiation : public StructuralStatement {
 class IfDef : public StructuralStatement {
   public:
    std::string condition_str;
+   bool invert;
    std::vector<std::unique_ptr<StructuralStatement>> body;
-
    IfDef(std::string condition_str,
          std::vector<std::unique_ptr<StructuralStatement>> body)
-       : condition_str(condition_str), body(std::move(body)){};
+       : condition_str(condition_str), invert(false), body(std::move(body)){};
+
+   IfDef(std::string condition_str,
+         bool invert,
+         std::vector<std::unique_ptr<StructuralStatement>> body)
+       : condition_str(condition_str), invert(invert), body(std::move(body)){};
    std::string toString();
    ~IfDef(){};
 };

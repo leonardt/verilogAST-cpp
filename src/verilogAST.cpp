@@ -410,7 +410,13 @@ std::string ModuleInstantiation::toString() {
 }
 
 std::string IfDef::toString() {
-  std::string s = "`ifdef " + this->condition_str + "\n";
+  std::string s;
+  if (this->invert) {
+      s = "`ifndef ";
+  } else {
+      s = "`ifdef ";
+  }
+  s += this->condition_str + "\n";
   for (auto &statement : this->body) {
     s += statement->toString() + "\n";
   }

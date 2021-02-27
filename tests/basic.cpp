@@ -774,6 +774,35 @@ TEST(BasicTests, TestIfDef) {
             "`endif");
 }
 
+TEST(BasicTests, TestIfDefInvert) {
+  std::string module_name = "test_module";
+
+  vAST::Parameters parameters = make_simple_params();
+
+  std::string instance_name = "test_module_inst";
+
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst =
+    std::make_unique<vAST::ModuleInstantiation>(module_name,
+                                                std::move(parameters),
+                                                instance_name,
+                                                make_simple_connections());
+  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+      body;
+  body.push_back(std::move(module_inst));
+  vAST::IfDef if_def("ASSERT_ON", true, std::move(body));
+  EXPECT_EQ(if_def.toString(), 
+            "`ifndef ASSERT_ON\n"
+            "test_module #(\n"
+            "    .param0(0),\n"
+            "    .param1(1)\n"
+            ") test_module_inst (\n"
+            "    .a(a),\n"
+            "    .b(b[0]),\n"
+            "    .c(c[31:0])\n"
+            ");\n"
+            "`endif");
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
