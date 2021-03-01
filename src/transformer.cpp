@@ -243,7 +243,7 @@ std::unique_ptr<InlineVerilog> Transformer::visit(
   return node;
 }
 
-std::unique_ptr<IfDef> Transformer::visit(std::unique_ptr<IfDef> node) {
+std::unique_ptr<IfMacro> Transformer::visit(std::unique_ptr<IfMacro> node) {
   std::vector<std::unique_ptr<StructuralStatement>> new_body;
   for (auto&& item : node->body) {
     new_body.push_back(this->visit(std::move(item)));
@@ -409,9 +409,9 @@ std::unique_ptr<StructuralStatement> Transformer::visit(
     node.release();
     return this->visit(std::unique_ptr<InlineVerilog>(ptr));
   }
-  if (auto ptr = dynamic_cast<IfDef*>(node.get())) {
+  if (auto ptr = dynamic_cast<IfMacro*>(node.get())) {
     node.release();
-    return this->visit(std::unique_ptr<IfDef>(ptr));
+    return this->visit(std::unique_ptr<IfMacro>(ptr));
   }
   throw std::runtime_error("Unreachable");  // LCOV_EXCL_LINE
   return node;                              // LCOV_EXCL_LINE
