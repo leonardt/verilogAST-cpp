@@ -409,8 +409,9 @@ std::string ModuleInstantiation::toString() {
   return module_inst_str;
 }
 
-std::string IfDef::toString() {
-  std::string s = "`ifdef " + this->condition_str + "\n";
+std::string IfMacro::toString() {
+  std::string s = this->getMacroString();
+  s += this->condition_str + "\n";
   for (auto &statement : this->body) {
     s += statement->toString() + "\n";
   }
