@@ -647,32 +647,35 @@ class ModuleInstantiation : public StructuralStatement {
 
 class IfMacro : public StructuralStatement {
   virtual std::string getMacroString() = 0;
-  public:
-   std::string condition_str;
-   std::vector<std::unique_ptr<StructuralStatement>> body;
-   IfMacro(std::string condition_str,
-           std::vector<std::unique_ptr<StructuralStatement>> body)
-       : condition_str(condition_str), body(std::move(body)){};
-   ~IfMacro(){};
-   std::string toString();
+
+ public:
+  std::string condition_str;
+  std::vector<std::unique_ptr<StructuralStatement>> body;
+  IfMacro(std::string condition_str,
+          std::vector<std::unique_ptr<StructuralStatement>> body)
+      : condition_str(condition_str), body(std::move(body)){};
+  ~IfMacro(){};
+  std::string toString();
 };
 
 class IfDef : public IfMacro {
   std::string getMacroString() { return "`ifdef "; };
-    public:
-   IfDef(std::string condition_str,
-           std::vector<std::unique_ptr<StructuralStatement>> body)
-       : IfMacro(condition_str, std::move(body)){};
-   ~IfDef(){};
+
+ public:
+  IfDef(std::string condition_str,
+        std::vector<std::unique_ptr<StructuralStatement>> body)
+      : IfMacro(condition_str, std::move(body)){};
+  ~IfDef(){};
 };
 
 class IfNDef : public IfMacro {
   std::string getMacroString() { return "`ifndef "; };
-    public:
-   IfNDef(std::string condition_str,
-           std::vector<std::unique_ptr<StructuralStatement>> body)
-       : IfMacro(condition_str, std::move(body)){};
-   ~IfNDef(){};
+
+ public:
+  IfNDef(std::string condition_str,
+         std::vector<std::unique_ptr<StructuralStatement>> body)
+      : IfMacro(condition_str, std::move(body)){};
+  ~IfNDef(){};
 };
 
 class Declaration : public Node {
