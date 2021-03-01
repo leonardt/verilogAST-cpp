@@ -755,9 +755,14 @@ TEST(InlineAssignTests, TestNoInlineIndex) {
   body.push_back(std::make_unique<vAST::ContinuousAssign>(vAST::make_id("y"),
                                                           vAST::make_id("i1")));
 
-  body.push_back(std::make_unique<vAST::ContinuousAssign>(
+  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_n_def_body;
+  if_n_def_body.push_back(std::make_unique<vAST::ContinuousAssign>(
       vAST::make_id("o1"),
       std::make_unique<vAST::Index>(vAST::make_id("y"), vAST::make_num("0"))));
+  std::unique_ptr<vAST::IfNDef> if_n_def =
+      std::make_unique<vAST::IfNDef>("ASSERT_ON", std::move(if_n_def_body));
+
+  body.push_back(std::move(if_n_def));
 
   std::unique_ptr<vAST::AbstractModule> module = std::make_unique<vAST::Module>(
       "test_module", std::move(ports), std::move(body));
@@ -774,7 +779,9 @@ TEST(InlineAssignTests, TestNoInlineIndex) {
       "assign x = i1 + i2;\n"
       "assign o0 = x[0];\n"
       "assign y = i1;\n"
+      "`ifndef ASSERT_ON\n"
       "assign o1 = y[0];\n"
+      "`endif\n"
       "endmodule\n";
 
   EXPECT_EQ(module->toString(), raw_str);
@@ -789,7 +796,9 @@ TEST(InlineAssignTests, TestNoInlineIndex) {
       "wire x;\n"
       "assign x = i1 + i2;\n"
       "assign o0 = x[0];\n"
+      "`ifndef ASSERT_ON\n"
       "assign o1 = i1[0];\n"
+      "`endif\n"
       "endmodule\n";
 
   vAST::AssignInliner transformer;

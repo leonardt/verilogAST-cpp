@@ -67,7 +67,7 @@ class Transformer {
   virtual std::unique_ptr<InlineVerilog> visit(
       std::unique_ptr<InlineVerilog> node);
 
-  virtual std::unique_ptr<IfDef> visit(std::unique_ptr<IfDef> node);
+  virtual std::unique_ptr<IfMacro> visit(std::unique_ptr<IfMacro> node);
 
   virtual std::unique_ptr<ModuleInstantiation> visit(
       std::unique_ptr<ModuleInstantiation> node);
