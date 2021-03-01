@@ -789,7 +789,7 @@ TEST(BasicTests, TestIfDefInvert) {
   std::vector<std::unique_ptr<vAST::StructuralStatement>>
       body;
   body.push_back(std::move(module_inst));
-  vAST::IfDef if_def("ASSERT_ON", true, std::move(body));
+  vAST::IfNDef if_def("ASSERT_ON", std::move(body));
   EXPECT_EQ(if_def.toString(), 
             "`ifndef ASSERT_ON\n"
             "test_module #(\n"
