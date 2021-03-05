@@ -244,11 +244,16 @@ std::unique_ptr<InlineVerilog> Transformer::visit(
 }
 
 std::unique_ptr<IfMacro> Transformer::visit(std::unique_ptr<IfMacro> node) {
-  std::vector<std::unique_ptr<StructuralStatement>> new_body;
-  for (auto&& item : node->body) {
-    new_body.push_back(this->visit(std::move(item)));
+  std::vector<std::unique_ptr<StructuralStatement>> new_true_body;
+  for (auto&& item : node->true_body) {
+    new_true_body.push_back(this->visit(std::move(item)));
   }
-  node->body = std::move(new_body);
+  node->true_body = std::move(new_true_body);
+  std::vector<std::unique_ptr<StructuralStatement>> new_else_body;
+  for (auto&& item : node->else_body) {
+    new_else_body.push_back(this->visit(std::move(item)));
+  }
+  node->else_body = std::move(new_else_body);
   return node;
 }
 

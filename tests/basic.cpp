@@ -803,6 +803,49 @@ TEST(BasicTests, TestIfDefInvert) {
             "`endif");
 }
 
+TEST(BasicTests, TestIfDefElse) {
+  std::string module_name = "test_module";
+
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst0 =
+    std::make_unique<vAST::ModuleInstantiation>(module_name,
+                                                make_simple_params(),
+                                                "test_module_inst0",
+                                                make_simple_connections());
+  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+      true_body;
+  true_body.push_back(std::move(module_inst0));
+
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst1 =
+    std::make_unique<vAST::ModuleInstantiation>(module_name,
+                                                make_simple_params(),
+                                                "test_module_inst1",
+                                                make_simple_connections());
+  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+      else_body;
+  else_body.push_back(std::move(module_inst1));
+  vAST::IfNDef if_def("ASSERT_ON", std::move(true_body), std::move(else_body));
+  EXPECT_EQ(if_def.toString(), 
+            "`ifndef ASSERT_ON\n"
+            "test_module #(\n"
+            "    .param0(0),\n"
+            "    .param1(1)\n"
+            ") test_module_inst0 (\n"
+            "    .a(a),\n"
+            "    .b(b[0]),\n"
+            "    .c(c[31:0])\n"
+            ");\n"
+            "`else\n"
+            "test_module #(\n"
+            "    .param0(0),\n"
+            "    .param1(1)\n"
+            ") test_module_inst1 (\n"
+            "    .a(a),\n"
+            "    .b(b[0]),\n"
+            "    .c(c[31:0])\n"
+            ");\n"
+            "`endif");
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {

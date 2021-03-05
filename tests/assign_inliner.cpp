@@ -649,22 +649,38 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("b"),
       std::make_unique<vAST::Identifier>("a")));
 
-  vAST::Parameters parameters;
-  std::unique_ptr<vAST::Connections> connections =
+  vAST::Parameters parameters0;
+  std::unique_ptr<vAST::Connections> connections0 =
       std::make_unique<vAST::Connections>();
-  connections->insert("c", vAST::make_id("a"));
-  connections->insert("i", vAST::make_id("x"));
-  connections->insert("o", vAST::make_id("y"));
+  connections0->insert("c", vAST::make_id("a"));
+  connections0->insert("i", vAST::make_id("x"));
+  connections0->insert("o", vAST::make_id("y"));
 
-  std::unique_ptr<vAST::ModuleInstantiation> module_inst =
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst0 =
       std::make_unique<vAST::ModuleInstantiation>(
-          "inner_module", std::move(parameters), "inner_module_inst",
-          std::move(connections));
+          "inner_module", std::move(parameters0), "inner_module_inst0",
+          std::move(connections0));
 
-  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_body;
-  if_def_body.push_back(std::move(module_inst));
-  std::unique_ptr<vAST::IfDef> if_def =
-      std::make_unique<vAST::IfDef>("ASSERT_ON", std::move(if_def_body));
+  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_true_body;
+  if_def_true_body.push_back(std::move(module_inst0));
+
+  vAST::Parameters parameters1;
+  std::unique_ptr<vAST::Connections> connections1 =
+      std::make_unique<vAST::Connections>();
+  connections1->insert("c", vAST::make_id("a"));
+  connections1->insert("i", vAST::make_id("x"));
+  connections1->insert("o", vAST::make_id("y"));
+
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst1 =
+      std::make_unique<vAST::ModuleInstantiation>(
+          "inner_module", std::move(parameters1), "inner_module_inst1",
+          std::move(connections1));
+
+  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_false_body;
+  if_def_false_body.push_back(std::move(module_inst1));
+
+  std::unique_ptr<vAST::IfDef> if_def = std::make_unique<vAST::IfDef>(
+      "ASSERT_ON", std::move(if_def_true_body), std::move(if_def_false_body));
 
   body.push_back(std::move(if_def));
 
@@ -687,7 +703,13 @@ TEST(InlineAssignTests, TestInstConn) {
       "assign x = i;\n"
       "assign b = a;\n"
       "`ifdef ASSERT_ON\n"
-      "inner_module inner_module_inst (\n"
+      "inner_module inner_module_inst0 (\n"
+      "    .c(a),\n"
+      "    .i(x),\n"
+      "    .o(y)\n"
+      ");\n"
+      "`else\n"
+      "inner_module inner_module_inst1 (\n"
       "    .c(a),\n"
       "    .i(x),\n"
       "    .o(y)\n"
@@ -707,7 +729,13 @@ TEST(InlineAssignTests, TestInstConn) {
       ");\n"
       "assign b = a;\n"
       "`ifdef ASSERT_ON\n"
-      "inner_module inner_module_inst (\n"
+      "inner_module inner_module_inst0 (\n"
+      "    .c(a),\n"
+      "    .i(i),\n"
+      "    .o(o)\n"
+      ");\n"
+      "`else\n"
+      "inner_module inner_module_inst1 (\n"
       "    .c(a),\n"
       "    .i(i),\n"
       "    .o(o)\n"

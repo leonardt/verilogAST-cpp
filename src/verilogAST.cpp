@@ -412,8 +412,14 @@ std::string ModuleInstantiation::toString() {
 std::string IfMacro::toString() {
   std::string s = this->getMacroString();
   s += this->condition_str + "\n";
-  for (auto &statement : this->body) {
+  for (auto &statement : this->true_body) {
     s += statement->toString() + "\n";
+  }
+  if (this->else_body.size() > 0) {
+    s += "`else\n";
+    for (auto &statement : this->else_body) {
+      s += statement->toString() + "\n";
+    }
   }
   return s + "`endif";
 }
