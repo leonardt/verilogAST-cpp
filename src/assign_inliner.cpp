@@ -56,6 +56,15 @@ std::unique_ptr<Index> IndexBlacklister::visit(std::unique_ptr<Index> node) {
   return node;
 }
 
+std::unique_ptr<IfMacro> IfMacroBlacklister::visit(std::unique_ptr<IfMacro> node) {
+  bool prev = this->blacklist;
+  this->blacklist = true;
+  node = Transformer::visit(std::move(node));
+  // Restore prev value, since we could be nested
+  this->blacklist = prev;
+  return node;
+}
+
 std::unique_ptr<ModuleInstantiation> ModuleInstanceBlacklister::visit(
     std::unique_ptr<ModuleInstantiation> node) {
   this->blacklist = true;
@@ -283,6 +292,9 @@ std::unique_ptr<Module> AssignInliner::visit(std::unique_ptr<Module> node) {
 
   IndexBlacklister index_blacklist(this->wire_blacklist, this->assign_map);
   node = index_blacklist.visit(std::move(node));
+
+  IfMacroBlacklister if_macro_blacklist(this->wire_blacklist, this->assign_map);
+  node = if_macro_blacklist.visit(std::move(node));
 
   SliceBlacklister slice_blacklist(this->wire_blacklist, this->assign_map);
   node = slice_blacklist.visit(std::move(node));
