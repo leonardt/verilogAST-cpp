@@ -649,35 +649,24 @@ TEST(InlineAssignTests, TestInstConn) {
       std::make_unique<vAST::Identifier>("b"),
       std::make_unique<vAST::Identifier>("a")));
 
-  vAST::Parameters parameters0;
-  std::unique_ptr<vAST::Connections> connections0 =
+  vAST::Parameters parameters;
+  std::unique_ptr<vAST::Connections> connections =
       std::make_unique<vAST::Connections>();
-  connections0->insert("c", vAST::make_id("a"));
-  connections0->insert("i", vAST::make_id("x"));
-  connections0->insert("o", vAST::make_id("y"));
+  connections->insert("c", vAST::make_id("a"));
+  connections->insert("i", vAST::make_id("x"));
+  connections->insert("o", vAST::make_id("y"));
 
-  std::unique_ptr<vAST::ModuleInstantiation> module_inst0 =
+  std::unique_ptr<vAST::ModuleInstantiation> module_inst =
       std::make_unique<vAST::ModuleInstantiation>(
-          "inner_module", std::move(parameters0), "inner_module_inst0",
-          std::move(connections0));
+          "inner_module", std::move(parameters), "inner_module_inst",
+          std::move(connections));
 
   std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_true_body;
-  if_def_true_body.push_back(std::move(module_inst0));
-
-  vAST::Parameters parameters1;
-  std::unique_ptr<vAST::Connections> connections1 =
-      std::make_unique<vAST::Connections>();
-  connections1->insert("c", vAST::make_id("a"));
-  connections1->insert("i", vAST::make_id("x"));
-  connections1->insert("o", vAST::make_id("y"));
-
-  std::unique_ptr<vAST::ModuleInstantiation> module_inst1 =
-      std::make_unique<vAST::ModuleInstantiation>(
-          "inner_module", std::move(parameters1), "inner_module_inst1",
-          std::move(connections1));
+  if_def_true_body.push_back(std::move(module_inst));
 
   std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_false_body;
-  if_def_false_body.push_back(std::move(module_inst1));
+  if_def_false_body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("y"), vAST::make_num("0")));
 
   std::unique_ptr<vAST::IfDef> if_def = std::make_unique<vAST::IfDef>(
       "ASSERT_ON", std::move(if_def_true_body), std::move(if_def_false_body));
@@ -703,17 +692,13 @@ TEST(InlineAssignTests, TestInstConn) {
       "assign x = i;\n"
       "assign b = a;\n"
       "`ifdef ASSERT_ON\n"
-      "inner_module inner_module_inst0 (\n"
+      "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(x),\n"
       "    .o(y)\n"
       ");\n"
       "`else\n"
-      "inner_module inner_module_inst1 (\n"
-      "    .c(a),\n"
-      "    .i(x),\n"
-      "    .o(y)\n"
-      ");\n"
+      "assign y = 0;\n"
       "`endif\n"
       "assign o = y;\n"
       "endmodule\n";
@@ -727,20 +712,18 @@ TEST(InlineAssignTests, TestInstConn) {
       "    output o,\n"
       "    output b\n"
       ");\n"
+      "wire y;\n"
       "assign b = a;\n"
       "`ifdef ASSERT_ON\n"
-      "inner_module inner_module_inst0 (\n"
+      "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(i),\n"
-      "    .o(o)\n"
+      "    .o(y)\n"
       ");\n"
       "`else\n"
-      "inner_module inner_module_inst1 (\n"
-      "    .c(a),\n"
-      "    .i(i),\n"
-      "    .o(o)\n"
-      ");\n"
+      "assign y = 0;\n"
       "`endif\n"
+      "assign o = y;\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
