@@ -650,10 +650,17 @@ class IfMacro : public StructuralStatement {
 
  public:
   std::string condition_str;
-  std::vector<std::unique_ptr<StructuralStatement>> body;
+  std::vector<std::unique_ptr<StructuralStatement>> true_body;
+  std::vector<std::unique_ptr<StructuralStatement>> else_body;
   IfMacro(std::string condition_str,
-          std::vector<std::unique_ptr<StructuralStatement>> body)
-      : condition_str(condition_str), body(std::move(body)){};
+          std::vector<std::unique_ptr<StructuralStatement>> true_body)
+      : condition_str(condition_str), true_body(std::move(true_body)){};
+  IfMacro(std::string condition_str,
+          std::vector<std::unique_ptr<StructuralStatement>> true_body,
+          std::vector<std::unique_ptr<StructuralStatement>> else_body)
+      : condition_str(condition_str),
+        true_body(std::move(true_body)),
+        else_body(std::move(else_body)){};
   ~IfMacro(){};
   std::string toString();
 };
@@ -665,6 +672,10 @@ class IfDef : public IfMacro {
   IfDef(std::string condition_str,
         std::vector<std::unique_ptr<StructuralStatement>> body)
       : IfMacro(condition_str, std::move(body)){};
+  IfDef(std::string condition_str,
+        std::vector<std::unique_ptr<StructuralStatement>> true_body,
+        std::vector<std::unique_ptr<StructuralStatement>> else_body)
+     : IfMacro(condition_str, std::move(true_body), std::move(else_body)){};
   ~IfDef(){};
 };
 
@@ -675,6 +686,10 @@ class IfNDef : public IfMacro {
   IfNDef(std::string condition_str,
          std::vector<std::unique_ptr<StructuralStatement>> body)
       : IfMacro(condition_str, std::move(body)){};
+  IfNDef(std::string condition_str,
+         std::vector<std::unique_ptr<StructuralStatement>> true_body,
+         std::vector<std::unique_ptr<StructuralStatement>> else_body)
+      : IfMacro(condition_str, std::move(true_body), std::move(else_body)){};
   ~IfNDef(){};
 };
 

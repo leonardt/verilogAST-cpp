@@ -112,6 +112,24 @@ class IndexBlacklister : public Blacklister {
   virtual std::unique_ptr<Index> visit(std::unique_ptr<Index> node);
 };
 
+class IfMacroBlacklister : public Blacklister {
+  // Prevent inling wires defined inside a macro, e.g.
+  // `ifdef ASSERT_ON
+  // assign x = y + z;
+  // assign w = x[0];
+  // `else
+  // assign x = 0;
+  // assign w = 0;
+  // `endif
+ public:
+  IfMacroBlacklister(
+      std::set<std::string> &wire_blacklist,
+      std::map<std::string, std::unique_ptr<Expression>> &assign_map)
+      : Blacklister(wire_blacklist, assign_map){};
+  using Blacklister::visit;
+  virtual std::unique_ptr<IfMacro> visit(std::unique_ptr<IfMacro> node);
+};
+
 class ModuleInstanceBlacklister : public Blacklister {
   // Prevent inling wires into module instance nodes, e.g.
   // wire z;

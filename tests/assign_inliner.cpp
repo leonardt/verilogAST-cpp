@@ -661,10 +661,15 @@ TEST(InlineAssignTests, TestInstConn) {
           "inner_module", std::move(parameters), "inner_module_inst",
           std::move(connections));
 
-  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_body;
-  if_def_body.push_back(std::move(module_inst));
-  std::unique_ptr<vAST::IfDef> if_def =
-      std::make_unique<vAST::IfDef>("ASSERT_ON", std::move(if_def_body));
+  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_true_body;
+  if_def_true_body.push_back(std::move(module_inst));
+
+  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_false_body;
+  if_def_false_body.push_back(std::make_unique<vAST::ContinuousAssign>(
+      vAST::make_id("y"), vAST::make_num("0")));
+
+  std::unique_ptr<vAST::IfDef> if_def = std::make_unique<vAST::IfDef>(
+      "ASSERT_ON", std::move(if_def_true_body), std::move(if_def_false_body));
 
   body.push_back(std::move(if_def));
 
@@ -692,6 +697,8 @@ TEST(InlineAssignTests, TestInstConn) {
       "    .i(x),\n"
       "    .o(y)\n"
       ");\n"
+      "`else\n"
+      "assign y = 0;\n"
       "`endif\n"
       "assign o = y;\n"
       "endmodule\n";
@@ -705,14 +712,18 @@ TEST(InlineAssignTests, TestInstConn) {
       "    output o,\n"
       "    output b\n"
       ");\n"
+      "wire y;\n"
       "assign b = a;\n"
       "`ifdef ASSERT_ON\n"
       "inner_module inner_module_inst (\n"
       "    .c(a),\n"
       "    .i(i),\n"
-      "    .o(o)\n"
+      "    .o(y)\n"
       ");\n"
+      "`else\n"
+      "assign y = 0;\n"
       "`endif\n"
+      "assign o = y;\n"
       "endmodule\n";
   vAST::AssignInliner transformer;
   EXPECT_EQ(transformer.visit(std::move(module))->toString(), expected_str);
