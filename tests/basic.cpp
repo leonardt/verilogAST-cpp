@@ -757,8 +757,8 @@ TEST(BasicTests, TestIfDef) {
                                                 std::move(parameters),
                                                 instance_name,
                                                 make_simple_connections());
-  std::vector<std::variant<std::unique_ptr<StructuralStatement>,
-                           std::unique_ptr<Declaration>>>
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
       body;
   body.push_back(std::move(module_inst));
   vAST::IfDef if_def("ASSERT_ON", std::move(body));
@@ -787,7 +787,8 @@ TEST(BasicTests, TestIfDefInvert) {
                                                 std::move(parameters),
                                                 instance_name,
                                                 make_simple_connections());
-  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
       body;
   body.push_back(std::move(module_inst));
   vAST::IfNDef if_def("ASSERT_ON", std::move(body));
@@ -812,7 +813,8 @@ TEST(BasicTests, TestIfDefElse) {
                                                 make_simple_params(),
                                                 "test_module_inst0",
                                                 make_simple_connections());
-  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
       true_body;
   true_body.push_back(std::move(module_inst0));
 
@@ -821,7 +823,8 @@ TEST(BasicTests, TestIfDefElse) {
                                                 make_simple_params(),
                                                 "test_module_inst1",
                                                 make_simple_connections());
-  std::vector<std::unique_ptr<vAST::StructuralStatement>>
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
       else_body;
   else_body.push_back(std::move(module_inst1));
   vAST::IfNDef if_def("ASSERT_ON", std::move(true_body), std::move(else_body));

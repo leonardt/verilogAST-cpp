@@ -661,10 +661,14 @@ TEST(InlineAssignTests, TestInstConn) {
           "inner_module", std::move(parameters), "inner_module_inst",
           std::move(connections));
 
-  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_true_body;
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      if_def_true_body;
   if_def_true_body.push_back(std::move(module_inst));
 
-  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_def_false_body;
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      if_def_false_body;
   if_def_false_body.push_back(std::make_unique<vAST::ContinuousAssign>(
       vAST::make_id("y"), vAST::make_num("0")));
 
@@ -766,7 +770,9 @@ TEST(InlineAssignTests, TestNoInlineIndex) {
   body.push_back(std::make_unique<vAST::ContinuousAssign>(vAST::make_id("y"),
                                                           vAST::make_id("i1")));
 
-  std::vector<std::unique_ptr<vAST::StructuralStatement>> if_n_def_body;
+  std::vector<std::variant<std::unique_ptr<vAST::StructuralStatement>,
+                           std::unique_ptr<vAST::Declaration>>>
+      if_n_def_body;
   if_n_def_body.push_back(std::make_unique<vAST::ContinuousAssign>(
       vAST::make_id("o1"),
       std::make_unique<vAST::Index>(vAST::make_id("y"), vAST::make_num("0"))));
