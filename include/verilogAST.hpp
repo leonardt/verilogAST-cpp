@@ -645,54 +645,6 @@ class ModuleInstantiation : public StructuralStatement {
   ~ModuleInstantiation(){};
 };
 
-class IfMacro : public StructuralStatement {
-  virtual std::string getMacroString() = 0;
-
- public:
-  std::string condition_str;
-  std::vector<std::unique_ptr<StructuralStatement>> true_body;
-  std::vector<std::unique_ptr<StructuralStatement>> else_body;
-  IfMacro(std::string condition_str,
-          std::vector<std::unique_ptr<StructuralStatement>> true_body)
-      : condition_str(condition_str), true_body(std::move(true_body)){};
-  IfMacro(std::string condition_str,
-          std::vector<std::unique_ptr<StructuralStatement>> true_body,
-          std::vector<std::unique_ptr<StructuralStatement>> else_body)
-      : condition_str(condition_str),
-        true_body(std::move(true_body)),
-        else_body(std::move(else_body)){};
-  ~IfMacro(){};
-  std::string toString();
-};
-
-class IfDef : public IfMacro {
-  std::string getMacroString() { return "`ifdef "; };
-
- public:
-  IfDef(std::string condition_str,
-        std::vector<std::unique_ptr<StructuralStatement>> body)
-      : IfMacro(condition_str, std::move(body)){};
-  IfDef(std::string condition_str,
-        std::vector<std::unique_ptr<StructuralStatement>> true_body,
-        std::vector<std::unique_ptr<StructuralStatement>> else_body)
-     : IfMacro(condition_str, std::move(true_body), std::move(else_body)){};
-  ~IfDef(){};
-};
-
-class IfNDef : public IfMacro {
-  std::string getMacroString() { return "`ifndef "; };
-
- public:
-  IfNDef(std::string condition_str,
-         std::vector<std::unique_ptr<StructuralStatement>> body)
-      : IfMacro(condition_str, std::move(body)){};
-  IfNDef(std::string condition_str,
-         std::vector<std::unique_ptr<StructuralStatement>> true_body,
-         std::vector<std::unique_ptr<StructuralStatement>> else_body)
-      : IfMacro(condition_str, std::move(true_body), std::move(else_body)){};
-  ~IfNDef(){};
-};
-
 class Declaration : public Node {
  public:
   std::string decl;
@@ -708,6 +660,76 @@ class Declaration : public Node {
 
   std::string toString();
   virtual ~Declaration() = default;
+};
+
+class IfMacro : public StructuralStatement {
+  virtual std::string getMacroString() = 0;
+
+ public:
+  std::string condition_str;
+  std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                           std::unique_ptr<Declaration>>>
+      true_body;
+  std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                           std::unique_ptr<Declaration>>>
+      else_body;
+  IfMacro(std::string condition_str,
+          std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                   std::unique_ptr<Declaration>>>
+              true_body)
+      : condition_str(condition_str), true_body(std::move(true_body)){};
+  IfMacro(std::string condition_str,
+          std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                   std::unique_ptr<Declaration>>>
+              true_body,
+          std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                   std::unique_ptr<Declaration>>>
+              else_body)
+      : condition_str(condition_str),
+        true_body(std::move(true_body)),
+        else_body(std::move(else_body)){};
+  ~IfMacro(){};
+  std::string toString();
+};
+
+class IfDef : public IfMacro {
+  std::string getMacroString() { return "`ifdef "; };
+
+ public:
+  IfDef(std::string condition_str,
+        std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                 std::unique_ptr<Declaration>>>
+            body)
+      : IfMacro(condition_str, std::move(body)){};
+  IfDef(std::string condition_str,
+        std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                 std::unique_ptr<Declaration>>>
+            true_body,
+        std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                 std::unique_ptr<Declaration>>>
+            else_body)
+      : IfMacro(condition_str, std::move(true_body), std::move(else_body)){};
+  ~IfDef(){};
+};
+
+class IfNDef : public IfMacro {
+  std::string getMacroString() { return "`ifndef "; };
+
+ public:
+  IfNDef(std::string condition_str,
+         std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                  std::unique_ptr<Declaration>>>
+             body)
+      : IfMacro(condition_str, std::move(body)){};
+  IfNDef(std::string condition_str,
+         std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                  std::unique_ptr<Declaration>>>
+             true_body,
+         std::vector<std::variant<std::unique_ptr<StructuralStatement>,
+                                  std::unique_ptr<Declaration>>>
+             else_body)
+      : IfMacro(condition_str, std::move(true_body), std::move(else_body)){};
+  ~IfNDef(){};
 };
 
 class Wire : public Declaration {
