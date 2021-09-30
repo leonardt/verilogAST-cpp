@@ -115,7 +115,7 @@ class Cast : public Expression {
 
   Cast(unsigned int width, std::unique_ptr<Expression> expr)
       : width(width), expr(std::move(expr)){};
-  Cast(const Cast& rhs) : width(rhs.width), expr(expr->clone()){};
+  Cast(const Cast& rhs) : width(rhs.width), expr(rhs.expr->clone()){};
   auto clone() const { return std::unique_ptr<Cast>(clone_impl()); }
 
   std::string toString() override;
