@@ -507,6 +507,21 @@ class NDVector : public Vector {
   ~NDVector(){};
 };
 
+class PackedNDVector : public NDVector {
+ public:
+  PackedNDVector(
+      std::unique_ptr<Identifier> id, std::unique_ptr<Expression> msb,
+      std::unique_ptr<Expression> lsb,
+      std::vector<
+          std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>>
+          outer_dims)
+      : NDVector(std::move(id), std::move(msb), std::move(lsb),
+                 std::move(outer_dims)) {}
+
+  std::string toString() override;
+  ~PackedNDVector() = default;
+};
+
 class Port : public AbstractPort {
  public:
   // Required

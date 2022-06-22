@@ -161,6 +161,14 @@ std::string NDVector::toString() {
   return s;
 }
 
+std::string PackedNDVector::toString() {
+  std::string s = "";
+  for (auto &dim : outer_dims) {
+    s += "[" + dim.first->toString() + ":" + dim.second->toString() + "]";
+  }
+  return (s + Vector::toString());
+}
+
 std::string BinaryOp::toString() {
   std::string op_str;
   switch (op) {

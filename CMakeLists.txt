@@ -21,8 +21,14 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include/
 ) 
 
-set(LIB_SOURCES src/verilogAST.cpp src/transformer.cpp src/assign_inliner.cpp
-    src/concat_coalescer.cpp src/zext_coalescer.cpp)
+set(LIB_SOURCES
+      src/verilogAST.cpp
+      src/transformer.cpp
+      src/assign_inliner.cpp
+      src/concat_coalescer.cpp
+      src/zext_coalescer.cpp
+      src/make_packed.cpp
+)
 
 set(LIBRARY_NAME verilogAST)
 add_library(${LIBRARY_NAME} SHARED ${LIB_SOURCES})
@@ -74,6 +80,10 @@ if (VERILOGAST_BUILD_TESTS)
     add_executable(zext_coalescer tests/zext_coalescer.cpp)
     target_link_libraries(zext_coalescer gtest_main ${LIBRARY_NAME})
     add_test(NAME zext_coalescer_tests COMMAND zext_coalescer)
+
+    add_executable(make_packed tests/make_packed.cpp)
+    target_link_libraries(make_packed gtest_main ${LIBRARY_NAME})
+    add_test(NAME make_packed_tests COMMAND make_packed)
 endif()
 
 install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
