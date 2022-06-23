@@ -133,6 +133,17 @@ TEST(BasicTests, TestNDVector) {
   EXPECT_EQ(slice.toString(), "[31:0] x [7:0][15:0]");
 }
 
+TEST(BasicTests, TestPackedNDVector) {
+  std::vector<std::pair<std::unique_ptr<vAST::Expression>,
+                        std::unique_ptr<vAST::Expression>>>
+      outer_dims;
+  outer_dims.push_back({vAST::make_num("7"), vAST::make_num("0")});
+  outer_dims.push_back({vAST::make_num("15"), vAST::make_num("0")});
+  vAST::PackedNDVector slice(vAST::make_id("x"), vAST::make_num("31"),
+                             vAST::make_num("0"), std::move(outer_dims));
+  EXPECT_EQ(slice.toString(), "[7:0][15:0][31:0] x");
+}
+
 TEST(BasicTests, TestBinaryOp) {
   std::vector<std::pair<vAST::BinOp::BinOp, std::string>> ops;
   ops.push_back(std::make_pair(vAST::BinOp::LSHIFT, "<<"));
