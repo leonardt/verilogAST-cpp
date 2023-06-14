@@ -421,7 +421,7 @@ class NegEdge : public Node {
   std::unique_ptr<Identifier> value;
 
   NegEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
-  std::string toString();
+  std::string toString() override;
   ~NegEdge(){};
 };
 
@@ -430,7 +430,7 @@ class PosEdge : public Node {
   std::unique_ptr<Identifier> value;
 
   PosEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
-  std::string toString();
+  std::string toString() override;
   ~PosEdge(){};
 };
 
@@ -542,7 +542,7 @@ class Port : public AbstractPort {
       : value(std::move(port->value)),
         direction(port->direction),
         data_type(port->data_type){};
-  std::string toString();
+  std::string toString() override;
   ~Port(){};
 };
 
@@ -570,7 +570,7 @@ class SingleLineComment : public StructuralStatement,
       : value(value), statement(std::unique_ptr<Statement>{}){};
   SingleLineComment(std::string value, std::unique_ptr<Statement> statement)
       : value(value), statement(std::move(statement)){};
-  std::string toString();
+  std::string toString() override;
   ~SingleLineComment(){};
 };
 
@@ -656,7 +656,7 @@ class ModuleInstantiation : public StructuralStatement {
         parameters(std::move(parameters)),
         instance_name(instance_name),
         connections(std::move(connections)){};
-  std::string toString();
+  std::string toString() override;
   ~ModuleInstantiation(){};
 };
 
@@ -673,7 +673,7 @@ class Declaration : public Node {
               std::string decl)
       : decl(decl), value(std::move(value)){};
 
-  std::string toString();
+  std::string toString() override;
   virtual ~Declaration() = default;
 };
 
@@ -704,7 +704,7 @@ class IfMacro : public StructuralStatement {
         true_body(std::move(true_body)),
         else_body(std::move(else_body)){};
   ~IfMacro(){};
-  std::string toString();
+  std::string toString() override;
 };
 
 class IfDef : public IfMacro {
@@ -792,7 +792,7 @@ class Assign : public Node {
         prefix(prefix),
         symbol(symbol){};
 
-  std::string toString();
+  std::string toString() override;
   virtual ~Assign() = default;
 };
 
@@ -868,7 +868,7 @@ class Always : public StructuralStatement {
     }
     this->sensitivity_list = std::move(sensitivity_list);
   };
-  std::string toString();
+  std::string toString() override;
   ~Always(){};
 };
 
@@ -900,7 +900,7 @@ class If : public BehavioralStatement {
         true_body(std::move(true_body)),
         else_body(std::move(else_body)){};
 
-  std::string toString();
+  std::string toString() override;
   ~If(){};
 };
 
@@ -939,7 +939,7 @@ class Module : public AbstractModule {
              body)
       : name(name), ports(std::move(ports)), body(std::move(body)){};
 
-  std::string toString();
+  std::string toString() override;
   ~Module(){};
 };
 
@@ -951,7 +951,7 @@ class StringBodyModule : public Module {
                    std::vector<std::unique_ptr<AbstractPort>> ports,
                    std::string body, Parameters parameters)
       : Module(name, std::move(ports), std::move(parameters)), body(body){};
-  std::string toString();
+  std::string toString() override;
   ~StringBodyModule(){};
 };
 
@@ -970,7 +970,7 @@ class File : public Node {
 
   File(std::vector<std::unique_ptr<AbstractModule>>& modules)
       : modules(std::move(modules)){};
-  std::string toString();
+  std::string toString() override;
   ~File(){};
 };
 
