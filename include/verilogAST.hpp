@@ -92,7 +92,7 @@ class NumericLiteral : public Expression {
   NumericLiteral(std::string value, unsigned int size)
       : value(value), size(size), _signed(false), radix(Radix::DECIMAL){};
 
-  NumericLiteral(std::string value)
+  explicit NumericLiteral(std::string value)
       : value(value), size(32), _signed(false), radix(Radix::DECIMAL){};
 
   NumericLiteral(std::string value, Radix radix)
@@ -133,7 +133,7 @@ class Identifier : public Expression {
  public:
   std::string value;
 
-  Identifier(std::string value);
+  explicit Identifier(std::string value);
   Identifier(const Identifier& rhs) : value(rhs.value){};
   auto clone() const { return std::unique_ptr<Identifier>(clone_impl()); }
 
@@ -187,7 +187,7 @@ class String : public Expression {
  public:
   std::string value;
 
-  String(std::string value) : value(value){};
+  explicit String(std::string value) : value(value){};
   String(const String& rhs) : value(rhs.value){};
 
   std::string toString() override;
@@ -386,7 +386,7 @@ class Concat : public Expression {
   std::vector<std::unique_ptr<Expression>> args;
   bool unpacked;
 
-  Concat(std::vector<std::unique_ptr<Expression>> args, bool unpacked = false)
+  explicit Concat(std::vector<std::unique_ptr<Expression>> args, bool unpacked = false)
       : args(std::move(args)), unpacked(unpacked){};
   Concat(const Concat& rhs) {
     for (const auto& arg : rhs.args) args.push_back(arg->clone());
@@ -420,7 +420,7 @@ class NegEdge : public Node {
  public:
   std::unique_ptr<Identifier> value;
 
-  NegEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
+  explicit NegEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
   std::string toString() override;
   ~NegEdge(){};
 };
@@ -429,7 +429,7 @@ class PosEdge : public Node {
  public:
   std::unique_ptr<Identifier> value;
 
-  PosEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
+  explicit PosEdge(std::unique_ptr<Identifier> value) : value(std::move(value)){};
   std::string toString() override;
   ~PosEdge(){};
 };
@@ -441,7 +441,7 @@ class Call {
 
   Call(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : func(func), args(std::move(args)){};
-  Call(std::string func) : func(func){};
+  explicit Call(std::string func) : func(func){};
   std::string toString();
   ~Call(){};
 };
@@ -459,7 +459,7 @@ class CallExpr : public Expression, public Call {
  public:
   CallExpr(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};
-  CallExpr(std::string func) : Call(std::move(func)){};
+  explicit CallExpr(std::string func) : Call(std::move(func)){};
   CallExpr(const CallExpr& rhs) : Call(std::move(rhs.func)) {
     for (const auto& arg : rhs.args) {
       args.push_back(arg->clone());
@@ -538,7 +538,7 @@ class Port : public AbstractPort {
   Port(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Vector>> value,
        Direction direction, PortType data_type)
       : value(std::move(value)), direction(direction), data_type(data_type){};
-  Port(std::unique_ptr<Port> port)
+  explicit Port(std::unique_ptr<Port> port)
       : value(std::move(port->value)),
         direction(port->direction),
         data_type(port->data_type){};
@@ -550,7 +550,7 @@ class StringPort : public AbstractPort {
  public:
   std::string value;
 
-  StringPort(std::string value) : value(value){};
+  explicit StringPort(std::string value) : value(value){};
   std::string toString() { return value; };
   ~StringPort(){};
 };
@@ -566,7 +566,7 @@ class SingleLineComment : public StructuralStatement,
   std::string value;
   std::unique_ptr<Statement> statement;  // optional
 
-  SingleLineComment(std::string value)
+  explicit SingleLineComment(std::string value)
       : value(value), statement(std::unique_ptr<Statement>{}){};
   SingleLineComment(std::string value, std::unique_ptr<Statement> statement)
       : value(value), statement(std::move(statement)){};
@@ -578,7 +578,7 @@ class BlockComment : public StructuralStatement, public BehavioralStatement {
  public:
   std::string value;
 
-  BlockComment(std::string value) : value(value){};
+  explicit BlockComment(std::string value) : value(value){};
   std::string toString() { return "/*\n" + value + "\n*/"; };
   ~BlockComment(){};
 };
@@ -591,7 +591,7 @@ class InlineVerilog : public StructuralStatement {
  public:
   std::string value;
 
-  InlineVerilog(std::string value) : value(value){};
+  explicit InlineVerilog(std::string value) : value(value){};
   std::string toString() { return value; };
   ~InlineVerilog(){};
 };
@@ -749,7 +749,7 @@ class IfNDef : public IfMacro {
 
 class Wire : public Declaration {
  public:
-  Wire(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  explicit Wire(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
                     std::unique_ptr<Slice>, std::unique_ptr<Vector>>
            value)
       : Declaration(std::move(value), "wire"){};
@@ -758,7 +758,7 @@ class Wire : public Declaration {
 
 class Reg : public Declaration {
  public:
-  Reg(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
+  explicit Reg(std::variant<std::unique_ptr<Identifier>, std::unique_ptr<Index>,
                    std::unique_ptr<Slice>, std::unique_ptr<Vector>>
           value)
       : Declaration(std::move(value), "reg"){};
@@ -838,7 +838,7 @@ class CallStmt : public BehavioralStatement, public Call {
  public:
   CallStmt(std::string func, std::vector<std::unique_ptr<Expression>> args)
       : Call(std::move(func), std::move(args)){};
-  CallStmt(std::string func) : Call(std::move(func)){};
+  explicit CallStmt(std::string func) : Call(std::move(func)){};
   std::string toString() { return Call::toString() + ";"; };
 };
 
@@ -959,7 +959,7 @@ class StringModule : public AbstractModule {
  public:
   std::string definition;
 
-  StringModule(std::string definition) : definition(definition){};
+  explicit StringModule(std::string definition) : definition(definition){};
   std::string toString() { return definition; };
   ~StringModule(){};
 };
@@ -968,7 +968,7 @@ class File : public Node {
  public:
   std::vector<std::unique_ptr<AbstractModule>> modules;
 
-  File(std::vector<std::unique_ptr<AbstractModule>>& modules)
+  explicit File(std::vector<std::unique_ptr<AbstractModule>>& modules)
       : modules(std::move(modules)){};
   std::string toString() override;
   ~File(){};
