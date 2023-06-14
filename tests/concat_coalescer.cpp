@@ -1,6 +1,7 @@
 #include "verilogAST/concat_coalescer.hpp"
 #include "common.cpp"
 #include "gtest/gtest.h"
+#include <array>
 
 namespace vAST = verilogAST;
 
