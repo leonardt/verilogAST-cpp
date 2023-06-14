@@ -161,9 +161,9 @@ class Attribute : public Expression {
 
   Attribute(const Attribute& rhs)
       : value(std::visit(
-            [](auto&& value) -> std::variant<std::unique_ptr<Identifier>,
-                                             std::unique_ptr<Attribute>> {
-              return value->clone();
+            [](auto&& val) -> std::variant<std::unique_ptr<Identifier>,
+                                           std::unique_ptr<Attribute>> {
+              return val->clone();
             },
             rhs.value)),
         attr(rhs.attr){};
@@ -252,10 +252,10 @@ class Index : public Expression {
                std::unique_ptr<Slice>, std::unique_ptr<Index>>
   clone_index_value() const {
     return std::visit(
-        [](auto&& value)
+        [](auto&& val)
             -> std::variant<std::unique_ptr<Identifier>,
                             std::unique_ptr<Attribute>, std::unique_ptr<Slice>,
-                            std::unique_ptr<Index>> { return value->clone(); },
+                            std::unique_ptr<Index>> { return val->clone(); },
         this->value);
   }
 };
